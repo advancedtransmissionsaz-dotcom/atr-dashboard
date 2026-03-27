@@ -14,7 +14,7 @@
   --green: #22c55e; --green-dim: rgba(34,197,94,0.15);
   --amber: #f59e0b; --amber-dim: rgba(245,158,11,0.15);
   --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.15);
-  --elite: #60a5fa; --strong: #22c55e; --developing: #86efac;
+  --elite: #60a5fa; --strong: #22c55e; --developing: #fb923c;
   --needs-work: #f59e0b; --poor: #C8102E;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -132,7 +132,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .score-badge { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 24px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px; }
 .score-badge.elite { background: rgba(96,165,250,0.15); color: var(--elite); }
 .score-badge.strong { background: var(--green-dim); color: var(--strong); }
-.score-badge.developing { background: rgba(134,239,172,0.1); color: var(--developing); }
+.score-badge.developing { background: rgba(251,146,60,0.12); color: var(--developing); }
 .score-badge.needs-work { background: var(--amber-dim); color: var(--needs-work); }
 .score-badge.poor { background: var(--red-glow); color: var(--poor); }
 .appt-yes { display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; background: var(--green-dim); color: var(--green); }
@@ -989,68 +989,49 @@ async function genWeeklyAdvisorReport(name, wkOff) {
   const lwScored=getWkCalls(wkOff-1).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
   const lwA=lwScored.length?avg(lwScored.map(c=>c.total)):null;
 
-  const callPrompts=txAvailable.map((c,i)=>{
-    const labels=['BEST CALL','WORST CALL','MOST IMPROVABLE CALL'];
-    const dotColors=['Best performing','Lowest scoring','Middle/most improvable'];
-    return `--- ${labels[i]||dotColors[i]||'CALL '+(i+1)} (Score: ${c.total}, Band: ${c.band}) ---
-Vehicle: ${c.vehicle||'Unknown'} | Customer: ${c.customerName||'Unknown'}
-TRANSCRIPT:
-${getTx(c)}`;
-  }).join('\n\n');
+  const callLabels=['BEST CALL','WORST CALL','MOST IMPROVABLE CALL'];
+  const callReports=[];
 
   try {
-    const report=await claudeCall(
-      `Generate a complete weekly coaching report for ${name} at Advanced Transmission Repair.
+    // Generate each call report separately to avoid payload size limits
+    for(let i=0;i<txAvailable.length;i++){
+      const c=txAvailable[i];
+      const tx=getTx(c);
+      const truncTx=tx.length>4000?tx.substring(0,4000)+'...[transcript truncated for length]':tx;
+      btn.textContent=`GENERATING ${name.toUpperCase()} REPORT... (CALL ${i+1} OF ${txAvailable.length})`;
+      outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Analyzing ${callLabels[i].toLowerCase()} (${i+1} of ${txAvailable.length})...<br><span style="font-size:11px;opacity:0.6;">Each call takes 20-40 seconds</span></div>`;
+      try {
+        const r=await claudeCall(
+          `Generate a complete ATR coaching report for this single call. Include all sections:\n\nCALL SUMMARY (advisor, vehicle, customer type, situation type)\nSCORECARD (show raw score for each criterion, scaling math, deductions per phase)\nWHAT WORKED (3 specific behaviors with exact transcript references)\nCOACHING FLAGS (each with: what happened, exact transcript quote, point impact, What to say instead using THIS vehicle/symptom/moment ready to read aloud, Why this works)\nPRIORITY FOCUS (single most impactful improvement for next call)\nKILL PHRASES DETECTED\n\nAdvisor: ${name}\nVehicle: ${c.vehicle||'Unknown'}\nScore: ${c.total} (${c.band})\n\nTRANSCRIPT:\n${truncTx}`, 2000);
+        callReports.push(`${'═'.repeat(55)}\n${callLabels[i]} — Score ${c.total} (${c.band})\nVehicle: ${c.vehicle||'Unknown'} | Customer: ${c.customerName||'Unknown'}\n${'═'.repeat(55)}\n${r}`);
+      } catch(callErr) {
+        callReports.push(`${'═'.repeat(55)}\n${callLabels[i]} — Score ${c.total}\n${'═'.repeat(55)}\nCould not generate report for this call: ${callErr.message}`);
+      }
+    }
 
-WEEK SUMMARY FOR ${name.toUpperCase()}:
-Week: ${fmtWkLabel(wkOff)}
-Calls scored: ${scored.length}
-Week average: ${a.toFixed(1)} (${getBand(a)})
-Week high: ${hi.toFixed(1)} | Week low: ${lo.toFixed(1)}
-Last week average: ${lwA?lwA.toFixed(1):'No data'}
-60-day rolling average: ${r60A?r60A.toFixed(1):'Insufficient data'}
-Appointments booked: ${myAppts} of ${scored.length} (${Math.round(myAppts/scored.length*100)}%)
-
-Generate the report in this exact structure:
-
-═══════════════════════════════════════
+    // Build the full weekly report from stats + individual call reports
+    const weeklyReport=`${'═'.repeat(55)}
 WEEKLY COACHING REPORT — ${name.toUpperCase()}
 ${fmtWkLabel(wkOff)}
-═══════════════════════════════════════
+${'═'.repeat(55)}
 
 WEEK AT A GLANCE
-[Summarize ${name}'s week in 3-4 sentences — trend direction, standout strengths, key areas to address]
+Calls scored: ${scored.length} | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)}
+Last week avg: ${lwA?lwA.toFixed(1):'No data'} | 60-day rolling avg: ${r60A?r60A.toFixed(1):'Insufficient data'}
+Appointments booked: ${myAppts} of ${scored.length} (${Math.round(myAppts/scored.length*100)}%)
 
-METRICS SUMMARY
-[Display the key numbers clearly]
-
-PATTERN ANALYSIS
-[What patterns do you see across all ${scored.length} calls this week? What is ${name} consistently doing well? What is the single most recurring gap?]
-
-═══════════════════════════════════════
+${'═'.repeat(55)}
 CALL REVIEWS
-═══════════════════════════════════════
+${'═'.repeat(55)}
 
-For each call below, provide the FULL coaching report including:
-- CALL SUMMARY (advisor, vehicle, customer type, situation type)
-- SCORECARD (show all raw scores with criteria, scaling math, deductions for each phase)
-- WHAT WORKED (3 specific behaviors with transcript references)
-- COACHING FLAGS (each with: what happened, where, impact, What to say instead using THIS vehicle/symptom/moment, Why this works)
-- PRIORITY FOCUS for this specific call
-
-${callPrompts}
-
-═══════════════════════════════════════
-WEEKLY PRIORITY FOCUS FOR ${name.toUpperCase()}
-═══════════════════════════════════════
-[The single highest-leverage improvement for ${name} to focus on next week — one clear, specific, actionable directive based on patterns across all calls reviewed]`, 6000);
+${callReports.join('\n\n')}`;
 
     outEl.innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px;">
-        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ WEEKLY REPORT GENERATED</div>
+        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ WEEKLY REPORT GENERATED — ${txAvailable.length} CALLS ANALYZED</div>
         <button class="print-btn" onclick="printWeeklyReport('${name}','${fmtWkLabel(wkOff).replace(/'/g,"\\'")}')">⎙ PRINT REPORT</button>
       </div>
-      <div class="report-output" id="wkRptTxt-${key}">${esc(report)}</div>`;
+      <div class="report-output" id="wkRptTxt-${key}">${esc(weeklyReport)}</div>`;
     btn.disabled=false; btn.textContent=`REGENERATE ${name.toUpperCase()} WEEKLY REPORT`;
   } catch(e) {
     outEl.innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error generating report: ${e.message}</div>`;
@@ -1087,7 +1068,7 @@ async function runScorer() {
   const out=document.getElementById('scorerOut');
   out.className='tool-output visible'; out.textContent='Analyzing call... 15-30 seconds';
   try {
-    const r=await claudeCall(`Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show raw scores for each criterion, scaling math, deductions per phase), WHAT WORKED (3 specific behaviors with exact transcript moments), COACHING FLAGS (each with: what happened, exact transcript quote where it occurred, point impact, What to say instead using THIS vehicle/symptom/moment, Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${adv}\n\nTRANSCRIPT:\n${tx}`, 2000);
+    const r=await claudeCall(`Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show raw scores for each criterion, scaling math, deductions per phase), WHAT WORKED (3 specific behaviors with exact transcript moments), COACHING FLAGS (each with: what happened, exact transcript quote where it occurred, point impact, What to say instead using THIS vehicle/symptom/moment, Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${adv}\n\nTRANSCRIPT:\n${tx}`, 4000);
     out.textContent=r;
     document.getElementById('scorerPrintBtn').style.display='inline-block';
   } catch(e){out.textContent='Error: '+e.message;}
