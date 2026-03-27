@@ -1087,7 +1087,7 @@ async function runScorer() {
   const out=document.getElementById('scorerOut');
   out.className='tool-output visible'; out.textContent='Analyzing call... 15-30 seconds';
   try {
-    const r=await claudeCall(`Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show raw scores for each criterion, scaling math, deductions per phase), WHAT WORKED (3 specific behaviors with exact transcript moments), COACHING FLAGS (each with: what happened, exact transcript quote where it occurred, point impact, What to say instead using THIS vehicle/symptom/moment, Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${adv}\n\nTRANSCRIPT:\n${tx}`, 4000);
+    const r=await claudeCall(`Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show raw scores for each criterion, scaling math, deductions per phase), WHAT WORKED (3 specific behaviors with exact transcript moments), COACHING FLAGS (each with: what happened, exact transcript quote where it occurred, point impact, What to say instead using THIS vehicle/symptom/moment, Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${adv}\n\nTRANSCRIPT:\n${tx}`, 2000);
     out.textContent=r;
     document.getElementById('scorerPrintBtn').style.display='inline-block';
   } catch(e){out.textContent='Error: '+e.message;}
