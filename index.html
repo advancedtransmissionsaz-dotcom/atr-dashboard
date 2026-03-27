@@ -35,7 +35,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .login-btn:hover { background: var(--red-dark); }
 .login-error { color: #f87171; font-size: 12px; text-align: center; margin-top: 12px; min-height: 16px; }
 
-/* HEADER */
+/* APP */
 #app { display: none; }
 .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
 .header-logo { display: flex; align-items: center; gap: 12px; }
@@ -56,19 +56,16 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .view { display: none; }
 .view.active { display: block; }
 .error-bar { background: rgba(200,16,46,0.1); border: 1px solid rgba(200,16,46,0.2); padding: 12px 16px; font-size: 13px; color: #f87171; margin-bottom: 20px; display: none; }
-
-/* CARDS */
 .card { background: var(--surface); border: 1px solid var(--border); padding: 24px; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
 .card-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; }
 .card-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--red); margin-bottom: 12px; font-family: 'DM Mono', monospace; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 
 /* WEEK NAV */
 .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); padding: 14px 20px; }
-.week-nav-btn { padding: 6px 14px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.15s; font-family: 'DM Mono', monospace; }
-.week-nav-btn:hover, .week-nav-btn.active { border-color: var(--red); color: var(--text); background: var(--red-glow); }
+.week-nav-btn { padding: 6px 14px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.15s; font-family: 'DM Mono', monospace; letter-spacing: 1px; }
+.week-nav-btn:hover, .week-nav-btn.now { border-color: var(--red); color: var(--text); background: var(--red-glow); }
 .week-nav-label { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; flex: 1; text-align: center; }
 .week-nav-sub { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; text-align: center; }
 
@@ -83,17 +80,20 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-family: 'DM Mono', monospace; }
 .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 1px; line-height: 1; }
 .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-.stat-delta { font-size: 11px; margin-top: 4px; font-family: 'DM Mono', monospace; }
 .delta-up { color: var(--green); }
 .delta-down { color: var(--red); }
 .delta-flat { color: var(--text-muted); }
 
 /* ADVISOR CARDS */
 .advisor-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; }
-.advisor-name-big { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; margin-bottom: 4px; }
-.advisor-score-big { font-family: 'Bebas Neue', sans-serif; font-size: 64px; line-height: 1; margin: 8px 0 4px; }
-.advisor-band-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
-.mini-bars { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.advisor-name-big { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; margin-bottom: 2px; }
+.advisor-score-big { font-family: 'Bebas Neue', sans-serif; font-size: 64px; line-height: 1; margin: 6px 0 4px; }
+.advisor-band-lbl { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+.advisor-sub-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.advisor-sub-stat { background: var(--surface2); padding: 8px 12px; }
+.advisor-sub-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.advisor-sub-val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; margin-top: 2px; }
+.mini-bars { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 .mini-bar-row { display: flex; align-items: center; gap: 8px; }
 .mini-bar-label { font-size: 10px; color: var(--text-muted); font-family: 'DM Mono', monospace; width: 64px; flex-shrink: 0; }
 .mini-bar-track { flex: 1; height: 4px; background: var(--surface3); }
@@ -106,9 +106,8 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .advisor-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
 .advisor-stat-lbl { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
 
-/* TREND CHART */
+/* TREND */
 .trend-container { position: relative; width: 100%; height: 180px; }
-canvas.trend-canvas { width: 100%; height: 100%; }
 
 /* BAND DIST */
 .band-dist { display: flex; flex-direction: column; gap: 10px; }
@@ -118,7 +117,7 @@ canvas.trend-canvas { width: 100%; height: 100%; }
 .band-fill { height: 100%; transition: width 0.8s ease; }
 .band-count { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-muted); width: 24px; text-align: right; }
 
-/* CALL TABLE */
+/* TABLE */
 .table-filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .filter-select { padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; outline: none; }
 .filter-select:focus { border-color: var(--red); color: var(--text); }
@@ -175,26 +174,39 @@ canvas.trend-canvas { width: 100%; height: 100%; }
 .modal-tag { padding: 3px 10px; background: var(--surface3); border: 1px solid var(--border2); font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
 
 /* TRANSCRIPT */
-.transcript-box { background: var(--surface2); border: 1px solid var(--border); padding: 20px; font-size: 13px; line-height: 1.8; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; color: var(--text); }
+.transcript-box { background: var(--surface2); border: 1px solid var(--border); padding: 20px; font-size: 13px; line-height: 1.8; overflow-y: auto; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; color: var(--text); }
 .transcript-collapsed { max-height: 120px; overflow: hidden; position: relative; }
 .transcript-collapsed::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(transparent, var(--surface2)); }
 .expand-btn { background: none; border: 1px solid var(--border2); color: var(--text-muted); padding: 6px 14px; font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; margin-top: 8px; width: 100%; letter-spacing: 1px; transition: all 0.15s; }
 .expand-btn:hover { border-color: var(--red); color: var(--text); }
 
-/* COACHING REPORT */
-.report-generate-btn { width: 100%; padding: 14px; background: var(--red); border: none; color: white; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; cursor: pointer; transition: background 0.15s; margin-bottom: 20px; }
-.report-generate-btn:hover { background: var(--red-dark); }
-.report-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.report-output { background: var(--surface2); border: 1px solid var(--border); padding: 20px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; min-height: 200px; }
-.report-loading { text-align: center; padding: 40px; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 12px; }
-.print-btn { padding: 10px 20px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 12px; font-family: 'DM Mono', monospace; cursor: pointer; letter-spacing: 1px; transition: all 0.15s; }
+/* BUTTONS */
+.big-btn { width: 100%; padding: 14px; background: var(--red); border: none; color: white; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; cursor: pointer; transition: background 0.15s; margin-bottom: 16px; }
+.big-btn:hover { background: var(--red-dark); }
+.big-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.print-btn { padding: 9px 18px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; letter-spacing: 1px; transition: all 0.15s; }
 .print-btn:hover { border-color: var(--green); color: var(--green); }
+.report-output { background: var(--surface2); border: 1px solid var(--border); padding: 20px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; min-height: 100px; }
 
-/* TOOLS TAB */
+/* WEEKLY REPORT */
+.wrc { background: var(--surface); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
+.wrc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.wrc-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
+.wrc-score { font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: 1; }
+.call-review-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.call-review-item:last-child { border-bottom: none; }
+.cri-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.cri-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cri-title { font-size: 13px; font-weight: 600; }
+.cri-note { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-left: 18px; }
+.cri-btn { padding: 4px 10px; font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; border: 1px solid var(--border2); color: var(--text-muted); background: none; letter-spacing: 1px; transition: all 0.15s; margin-top: 6px; margin-left: 18px; }
+.cri-btn:hover { border-color: var(--red); color: var(--text); }
+
+/* TOOLS */
 .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .tool-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; }
 .tool-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; margin-bottom: 6px; }
-.tool-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+.tool-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
 .tool-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 12px; outline: none; resize: vertical; min-height: 120px; line-height: 1.6; }
 .tool-textarea:focus { border-color: var(--red); }
 .tool-select { width: 100%; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; margin-bottom: 12px; }
@@ -204,46 +216,31 @@ canvas.trend-canvas { width: 100%; height: 100%; }
 .tool-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .tool-output { background: var(--surface2); border: 1px solid var(--border); padding: 16px; font-size: 13px; line-height: 1.7; margin-top: 14px; white-space: pre-wrap; min-height: 80px; color: var(--text); font-family: 'DM Sans', sans-serif; display: none; }
 .tool-output.visible { display: block; }
-.tool-copy-btn { padding: 7px 14px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; letter-spacing: 1px; margin-top: 8px; transition: all 0.15s; }
-.tool-copy-btn:hover { border-color: var(--green); color: var(--green); }
+.copy-btn { padding: 7px 14px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; letter-spacing: 1px; margin-top: 8px; transition: all 0.15s; }
+.copy-btn:hover { border-color: var(--green); color: var(--green); }
 
-/* WEEKLY REPORT */
-.weekly-report-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
-.wrc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-.wrc-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
-.wrc-score { font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: 1; }
-.calls-to-review { list-style: none; }
-.ctr-item { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
-.ctr-item:last-child { border-bottom: none; }
-.ctr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-.ctr-content { flex: 1; }
-.ctr-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
-.ctr-note { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-.ctr-actions { display: flex; gap: 8px; margin-top: 8px; }
-.ctr-btn { padding: 4px 10px; font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; border: 1px solid var(--border2); color: var(--text-muted); background: none; letter-spacing: 1px; transition: all 0.15s; }
-.ctr-btn:hover { border-color: var(--red); color: var(--text); }
-
-/* LOADING / EMPTY */
+/* LOADING */
 .loading { text-align: center; padding: 60px; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 12px; }
 .spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
 .empty-icon { font-size: 36px; opacity: 0.2; margin-bottom: 10px; }
+.info-bar { background: var(--surface2); border: 1px solid var(--border2); padding: 10px 16px; font-size: 12px; color: var(--text-muted); margin-bottom: 16px; font-family: 'DM Mono', monospace; }
 
-/* PRINT STYLES */
+/* PRINT */
 @media print {
-  body { background: white; color: black; }
-  .header, .nav-tabs, .week-nav, .modal-overlay, #loginScreen, .refresh-btn, .last-updated, .tool-btn, .print-btn, .report-generate-btn, .ctr-btn, .expand-btn { display: none !important; }
-  .print-section { page-break-inside: avoid; }
-  .card, .weekly-report-card, .advisor-card { border: 1px solid #ccc; background: white; }
-  .stat-card { border: 1px solid #ccc; background: white; }
+  #loginScreen, .header, .week-nav, .modal-overlay, .nav-tabs, .refresh-btn, .last-updated, .tool-btn, .print-btn, .big-btn, .cri-btn, .expand-btn, .copy-btn, .error-bar, .info-bar { display: none !important; }
+  body { background: white !important; color: black !important; font-size: 12px; }
+  .card, .wrc, .advisor-card, .stat-card { border: 1px solid #ddd !important; background: white !important; break-inside: avoid; }
   * { color: black !important; background: white !important; }
-  .report-output { border: 1px solid #ccc; }
+  .report-output, .transcript-box { border: 1px solid #ddd !important; max-height: none !important; }
+  .transcript-collapsed { max-height: none !important; }
+  .transcript-collapsed::after { display: none !important; }
 }
 
 @media (max-width: 900px) {
   .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .two-col, .three-col, .tools-grid { grid-template-columns: 1fr; }
+  .two-col, .tools-grid { grid-template-columns: 1fr; }
   .container { padding: 16px; }
 }
 </style>
@@ -273,10 +270,10 @@ canvas.trend-canvas { width: 100%; height: 100%; }
     </div>
     <div class="header-right">
       <div class="nav-tabs">
-        <button class="nav-tab active" onclick="showView('weekly', this)">This Week</button>
-        <button class="nav-tab" onclick="showView('calls', this)">Call Log</button>
-        <button class="nav-tab" onclick="showView('report', this)">Weekly Report</button>
-        <button class="nav-tab" onclick="showView('tools', this)">Tools</button>
+        <button class="nav-tab active" onclick="showView('week',this)">This Week</button>
+        <button class="nav-tab" onclick="showView('calls',this)">Call Log</button>
+        <button class="nav-tab" onclick="showView('report',this)">Weekly Report</button>
+        <button class="nav-tab" onclick="showView('tools',this)">Tools</button>
       </div>
       <button class="refresh-btn" onclick="loadData()">↻ REFRESH</button>
       <div class="last-updated" id="lastUpdated">—</div>
@@ -286,49 +283,49 @@ canvas.trend-canvas { width: 100%; height: 100%; }
   <div class="container">
     <div class="error-bar" id="errorBar"></div>
 
-    <!-- THIS WEEK VIEW (default) -->
-    <div class="view active" id="view-weekly">
+    <!-- THIS WEEK -->
+    <div class="view active" id="view-week">
       <div class="week-nav">
-        <button class="week-nav-btn" onclick="changeWeek(-1)">← PREV WEEK</button>
+        <button class="week-nav-btn" onclick="changeWeek(-1)">← PREV</button>
         <div style="flex:1;text-align:center;">
           <div class="week-nav-label" id="weekLabel">—</div>
           <div class="week-nav-sub" id="weekSub">—</div>
         </div>
-        <button class="week-nav-btn active" onclick="goCurrentWeek()">THIS WEEK</button>
-        <button class="week-nav-btn" onclick="changeWeek(1)">NEXT WEEK →</button>
+        <button class="week-nav-btn now" onclick="goNow()">THIS WEEK</button>
+        <button class="week-nav-btn" onclick="changeWeek(1)">NEXT →</button>
       </div>
 
-      <div class="stats-row" id="weekStats">
-        <div class="stat-card red"><div class="stat-label">Calls Scored</div><div class="stat-value" id="wkTotal">—</div><div class="stat-sub">this week</div></div>
-        <div class="stat-card green"><div class="stat-label">Week Avg Score</div><div class="stat-value" id="wkAvg">—</div><div class="stat-sub" id="wkAvgDelta">vs last week</div></div>
-        <div class="stat-card amber"><div class="stat-label">Jack Avg</div><div class="stat-value" id="wkJack">—</div><div class="stat-sub" id="wkJackBand">—</div></div>
-        <div class="stat-card blue"><div class="stat-label">Jay Avg</div><div class="stat-value" id="wkJay">—</div><div class="stat-sub" id="wkJayBand">—</div></div>
+      <div class="stats-row">
+        <div class="stat-card red"><div class="stat-label">Calls Scored</div><div class="stat-value" id="wkTotal">—</div><div class="stat-sub" id="wkTotalSub">this week</div></div>
+        <div class="stat-card green"><div class="stat-label">Week Avg</div><div class="stat-value" id="wkAvg">—</div><div class="stat-sub" id="wkAvgDelta">vs last week</div></div>
+        <div class="stat-card amber"><div class="stat-label">Jack This Week</div><div class="stat-value" id="wkJack">—</div><div class="stat-sub" id="wkJackSub">—</div></div>
+        <div class="stat-card blue"><div class="stat-label">Jay This Week</div><div class="stat-value" id="wkJay">—</div><div class="stat-sub" id="wkJaySub">—</div></div>
       </div>
 
       <div class="two-col">
-        <!-- JACK CARD -->
         <div class="advisor-card">
           <div class="card-label">Advisor</div>
           <div class="advisor-name-big">JACK</div>
-          <div class="advisor-score-big" id="jackScoreBig">—</div>
-          <div class="advisor-band-label" id="jackBandLabel">—</div>
-          <div class="mini-bars" id="jackMiniBarss"></div>
+          <div class="advisor-score-big" id="jackBig">—</div>
+          <div class="advisor-band-lbl" id="jackBandLbl">—</div>
+          <div class="advisor-sub-stats" id="jackSubStats"></div>
+          <div class="mini-bars" id="jackBars"></div>
           <div class="advisor-stat-row" id="jackStatRow"></div>
         </div>
-        <!-- JAY CARD -->
         <div class="advisor-card">
           <div class="card-label">Advisor</div>
           <div class="advisor-name-big">JAY</div>
-          <div class="advisor-score-big" id="jayScoreBig">—</div>
-          <div class="advisor-band-label" id="jayBandLabel">—</div>
-          <div class="mini-bars" id="jayMiniBarss"></div>
+          <div class="advisor-score-big" id="jayBig">—</div>
+          <div class="advisor-band-lbl" id="jayBandLbl">—</div>
+          <div class="advisor-sub-stats" id="jaySubStats"></div>
+          <div class="mini-bars" id="jayBars"></div>
           <div class="advisor-stat-row" id="jayStatRow"></div>
         </div>
       </div>
 
       <div class="two-col">
         <div class="card">
-          <div class="card-header"><div class="card-title">Weekly Call Volume Trend</div></div>
+          <div class="card-header"><div class="card-title">8-Week Trend</div><div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">▪ calls &nbsp; — avg score</div></div>
           <div class="trend-container"><canvas id="trendChart"></canvas></div>
         </div>
         <div class="card">
@@ -340,95 +337,89 @@ canvas.trend-canvas { width: 100%; height: 100%; }
       <div class="card">
         <div class="card-header">
           <div class="card-title">This Week's Calls</div>
-          <div id="weekCallCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;">—</div>
+          <div id="weekCallCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;"></div>
         </div>
         <div id="weekCallsTable"></div>
       </div>
     </div>
 
-    <!-- CALL LOG VIEW -->
+    <!-- CALL LOG -->
     <div class="view" id="view-calls">
       <div class="card">
         <div class="card-header">
           <div class="card-title">Full Call Log</div>
-          <div id="callLogCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;">—</div>
+          <div id="logCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;"></div>
         </div>
         <div class="table-filters">
-          <select class="filter-select" id="fAdvisor" onchange="renderCallLog()"><option value="">All Advisors</option><option value="Jack">Jack</option><option value="Jay">Jay</option></select>
-          <select class="filter-select" id="fBand" onchange="renderCallLog()"><option value="">All Bands</option><option value="Elite">Elite</option><option value="Strong">Strong</option><option value="Developing">Developing</option><option value="Needs Work">Needs Work</option><option value="Poor">Poor</option></select>
-          <select class="filter-select" id="fAppt" onchange="renderCallLog()"><option value="">All Calls</option><option value="Yes">Appt Booked</option><option value="No">No Appt</option></select>
-          <select class="filter-select" id="fScoreable" onchange="renderCallLog()"><option value="">All Types</option><option value="Yes">Scoreable</option><option value="No">Non-Scoreable</option></select>
-          <select class="filter-select" id="fWeek" onchange="renderCallLog()"><option value="">All Weeks</option></select>
-          <input class="search-input" id="searchLog" placeholder="Vehicle, customer..." oninput="renderCallLog()" />
+          <select class="filter-select" id="fAdv" onchange="renderLog()"><option value="">All Advisors</option><option value="Jack">Jack</option><option value="Jay">Jay</option></select>
+          <select class="filter-select" id="fBand" onchange="renderLog()"><option value="">All Bands</option><option value="Elite">Elite</option><option value="Strong">Strong</option><option value="Developing">Developing</option><option value="Needs Work">Needs Work</option><option value="Poor">Poor</option></select>
+          <select class="filter-select" id="fAppt" onchange="renderLog()"><option value="">All Calls</option><option value="Yes">Appt Booked</option><option value="No">No Appt</option></select>
+          <select class="filter-select" id="fScore" onchange="renderLog()"><option value="">All Types</option><option value="Yes">Scoreable</option><option value="No">Non-Scoreable</option></select>
+          <select class="filter-select" id="fWk" onchange="renderLog()"><option value="">All Weeks</option></select>
+          <input class="search-input" id="searchLog" placeholder="Vehicle, customer..." oninput="renderLog()" />
         </div>
-        <div id="callLogWrap"></div>
+        <div id="logWrap"></div>
       </div>
     </div>
 
-    <!-- WEEKLY REPORT VIEW -->
+    <!-- WEEKLY REPORT -->
     <div class="view" id="view-report">
       <div class="week-nav">
-        <button class="week-nav-btn" onclick="changeReportWeek(-1)">← PREV WEEK</button>
-        <div style="flex:1;text-align:center;">
-          <div class="week-nav-label" id="reportWeekLabel">—</div>
-        </div>
-        <button class="week-nav-btn active" onclick="goCurrentReportWeek()">THIS WEEK</button>
-        <button class="week-nav-btn" onclick="changeReportWeek(1)">NEXT WEEK →</button>
-        <button class="print-btn" onclick="window.print()">⎙ PRINT REPORT</button>
+        <button class="week-nav-btn" onclick="changeRptWeek(-1)">← PREV</button>
+        <div style="flex:1;text-align:center;"><div class="week-nav-label" id="rptWeekLabel">—</div></div>
+        <button class="week-nav-btn now" onclick="goRptNow()">THIS WEEK</button>
+        <button class="week-nav-btn" onclick="changeRptWeek(1)">NEXT →</button>
+        <button class="print-btn" onclick="window.print()">⎙ PRINT PAGE</button>
       </div>
-      <div id="reportContent"></div>
+      <div id="rptContent"></div>
     </div>
 
-    <!-- TOOLS VIEW -->
+    <!-- TOOLS -->
     <div class="view" id="view-tools">
       <div class="tools-grid">
-        <!-- CALL SCORER -->
-        <div class="tool-card" style="grid-column: 1 / -1;">
+        <div class="tool-card" style="grid-column:1/-1;">
           <div class="tool-title">Call Scorer</div>
-          <div class="tool-desc">Paste a call transcript to get a full ATR scoring report with phase-by-phase breakdown, coaching flags, and specific replacement language for each issue found. Report is printable for advisor coaching sessions.</div>
-          <textarea class="tool-textarea" id="scorerTranscript" placeholder="Paste call transcript here..." style="min-height:160px;"></textarea>
-          <div style="display:flex;gap:10px;align-items:center;margin-top:12px;">
-            <select class="tool-select" id="scorerAdvisor" style="width:auto;margin:0;">
-              <option value="Jack">Jack</option>
-              <option value="Jay">Jay</option>
-            </select>
-            <button class="tool-btn" id="scorerBtn" onclick="runCallScorer()" style="flex:1;margin:0;">SCORE THIS CALL</button>
-            <button class="print-btn" onclick="printScorerReport()" id="scorerPrintBtn" style="display:none;">⎙ PRINT</button>
+          <div class="tool-desc">Paste a call transcript to get a full ATR coaching report with phase-by-phase scoring, coaching flags, and specific replacement language. Printable for advisor coaching sessions.</div>
+          <select class="tool-select" id="scorerAdv" style="width:auto;display:inline-block;margin-right:8px;margin-bottom:0;">
+            <option value="Jack">Jack</option><option value="Jay">Jay</option>
+          </select>
+          <textarea class="tool-textarea" id="scorerTx" placeholder="Paste call transcript here..." style="min-height:160px;margin-top:12px;"></textarea>
+          <div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
+            <button class="tool-btn" id="scorerBtn" onclick="runScorer()" style="margin:0;">SCORE THIS CALL</button>
+            <button class="print-btn" id="scorerPrintBtn" onclick="printScorer()" style="display:none;">⎙ PRINT</button>
           </div>
-          <div class="tool-output" id="scorerOutput"></div>
+          <div class="tool-output" id="scorerOut"></div>
         </div>
 
-        <!-- FOLLOW-UP TEXT -->
         <div class="tool-card">
           <div class="tool-title">Follow-Up Text</div>
-          <div class="tool-desc">Generate the right follow-up text based on where the customer is in the funnel.</div>
-          <select class="tool-select" id="followupType">
+          <div class="tool-desc">Generate a follow-up text based on where the customer is in the funnel.</div>
+          <select class="tool-select" id="fuType">
             <option value="first">First Touch (Day 0)</option>
             <option value="mid">Mid Touch (Day 2-3)</option>
             <option value="last">Last Touch (Final)</option>
           </select>
-          <textarea class="tool-textarea" id="followupContext" placeholder="Describe the customer situation — vehicle, issue, what was discussed, any barriers mentioned..."></textarea>
-          <button class="tool-btn" id="followupBtn" onclick="runFollowup()">GENERATE TEXT</button>
-          <div class="tool-output" id="followupOutput"></div>
-          <button class="tool-copy-btn" id="followupCopy" onclick="copyTool('followupOutput', 'followupCopy')" style="display:none;">COPY TEXT</button>
+          <textarea class="tool-textarea" id="fuCtx" placeholder="Vehicle, issue, what was discussed, barriers..."></textarea>
+          <button class="tool-btn" id="fuBtn" onclick="runFollowup()">GENERATE TEXT</button>
+          <div class="tool-output" id="fuOut"></div>
+          <button class="copy-btn" id="fuCopy" onclick="copyOut('fuOut','fuCopy')" style="display:none;">COPY</button>
         </div>
 
-        <!-- LAST TOUCH -->
         <div class="tool-card">
-          <div class="tool-title">Last Touch Generator</div>
-          <div class="tool-desc">Generate a final goodbye text for a lead that has gone cold. Short, human, no pressure.</div>
-          <select class="tool-select" id="lastTouchType">
-            <option value="standard">Standard (unknown reason)</option>
-            <option value="price">Went with cheaper option</option>
-            <option value="towing">Towing / logistics barrier</option>
-            <option value="vacation">Customer was on vacation</option>
-            <option value="keepvssell">Keep vs sell decision</option>
+          <div class="tool-title">Last Touch</div>
+          <div class="tool-desc">Final goodbye text for a cold lead. Short, human, no pressure.</div>
+          <select class="tool-select" id="ltType">
+            <option value="standard">Standard</option>
+            <option value="price">Went cheaper</option>
+            <option value="towing">Towing barrier</option>
+            <option value="vacation">On vacation</option>
+            <option value="keepvssell">Keep vs sell</option>
             <option value="engaged">Was engaged, logistical barrier</option>
           </select>
-          <textarea class="tool-textarea" id="lastTouchContext" placeholder="Vehicle, customer name, key details from the conversation..."></textarea>
-          <button class="tool-btn" id="lastTouchBtn" onclick="runLastTouch()">GENERATE LAST TOUCH</button>
-          <div class="tool-output" id="lastTouchOutput"></div>
-          <button class="tool-copy-btn" id="lastTouchCopy" onclick="copyTool('lastTouchOutput', 'lastTouchCopy')" style="display:none;">COPY TEXT</button>
+          <textarea class="tool-textarea" id="ltCtx" placeholder="Vehicle, customer name, key details..."></textarea>
+          <button class="tool-btn" id="ltBtn" onclick="runLastTouch()">GENERATE LAST TOUCH</button>
+          <div class="tool-output" id="ltOut"></div>
+          <button class="copy-btn" id="ltCopy" onclick="copyOut('ltOut','ltCopy')" style="display:none;">COPY</button>
         </div>
       </div>
     </div>
@@ -436,18 +427,18 @@ canvas.trend-canvas { width: 100%; height: 100%; }
   </div>
 </div>
 
-<!-- CALL DETAIL MODAL -->
+<!-- MODAL -->
 <div class="modal-overlay" id="callModal" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-header">
-      <div><div class="modal-title" id="modalTitle">—</div><div class="modal-meta" id="modalMeta">—</div></div>
+      <div><div class="modal-title" id="mTitle">—</div><div class="modal-meta" id="mMeta">—</div></div>
       <button class="modal-close" onclick="closeModalDirect()">✕</button>
     </div>
     <div class="modal-body">
       <div class="modal-tabs">
-        <button class="modal-tab active" onclick="switchModalTab('score', this)">Score</button>
-        <button class="modal-tab" onclick="switchModalTab('transcript', this)">Transcript</button>
-        <button class="modal-tab" onclick="switchModalTab('coaching', this)">Full Report</button>
+        <button class="modal-tab active" onclick="switchMTab('score',this)">Score</button>
+        <button class="modal-tab" onclick="switchMTab('transcript',this)">Transcript</button>
+        <button class="modal-tab" onclick="switchMTab('coaching',this)">Full Report</button>
       </div>
       <div class="modal-tab-content active" id="mtab-score"></div>
       <div class="modal-tab-content" id="mtab-transcript"></div>
@@ -457,21 +448,15 @@ canvas.trend-canvas { width: 100%; height: 100%; }
 </div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
 const SHEET_ID = '1VDs-N3l2sUBZFFVophcSVUvJxgT98Z5ETuLSlDhaMPY';
 const SHEET_NAME = 'Call Log';
 const PASSWORD = '1950';
+const API_KEY = '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';
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let allCalls = [];
-let weekOffset = 0;
-let reportWeekOffset = 0;
-let logPage = 1;
-const PAGE_SIZE = 30;
-let currentModalIdx = -1;
-let transcriptExpanded = false;
+let allCalls = [], weekOff = 0, rptWeekOff = 0, logPage = 1, curModalIdx = -1;
+const PAGE = 30;
 
-// ─── LOGIN ────────────────────────────────────────────────────────────────────
+// LOGIN
 function tryLogin() {
   if (document.getElementById('loginInput').value === PASSWORD) {
     document.getElementById('loginScreen').style.display = 'none';
@@ -487,200 +472,193 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
 });
 
-// ─── DATA ─────────────────────────────────────────────────────────────────────
+// DATA
 async function loadData() {
-  showError('');
+  showErr('');
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
     const res = await fetch(url);
     const text = await res.text();
-    const json = JSON.parse(text.substring(47).slice(0, -2));
+    const json = JSON.parse(text.substring(47).slice(0,-2));
     allCalls = parseSheet(json);
-    document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     populateWeekFilter();
     renderAll();
   } catch(e) {
-    showError('Could not load data. Make sure the Google Sheet is published to web (File → Share → Publish to web). Error: ' + e.message);
+    showErr('Could not load data. Make sure the Google Sheet is published to web (File → Share → Publish to web). ' + e.message);
   }
 }
 
 function parseSheet(json) {
-  const rows = json.table.rows;
-  return rows.map(row => {
+  return json.table.rows.map(row => {
     const c = row.c || [];
-    const g = (i) => c[i] && c[i].v != null ? String(c[i].v).trim() : '';
-    const n = (i) => c[i] && c[i].v != null ? parseFloat(c[i].v) : null;
-    return {
-      date: g(0), advisor: g(1), customerName: g(2), customerPhone: g(3),
-      vehicle: g(4), callType: g(5), scoreable: g(6),
-      phase1: n(7), phase2: n(8), phase3: n(9), phase4: n(10),
-      total: n(11), band: g(12), customerType: g(13), situationType: g(14),
-      apptBooked: g(15), topCoachingNote: g(16), transcriptRaw: g(17), flags: g(18),
-    };
+    const g = i => c[i]?.v != null ? String(c[i].v).trim() : '';
+    const n = i => c[i]?.v != null ? parseFloat(c[i].v) : null;
+    return { date:g(0), advisor:g(1), customerName:g(2), customerPhone:g(3), vehicle:g(4),
+      callType:g(5), scoreable:g(6), phase1:n(7), phase2:n(8), phase3:n(9), phase4:n(10),
+      total:n(11), band:g(12), customerType:g(13), situationType:g(14),
+      apptBooked:g(15), topCoachingNote:g(16), transcriptRaw:g(17), flags:g(18) };
   }).filter(r => r.date || r.advisor);
 }
 
-function getTranscript(call) {
-  const raw = call.transcriptRaw || '';
-  const prefix = 'https://app.assemblyai.com/transcript/';
-  if (raw.startsWith(prefix)) return raw.substring(prefix.length).trim();
-  return raw.trim();
+function getTx(c) {
+  const raw = c.transcriptRaw || '';
+  const pfx = 'https://app.assemblyai.com/transcript/';
+  return raw.startsWith(pfx) ? raw.substring(pfx.length).trim() : raw.trim();
 }
 
-function showError(msg) {
+function showErr(msg) {
   const el = document.getElementById('errorBar');
   el.textContent = msg; el.style.display = msg ? 'block' : 'none';
 }
 
-// ─── WEEK HELPERS ─────────────────────────────────────────────────────────────
-function getWeekStart(offset) {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+// WEEK HELPERS
+function getWkStart(off) {
+  const now = new Date(), day = now.getDay();
+  const diff = now.getDate() - day + (day===0?-6:1);
   const mon = new Date(now); mon.setDate(diff); mon.setHours(0,0,0,0);
-  mon.setDate(mon.getDate() + offset * 7);
-  return mon;
+  mon.setDate(mon.getDate() + off*7); return mon;
 }
-
-function getWeekEnd(start) {
-  const end = new Date(start); end.setDate(end.getDate() + 6); end.setHours(23,59,59,999);
-  return end;
+function getWkEnd(s) { const e = new Date(s); e.setDate(e.getDate()+6); e.setHours(23,59,59,999); return e; }
+function getWkCalls(off) {
+  const s = getWkStart(off), e = getWkEnd(s);
+  return allCalls.filter(c => { const d = pd(c.date); return d && d>=s && d<=e; });
 }
-
-function getCallsForWeek(offset) {
-  const s = getWeekStart(offset), e = getWeekEnd(s);
-  return allCalls.filter(c => { const d = parseDate(c.date); return d && d >= s && d <= e; });
+function fmtWkLabel(off) {
+  const s = getWkStart(off), e = getWkEnd(s);
+  const f = d => d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  return f(s)+' – '+f(e)+', '+e.getFullYear();
 }
+function pd(str) { if(!str) return null; try { const d=new Date(str); return isNaN(d)?null:d; } catch(e){return null;} }
+function fd(str) { if(!str) return '—'; try { return new Date(str).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){return str;} }
+function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+function avg2(calls,f) { const v=calls.map(c=>c[f]).filter(x=>x!==null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }
 
-function formatWeekLabel(offset) {
-  const s = getWeekStart(offset), e = getWeekEnd(s);
-  const fmt = d => d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
-  return fmt(s) + ' – ' + fmt(e) + ', ' + e.getFullYear();
-}
+// RENDER ALL
+function renderAll() { renderWeek(); renderLog(); renderReport(); }
 
-function parseDate(str) {
-  if (!str) return null;
-  try { const d = new Date(str); return isNaN(d) ? null : d; } catch(e) { return null; }
-}
+// THIS WEEK VIEW
+function goNow() { weekOff=0; renderWeek(); }
+function changeWeek(d) { weekOff+=d; renderWeek(); }
 
-function formatDate(str) {
-  if (!str) return '—';
-  try { return new Date(str).toLocaleDateString('en-US', {month:'short', day:'numeric'}); } catch(e) { return str; }
-}
+function renderWeek() {
+  document.getElementById('weekLabel').textContent = fmtWkLabel(weekOff);
+  document.getElementById('weekSub').textContent = weekOff===0?'Current Week':weekOff===-1?'Last Week':`${Math.abs(weekOff)} weeks ${weekOff<0?'ago':'ahead'}`;
 
-// ─── RENDER ALL ───────────────────────────────────────────────────────────────
-function renderAll() {
-  renderWeeklyView();
-  renderCallLog();
-  renderWeeklyReport();
-}
+  const wk = getWkCalls(weekOff).filter(c=>c.total!==null);
+  const pw = getWkCalls(weekOff-1).filter(c=>c.total!==null);
+  const wkA = wk.length ? avg(wk.map(c=>c.total)) : null;
+  const pwA = pw.length ? avg(pw.map(c=>c.total)) : null;
 
-// ─── WEEKLY VIEW ──────────────────────────────────────────────────────────────
-function goCurrentWeek() { weekOffset = 0; renderWeeklyView(); }
-function changeWeek(d) { weekOffset += d; renderWeeklyView(); }
+  document.getElementById('wkTotal').textContent = wk.length||'0';
+  document.getElementById('wkAvg').textContent = wkA ? wkA.toFixed(1) : '—';
 
-function renderWeeklyView() {
-  document.getElementById('weekLabel').textContent = formatWeekLabel(weekOffset);
-  document.getElementById('weekSub').textContent = weekOffset === 0 ? 'Current Week' : weekOffset === -1 ? 'Last Week' : `${Math.abs(weekOffset)} weeks ${weekOffset < 0 ? 'ago' : 'ahead'}`;
-
-  const wk = getCallsForWeek(weekOffset);
-  const wkScored = wk.filter(c => c.total !== null);
-  const prevWk = getCallsForWeek(weekOffset - 1).filter(c => c.total !== null);
-
-  const wkAvg = wkScored.length ? avg(wkScored.map(c=>c.total)) : null;
-  const prevAvg = prevWk.length ? avg(prevWk.map(c=>c.total)) : null;
-
-  document.getElementById('wkTotal').textContent = wkScored.length || '0';
-  document.getElementById('wkAvg').textContent = wkAvg ? wkAvg.toFixed(1) : '—';
-
-  if (wkAvg && prevAvg) {
-    const diff = wkAvg - prevAvg;
-    const cls = diff > 0 ? 'delta-up' : diff < 0 ? 'delta-down' : 'delta-flat';
-    const sign = diff > 0 ? '+' : '';
-    document.getElementById('wkAvgDelta').innerHTML = `<span class="${cls}">${sign}${diff.toFixed(1)} vs last week</span>`;
-  } else {
-    document.getElementById('wkAvgDelta').textContent = 'vs last week';
+  if (wkA && pwA) {
+    const d = wkA-pwA, cls = d>0?'delta-up':d<0?'delta-down':'delta-flat', sign = d>0?'+':'';
+    document.getElementById('wkAvgDelta').innerHTML = `<span class="${cls}">${sign}${d.toFixed(1)} vs last week</span>`;
   }
 
-  renderAdvisorCard('jack', 'Jack', wkScored);
-  renderAdvisorCard('jay', 'Jay', wkScored);
-  renderTrendChart();
-  renderWeekBandDist(wkScored);
-  renderWeekCallsTable(wk);
+  const jackW = wk.filter(c=>(c.advisor||'').toLowerCase().includes('jack'));
+  const jayW = wk.filter(c=>(c.advisor||'').toLowerCase().includes('jay'));
+  const jackA = jackW.length ? avg(jackW.map(c=>c.total)) : null;
+  const jayA = jayW.length ? avg(jayW.map(c=>c.total)) : null;
+
+  document.getElementById('wkJack').textContent = jackA ? jackA.toFixed(1) : '—';
+  document.getElementById('wkJackSub').textContent = jackA ? getBand(jackA) : 'No calls';
+  document.getElementById('wkJay').textContent = jayA ? jayA.toFixed(1) : '—';
+  document.getElementById('wkJaySub').textContent = jayA ? getBand(jayA) : 'No calls';
+
+  renderAdvisorCard('jack', 'Jack', wk);
+  renderAdvisorCard('jay', 'Jay', wk);
+  renderTrend();
+  renderBandDist(wk);
+  renderWeekTable(getWkCalls(weekOff));
 }
 
-function renderAdvisorCard(key, name, calls) {
-  const mine = calls.filter(c => (c.advisor||'').toLowerCase().includes(key));
-  if (!mine.length) {
-    document.getElementById(key+'ScoreBig').textContent = '—';
-    document.getElementById(key+'BandLabel').textContent = 'No calls this week';
-    document.getElementById(key+'MiniBarss').innerHTML = '';
+function renderAdvisorCard(key, name, wkScored) {
+  const mine = wkScored.filter(c=>(c.advisor||'').toLowerCase().includes(key));
+
+  // 60-day rolling
+  const now = new Date(), d60 = new Date(now); d60.setDate(d60.getDate()-60);
+  const rolling = allCalls.filter(c=>{ const d=pd(c.date); return d && d>=d60 && c.total!==null && (c.advisor||'').toLowerCase().includes(key); });
+
+  // Last week
+  const lw = getWkCalls(weekOff-1).filter(c=>c.total!==null && (c.advisor||'').toLowerCase().includes(key));
+
+  if (!mine.length && !rolling.length) {
+    document.getElementById(key+'Big').textContent = '—';
+    document.getElementById(key+'BandLbl').textContent = 'No data';
+    document.getElementById(key+'SubStats').innerHTML = '';
+    document.getElementById(key+'Bars').innerHTML = '';
     document.getElementById(key+'StatRow').innerHTML = '';
     return;
   }
-  const a = avg(mine.map(c=>c.total));
-  const band = getBand(a);
-  const color = getBandColor(band);
-  const hi = Math.max(...mine.map(c=>c.total));
-  const lo = Math.min(...mine.map(c=>c.total));
 
-  const sc = document.getElementById(key+'ScoreBig');
-  sc.textContent = a.toFixed(1); sc.style.color = color;
-  const bl = document.getElementById(key+'BandLabel');
-  bl.textContent = band; bl.style.color = color;
+  const a = mine.length ? avg(mine.map(c=>c.total)) : null;
+  const band = a ? getBand(a) : '—';
+  const bc = getBandColor(band);
+  const lwA = lw.length ? avg(lw.map(c=>c.total)) : null;
+  const r60A = rolling.length ? avg(rolling.map(c=>c.total)) : null;
 
-  const p1 = avg2(mine,'phase1'), p2 = avg2(mine,'phase2');
-  const p3 = avg2(mine,'phase3'), p4 = avg2(mine,'phase4');
-  document.getElementById(key+'MiniBarss').innerHTML =
-    miniBar('Phase 1', p1, 2.5) + miniBar('Phase 2', p2, 2.5) +
-    miniBar('Phase 3', p3, 3.0) + miniBar('Phase 4', p4, 2.0);
+  const bigEl = document.getElementById(key+'Big');
+  bigEl.textContent = a ? a.toFixed(1) : '—'; bigEl.style.color = bc;
+  const bandEl = document.getElementById(key+'BandLbl');
+  bandEl.textContent = band; bandEl.style.color = bc;
 
-  document.getElementById(key+'StatRow').innerHTML = `
-    <div class="advisor-stat"><div class="advisor-stat-val" style="color:var(--green)">${hi.toFixed(1)}</div><div class="advisor-stat-lbl">High</div></div>
-    <div class="advisor-stat"><div class="advisor-stat-val">${a.toFixed(1)}</div><div class="advisor-stat-lbl">Avg</div></div>
-    <div class="advisor-stat"><div class="advisor-stat-val" style="color:${lo<5?'var(--red)':'var(--amber)'}">${lo.toFixed(1)}</div><div class="advisor-stat-lbl">Low</div></div>
-  `;
+  document.getElementById(key+'SubStats').innerHTML = `
+    <div class="advisor-sub-stat">
+      <div class="advisor-sub-label">Last Week</div>
+      <div class="advisor-sub-val" style="color:${lwA?(lwA>=(a||0)?'var(--green)':'var(--amber)'):'var(--text-muted)'}">${lwA?lwA.toFixed(1):'—'}</div>
+    </div>
+    <div class="advisor-sub-stat">
+      <div class="advisor-sub-label">60-Day Avg</div>
+      <div class="advisor-sub-val">${r60A?r60A.toFixed(1):'—'}</div>
+    </div>`;
+
+  if (mine.length) {
+    const p1=avg2(mine,'phase1'), p2=avg2(mine,'phase2'), p3=avg2(mine,'phase3'), p4=avg2(mine,'phase4');
+    document.getElementById(key+'Bars').innerHTML =
+      mBar('Phase 1',p1,2.5)+mBar('Phase 2',p2,2.5)+mBar('Phase 3',p3,3.0)+mBar('Phase 4',p4,2.0);
+    const hi=Math.max(...mine.map(c=>c.total)), lo=Math.min(...mine.map(c=>c.total));
+    document.getElementById(key+'StatRow').innerHTML = `
+      <div class="advisor-stat"><div class="advisor-stat-val" style="color:var(--green)">${hi.toFixed(1)}</div><div class="advisor-stat-lbl">High</div></div>
+      <div class="advisor-stat"><div class="advisor-stat-val">${a.toFixed(1)}</div><div class="advisor-stat-lbl">Avg</div></div>
+      <div class="advisor-stat"><div class="advisor-stat-val" style="color:${lo<5?'var(--red)':'var(--amber)'}">${lo.toFixed(1)}</div><div class="advisor-stat-lbl">Low</div></div>`;
+  } else {
+    document.getElementById(key+'Bars').innerHTML = '';
+    document.getElementById(key+'StatRow').innerHTML = '';
+  }
 }
 
-function miniBar(label, val, max) {
-  const pct = val ? Math.min((val/max)*100, 100) : 0;
-  const cls = pct >= 85 ? 'g' : pct >= 65 ? 'a' : '';
-  return `<div class="mini-bar-row">
-    <div class="mini-bar-label">${label}</div>
-    <div class="mini-bar-track"><div class="mini-bar-fill ${cls}" style="width:${pct}%"></div></div>
-    <div class="mini-bar-val">${val ? val.toFixed(1) : '—'}</div>
-  </div>`;
+function mBar(label, val, max) {
+  const pct = val ? Math.min((val/max)*100,100) : 0;
+  const cls = pct>=85?'g':pct>=65?'a':'';
+  return `<div class="mini-bar-row"><div class="mini-bar-label">${label}</div><div class="mini-bar-track"><div class="mini-bar-fill ${cls}" style="width:${pct}%"></div></div><div class="mini-bar-val">${val?val.toFixed(1):'—'}</div></div>`;
 }
 
-function renderWeekBandDist(calls) {
+function renderBandDist(calls) {
   const bands = ['Elite','Strong','Developing','Needs Work','Poor'];
   const colors = {Elite:'var(--elite)',Strong:'var(--strong)',Developing:'var(--developing)','Needs Work':'var(--needs-work)',Poor:'var(--poor)'};
-  const max = calls.length || 1;
+  const max = calls.length||1;
   document.getElementById('weekBandDist').innerHTML = bands.map(b => {
     const cnt = calls.filter(c=>c.band===b).length;
-    return `<div class="band-row">
-      <div class="band-name">${b}</div>
-      <div class="band-track"><div class="band-fill" style="width:${(cnt/max)*100}%;background:${colors[b]}"></div></div>
-      <div class="band-count">${cnt}</div>
-    </div>`;
+    return `<div class="band-row"><div class="band-name">${b}</div><div class="band-track"><div class="band-fill" style="width:${(cnt/max)*100}%;background:${colors[b]}"></div></div><div class="band-count">${cnt}</div></div>`;
   }).join('');
 }
 
-function renderWeekCallsTable(calls) {
-  document.getElementById('weekCallCount').textContent = `${calls.length} calls`;
-  if (!calls.length) {
-    document.getElementById('weekCallsTable').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>No calls this week</div></div>';
-    return;
-  }
-  const rows = calls.filter(c=>c.total!==null).sort((a,b) => new Date(b.date)-new Date(a.date)).map(c => {
+function renderWeekTable(calls) {
+  const scored = calls.filter(c=>c.total!==null).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('weekCallCount').textContent = `${scored.length} scored calls`;
+  if (!scored.length) { document.getElementById('weekCallsTable').innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div>No scored calls this week</div></div>'; return; }
+  const rows = scored.map(c => {
     const idx = allCalls.indexOf(c);
     return `<tr onclick="openModal(${idx})">
-      <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;">${formatDate(c.date)}</td>
+      <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;">${fd(c.date)}</td>
       <td style="font-weight:500;">${c.advisor||'—'}</td>
-      <td style="color:var(--text-muted);font-size:12px;">${c.vehicle||'—'}</td>
-      <td style="color:var(--text-muted);font-size:12px;">${c.customerName||'—'}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${c.vehicle||'—'}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${c.customerName||'—'}</td>
       <td><span class="score-badge ${getBandClass(c.band)}">${c.total}</span></td>
-      <td><span style="font-size:11px;color:${getBandColor(c.band)};font-weight:600;letter-spacing:1px;text-transform:uppercase;">${c.band||'—'}</span></td>
+      <td><span style="font-size:11px;color:${getBandColor(c.band)};font-weight:600;text-transform:uppercase;letter-spacing:1px;">${c.band||'—'}</span></td>
       <td><span class="${c.apptBooked==='Yes'?'appt-yes':'appt-no'}">${c.apptBooked==='Yes'?'YES':'NO'}</span></td>
     </tr>`;
   }).join('');
@@ -691,162 +669,108 @@ function renderWeekCallsTable(calls) {
     </table>`;
 }
 
-// ─── TREND CHART ──────────────────────────────────────────────────────────────
-function renderTrendChart() {
+// TREND CHART
+function renderTrend() {
   const canvas = document.getElementById('trendChart');
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth * window.devicePixelRatio || 600;
-  canvas.height = canvas.offsetHeight * window.devicePixelRatio || 180;
-  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-  const w = canvas.offsetWidth, h = canvas.offsetHeight;
+  const dpr = window.devicePixelRatio||1;
+  const W = canvas.parentElement.offsetWidth, H = 180;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr);
 
-  // Build 8-week data
   const weeks = [];
-  for (let i = -7; i <= weekOffset; i++) {
-    const wk = getCallsForWeek(i).filter(c=>c.total!==null);
-    weeks.push({ label: formatWeekLabel(i).split(' – ')[0], count: wk.length, avg: wk.length ? avg(wk.map(c=>c.total)) : 0 });
-  }
-  if (weeks.length < 2) {
-    ctx.fillStyle = '#444'; ctx.font = '12px DM Sans'; ctx.textAlign = 'center';
-    ctx.fillText('Not enough data for trend', w/2, h/2);
-    return;
+  for (let i=-7; i<=weekOff; i++) {
+    const wk = getWkCalls(i).filter(c=>c.total!==null);
+    weeks.push({ label: getWkStart(i).toLocaleDateString('en-US',{month:'short',day:'numeric'}), count: wk.length, avg: wk.length?avg(wk.map(c=>c.total)):0 });
   }
 
-  const maxCount = Math.max(...weeks.map(w=>w.count), 1);
-  const pad = { top: 20, right: 16, bottom: 32, left: 36 };
-  const cw = w - pad.left - pad.right, ch = h - pad.top - pad.bottom;
-  const barW = Math.min(cw / weeks.length * 0.6, 40);
-  const step = cw / weeks.length;
+  if (weeks.length<2) { ctx.fillStyle='#444'; ctx.font='12px DM Sans'; ctx.textAlign='center'; ctx.fillText('More data needed',W/2,H/2); return; }
 
-  ctx.clearRect(0, 0, w, h);
+  const maxC = Math.max(...weeks.map(w=>w.count),1);
+  const pad = {t:20,r:16,b:32,l:36};
+  const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+  const step=cw/weeks.length, bw=Math.min(step*0.6,36);
 
-  // Grid lines
-  ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.top + ch * (i/4);
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
-  }
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#222'; ctx.lineWidth=1;
+  [0,.25,.5,.75,1].forEach(f=>{ const y=pad.t+ch*f; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke(); });
 
-  // Bars (call count)
-  weeks.forEach((wk, i) => {
-    const x = pad.left + i * step + step/2;
-    const barH = (wk.count / maxCount) * ch;
-    const y = pad.top + ch - barH;
-    ctx.fillStyle = i === weeks.length - 1 ? 'rgba(200,16,46,0.5)' : 'rgba(200,16,46,0.2)';
-    ctx.fillRect(x - barW/2, y, barW, barH);
-    // Count label
-    if (wk.count > 0) {
-      ctx.fillStyle = '#888'; ctx.font = '10px DM Mono'; ctx.textAlign = 'center';
-      ctx.fillText(wk.count, x, y - 4);
-    }
+  weeks.forEach((wk,i)=>{
+    const x=pad.l+i*step+step/2, barH=(wk.count/maxC)*ch, y=pad.t+ch-barH;
+    ctx.fillStyle=i===weeks.length-1?'rgba(200,16,46,0.55)':'rgba(200,16,46,0.2)';
+    ctx.fillRect(x-bw/2,y,bw,barH);
+    if(wk.count>0){ctx.fillStyle='#666';ctx.font='9px DM Mono';ctx.textAlign='center';ctx.fillText(wk.count,x,y-3);}
   });
 
-  // Avg score line
-  ctx.beginPath(); ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2;
-  weeks.forEach((wk, i) => {
-    if (wk.avg === 0) return;
-    const x = pad.left + i * step + step/2;
-    const y = pad.top + ch - (wk.avg / 10) * ch;
-    if (i === 0 || weeks[i-1].avg === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  let first=true;
+  weeks.forEach((wk,i)=>{
+    if(!wk.avg) return;
+    const x=pad.l+i*step+step/2, y=pad.t+ch-(wk.avg/10)*ch;
+    if(first){ctx.moveTo(x,y);first=false;} else ctx.lineTo(x,y);
   });
   ctx.stroke();
 
-  // Avg score dots
-  weeks.forEach((wk, i) => {
-    if (wk.avg === 0) return;
-    const x = pad.left + i * step + step/2;
-    const y = pad.top + ch - (wk.avg / 10) * ch;
-    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI*2);
-    ctx.fillStyle = '#22c55e'; ctx.fill();
+  weeks.forEach((wk,i)=>{
+    if(!wk.avg) return;
+    const x=pad.l+i*step+step/2, y=pad.t+ch-(wk.avg/10)*ch;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle='#22c55e'; ctx.fill();
+    ctx.fillStyle='#555'; ctx.font='9px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(wk.avg.toFixed(1),x,y-6);
   });
 
-  // X labels
-  ctx.fillStyle = '#555'; ctx.font = '9px DM Mono'; ctx.textAlign = 'center';
-  weeks.forEach((wk, i) => {
-    const x = pad.left + i * step + step/2;
-    ctx.fillText(wk.label, x, h - 6);
+  ctx.fillStyle='#444'; ctx.font='9px DM Mono';
+  ctx.textAlign='right'; ctx.fillText('10',pad.l-3,pad.t+4);
+  ctx.fillText('5',pad.l-3,pad.t+ch/2+4);
+  ctx.fillText('0',pad.l-3,pad.t+ch+4);
+
+  weeks.forEach((wk,i)=>{
+    const x=pad.l+i*step+step/2;
+    ctx.fillStyle='#444'; ctx.font='8px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(wk.label,x,H-4);
   });
-
-  // Y axis
-  ctx.fillStyle = '#555'; ctx.font = '9px DM Mono'; ctx.textAlign = 'right';
-  ctx.fillText('10', pad.left - 4, pad.top + 4);
-  ctx.fillText('5', pad.left - 4, pad.top + ch/2 + 4);
-  ctx.fillText('0', pad.left - 4, pad.top + ch + 4);
-
-  // Legend
-  ctx.fillStyle = 'rgba(200,16,46,0.5)'; ctx.fillRect(pad.left, 4, 12, 8);
-  ctx.fillStyle = '#888'; ctx.font = '9px DM Mono'; ctx.textAlign = 'left';
-  ctx.fillText('Calls scored', pad.left + 16, 12);
-  ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(pad.left + 100, 8); ctx.lineTo(pad.left + 112, 8); ctx.stroke();
-  ctx.fillStyle = '#888'; ctx.fillText('Avg score', pad.left + 116, 12);
 }
 
-// ─── CALL LOG ─────────────────────────────────────────────────────────────────
+// CALL LOG
 function populateWeekFilter() {
-  const sel = document.getElementById('fWeek');
-  const existing = new Set();
-  const opts = ['<option value="">All Weeks</option>'];
-  allCalls.forEach(c => {
-    const d = parseDate(c.date);
-    if (!d) return;
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    const mon = new Date(d); mon.setDate(diff); mon.setHours(0,0,0,0);
-    const key = mon.toISOString().split('T')[0];
-    if (!existing.has(key)) {
-      existing.add(key);
-      opts.push(`<option value="${key}">${formatDate(mon.toISOString())}</option>`);
-    }
+  const sel=document.getElementById('fWk'), seen=new Set();
+  let opts='<option value="">All Weeks</option>';
+  allCalls.forEach(c=>{
+    const d=pd(c.date); if(!d) return;
+    const day=d.getDay(), diff=d.getDate()-day+(day===0?-6:1);
+    const mon=new Date(d); mon.setDate(diff); mon.setHours(0,0,0,0);
+    const key=mon.toISOString().split('T')[0];
+    if(!seen.has(key)){seen.add(key);opts+=`<option value="${key}">${fd(mon.toISOString())} week</option>`;}
   });
-  sel.innerHTML = opts.join('');
+  sel.innerHTML=opts;
 }
 
-function getFilteredCalls() {
-  const advisor = document.getElementById('fAdvisor').value;
-  const band = document.getElementById('fBand').value;
-  const appt = document.getElementById('fAppt').value;
-  const scoreable = document.getElementById('fScoreable').value;
-  const week = document.getElementById('fWeek').value;
-  const search = document.getElementById('searchLog').value.toLowerCase();
-  return allCalls.filter(c => {
-    if (advisor && !(c.advisor||'').toLowerCase().includes(advisor.toLowerCase())) return false;
-    if (band && c.band !== band) return false;
-    if (appt && c.apptBooked !== appt) return false;
-    if (scoreable && c.scoreable !== scoreable) return false;
-    if (week) {
-      const d = parseDate(c.date);
-      if (!d) return false;
-      const day = d.getDay(), diff = d.getDate() - day + (day===0?-6:1);
-      const mon = new Date(d); mon.setDate(diff); mon.setHours(0,0,0,0);
-      if (mon.toISOString().split('T')[0] !== week) return false;
-    }
-    if (search && !(c.vehicle+c.customerName+c.advisor).toLowerCase().includes(search)) return false;
+function getFiltered() {
+  const adv=document.getElementById('fAdv').value, band=document.getElementById('fBand').value;
+  const appt=document.getElementById('fAppt').value, score=document.getElementById('fScore').value;
+  const wk=document.getElementById('fWk').value, srch=document.getElementById('searchLog').value.toLowerCase();
+  return allCalls.filter(c=>{
+    if(adv && !(c.advisor||'').toLowerCase().includes(adv.toLowerCase())) return false;
+    if(band && c.band!==band) return false;
+    if(appt && c.apptBooked!==appt) return false;
+    if(score && c.scoreable!==score) return false;
+    if(wk){const d=pd(c.date);if(!d)return false;const day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1);const mon=new Date(d);mon.setDate(diff);mon.setHours(0,0,0,0);if(mon.toISOString().split('T')[0]!==wk)return false;}
+    if(srch && !(c.vehicle+c.customerName+c.advisor).toLowerCase().includes(srch)) return false;
     return true;
   });
 }
 
-function renderCallLog() {
-  logPage = 1; renderCallLogPage();
-}
+function renderLog() { logPage=1; renderLogPage(); }
 
-function renderCallLogPage() {
-  const filtered = getFilteredCalls();
-  document.getElementById('callLogCount').textContent = `${filtered.length} calls`;
-  if (!filtered.length) {
-    document.getElementById('callLogWrap').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div>No calls match filters</div></div>';
-    return;
-  }
-  const total = filtered.length;
-  const start = (logPage-1)*PAGE_SIZE;
-  const page = filtered.slice(start, start+PAGE_SIZE);
-  const totalPages = Math.ceil(total/PAGE_SIZE);
-
-  const rows = page.map(c => {
-    const idx = allCalls.indexOf(c);
+function renderLogPage() {
+  const f=getFiltered(), total=f.length;
+  document.getElementById('logCount').textContent=`${total} calls`;
+  if(!total){document.getElementById('logWrap').innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div>No calls match filters</div></div>';return;}
+  const start=(logPage-1)*PAGE, page=f.slice(start,start+PAGE), totalPages=Math.ceil(total/PAGE);
+  const rows=page.map(c=>{
+    const idx=allCalls.indexOf(c);
     return `<tr onclick="openModal(${idx})">
-      <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;">${formatDate(c.date)}</td>
+      <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;">${fd(c.date)}</td>
       <td style="font-weight:500;">${c.advisor||'—'}</td>
       <td style="font-size:12px;color:var(--text-muted);">${c.vehicle||'—'}</td>
       <td style="font-size:12px;color:var(--text-muted);">${c.customerName||'—'}</td>
@@ -856,487 +780,429 @@ function renderCallLogPage() {
       <td style="font-size:11px;color:var(--text-muted);">${c.customerType||'—'}</td>
     </tr>`;
   }).join('');
-
-  document.getElementById('callLogWrap').innerHTML = `
+  document.getElementById('logWrap').innerHTML=`
     <table class="call-table">
       <thead><tr><th>Date</th><th>Advisor</th><th>Vehicle</th><th>Customer</th><th>Score</th><th>Band</th><th>Appt</th><th>Type</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <div class="pagination">
-      <div class="page-info">Showing ${start+1}–${Math.min(start+PAGE_SIZE,total)} of ${total}</div>
+      <div class="page-info">Showing ${start+1}–${Math.min(start+PAGE,total)} of ${total}</div>
       <div class="page-btns">
-        <button class="page-btn" onclick="changeLogPage(-1)" ${logPage===1?'disabled':''}>← Prev</button>
+        <button class="page-btn" onclick="chLogPage(-1)" ${logPage===1?'disabled':''}>← Prev</button>
         <button class="page-btn cur">${logPage}/${totalPages}</button>
-        <button class="page-btn" onclick="changeLogPage(1)" ${logPage>=totalPages?'disabled':''}>Next →</button>
+        <button class="page-btn" onclick="chLogPage(1)" ${logPage>=totalPages?'disabled':''}>Next →</button>
       </div>
     </div>`;
 }
 
-function changeLogPage(d) {
-  const filtered = getFilteredCalls();
-  const totalPages = Math.ceil(filtered.length/PAGE_SIZE);
-  logPage = Math.max(1, Math.min(totalPages, logPage+d));
-  renderCallLogPage();
+function chLogPage(d) {
+  const totalPages=Math.ceil(getFiltered().length/PAGE);
+  logPage=Math.max(1,Math.min(totalPages,logPage+d)); renderLogPage();
 }
 
-// ─── MODAL ────────────────────────────────────────────────────────────────────
+// MODAL
 function openModal(idx) {
-  const c = allCalls[idx];
-  if (!c) return;
-  currentModalIdx = idx;
+  const c=allCalls[idx]; if(!c) return;
+  curModalIdx=idx;
+  document.getElementById('mTitle').textContent=c.vehicle||c.customerName||'Call Detail';
+  document.getElementById('mMeta').textContent=[c.advisor,fd(c.date),c.customerPhone].filter(Boolean).join(' · ');
 
-  document.getElementById('modalTitle').textContent = c.vehicle || c.customerName || 'Call Detail';
-  document.getElementById('modalMeta').textContent = [c.advisor, formatDate(c.date), c.customerPhone].filter(Boolean).join(' · ');
-
-  // Score tab
-  const band = c.band || getBand(c.total);
-  const bc = getBandColor(band);
-  document.getElementById('mtab-score').innerHTML = `
-    <div class="modal-total">
-      <div class="modal-total-score" style="color:${bc}">${c.total !== null ? c.total : '—'}</div>
-      <div class="modal-total-band" style="color:${bc}">${band || '—'}</div>
-    </div>
+  const band=c.band||getBand(c.total), bc=getBandColor(band);
+  document.getElementById('mtab-score').innerHTML=`
+    <div class="modal-total"><div class="modal-total-score" style="color:${bc}">${c.total!==null?c.total:'—'}</div><div class="modal-total-band" style="color:${bc}">${band||'—'}</div></div>
     <div class="modal-score-row">
-      ${[['Phase 1',c.phase1,2.5],['Phase 2',c.phase2,2.5],['Phase 3',c.phase3,3.0],['Phase 4',c.phase4,2.0]].map(([p,v,m]) => {
-        const pct = v ? (v/m)*100 : 0;
-        return `<div class="modal-phase">
-          <div class="modal-phase-label">${p}</div>
-          <div class="modal-phase-score" style="color:${pct>=85?'var(--green)':pct>=65?'var(--amber)':'var(--red)'}">${v!==null?v:'—'}<span style="font-size:13px;color:var(--text-muted)">/${m}</span></div>
-        </div>`;
+      ${[['Phase 1',c.phase1,2.5],['Phase 2',c.phase2,2.5],['Phase 3',c.phase3,3.0],['Phase 4',c.phase4,2.0]].map(([p,v,m])=>{
+        const pct=v?(v/m)*100:0;
+        return `<div class="modal-phase"><div class="modal-phase-label">${p}</div><div class="modal-phase-score" style="color:${pct>=85?'var(--green)':pct>=65?'var(--amber)':'var(--red)'}">${v!==null?v:'—'}<span style="font-size:13px;color:var(--text-muted)">/${m}</span></div></div>`;
       }).join('')}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div class="modal-section">
-        <div class="modal-section-title">Call Details</div>
-        ${drow('Customer', c.customerName)}${drow('Phone', c.customerPhone)}
-        ${drow('Vehicle', c.vehicle)}${drow('Appointment', c.apptBooked, c.apptBooked==='Yes'?'var(--green)':'')}
-        ${drow('Customer Type', c.customerType)}${drow('Situation', c.situationType)}
-        ${drow('Scoreable', c.scoreable)}
+      <div class="modal-section"><div class="modal-section-title">Call Details</div>
+        ${dr('Customer',c.customerName)}${dr('Phone',c.customerPhone)}${dr('Vehicle',c.vehicle)}
+        ${dr('Appt',c.apptBooked,c.apptBooked==='Yes'?'var(--green)':'')}
+        ${dr('Type',c.customerType)}${dr('Situation',c.situationType)}${dr('Scoreable',c.scoreable)}
       </div>
-      <div class="modal-section">
-        <div class="modal-section-title">Top Coaching Note</div>
-        <div class="coaching-box">${c.topCoachingNote || 'No coaching note available'}</div>
-        ${c.flags ? `<div class="modal-section-title" style="margin-top:12px;">Flags</div><div class="modal-tags">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>` : ''}
+      <div class="modal-section"><div class="modal-section-title">Top Coaching Note</div>
+        <div class="coaching-box">${c.topCoachingNote||'No note available'}</div>
+        ${c.flags?`<div class="modal-section-title" style="margin-top:12px;">Flags</div><div class="modal-tags">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>`:''}
       </div>
     </div>`;
 
-  // Transcript tab
-  const transcript = getTranscript(c);
-  if (transcript) {
-    document.getElementById('mtab-transcript').innerHTML = `
-      <div class="modal-section-title">Full Transcript</div>
-      <div class="transcript-box transcript-collapsed" id="transcriptBox">${escHtml(transcript)}</div>
-      <button class="expand-btn" id="expandBtn" onclick="toggleTranscript()">▼ SHOW FULL TRANSCRIPT</button>`;
-  } else {
-    document.getElementById('mtab-transcript').innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><div>No transcript available for this call</div></div>';
-  }
+  const tx=getTx(c);
+  document.getElementById('mtab-transcript').innerHTML=tx?`
+    <div class="modal-section-title">Full Transcript</div>
+    <div class="transcript-box transcript-collapsed" id="txBox">${esc(tx)}</div>
+    <button class="expand-btn" id="txBtn" onclick="toggleTx()">▼ SHOW FULL TRANSCRIPT</button>`
+    :'<div class="empty-state"><div class="empty-icon">📝</div><div>No transcript available</div></div>';
 
-  // Coaching report tab
-  document.getElementById('mtab-coaching').innerHTML = `
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Generate a full ATR coaching report for this call — complete phase-by-phase breakdown, coaching flags with specific replacement language, and priority focus. You can print this for your coaching session with the advisor.</p>
-    <button class="report-generate-btn" id="reportGenBtn" onclick="generateCoachingReport(${idx})">GENERATE FULL COACHING REPORT</button>
-    <div id="reportGenOutput"></div>`;
+  document.getElementById('mtab-coaching').innerHTML=`
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Generate a complete ATR coaching report for this call — full phase scoring with work shown, coaching flags with specific replacement language, and priority focus. Printable for advisor sessions.</p>
+    <button class="big-btn" id="coachGenBtn" onclick="genCoachReport(${idx})">GENERATE FULL COACHING REPORT</button>
+    <div id="coachGenOut"></div>`;
 
-  // Reset tabs
-  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.modal-tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelector('.modal-tab').classList.add('active');
   document.getElementById('mtab-score').classList.add('active');
-  transcriptExpanded = false;
 
   document.getElementById('callModal').classList.add('open');
 }
 
-function toggleTranscript() {
-  const box = document.getElementById('transcriptBox');
-  const btn = document.getElementById('expandBtn');
-  transcriptExpanded = !transcriptExpanded;
-  if (transcriptExpanded) {
-    box.classList.remove('transcript-collapsed');
-    btn.textContent = '▲ COLLAPSE TRANSCRIPT';
-  } else {
-    box.classList.add('transcript-collapsed');
-    btn.textContent = '▼ SHOW FULL TRANSCRIPT';
-  }
+function toggleTx() {
+  const box=document.getElementById('txBox'), btn=document.getElementById('txBtn');
+  const exp=box.classList.contains('transcript-collapsed');
+  box.classList.toggle('transcript-collapsed',!exp);
+  btn.textContent=exp?'▲ COLLAPSE TRANSCRIPT':'▼ SHOW FULL TRANSCRIPT';
 }
 
-function switchModalTab(name, el) {
-  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.modal-tab-content').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('mtab-'+name).classList.add('active');
+function switchMTab(name,el) {
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active'); document.getElementById('mtab-'+name).classList.add('active');
 }
 
-function closeModal(e) { if (e.target.id === 'callModal') closeModalDirect(); }
+function closeModal(e) { if(e.target.id==='callModal') closeModalDirect(); }
 function closeModalDirect() { document.getElementById('callModal').classList.remove('open'); }
 
-function drow(label, val, color) {
-  if (!val) return '';
-  return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);">
-    <span style="color:var(--text-muted);">${label}</span>
-    <span style="color:${color||'var(--text)'};font-weight:500;">${val}</span>
-  </div>`;
+function dr(label,val,color) {
+  if(!val) return '';
+  return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">${label}</span><span style="color:${color||'var(--text)'};font-weight:500;">${val}</span></div>`;
 }
 
-// ─── COACHING REPORT GENERATION ───────────────────────────────────────────────
-async function generateCoachingReport(idx) {
-  const c = allCalls[idx];
-  const transcript = getTranscript(c);
-  if (!transcript) {
-    document.getElementById('reportGenOutput').innerHTML = '<div class="coaching-box" style="border-color:var(--amber);">No transcript available for this call. Cannot generate report.</div>';
-    return;
-  }
-
-  const btn = document.getElementById('reportGenBtn');
-  btn.disabled = true; btn.textContent = 'GENERATING REPORT...';
-  document.getElementById('reportGenOutput').innerHTML = '<div class="report-loading"><div class="spinner"></div>Analyzing call and building coaching report...<br><span style="font-size:11px;opacity:0.6;">This takes 15-30 seconds</span></div>';
-
-  const systemPrompt = await getSystemPrompt();
-
+// COACHING REPORT (single call)
+async function genCoachReport(idx) {
+  const c=allCalls[idx], tx=getTx(c);
+  if(!tx){document.getElementById('coachGenOut').innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcript available.</div>';return;}
+  const btn=document.getElementById('coachGenBtn');
+  btn.disabled=true; btn.textContent='GENERATING... (15-30 SECONDS)';
+  document.getElementById('coachGenOut').innerHTML='<div class="loading"><div class="spinner"></div>Analyzing call and building coaching report...</div>';
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        system: systemPrompt,
-        messages: [{
-          role: 'user',
-          content: `You are generating a full human-readable coaching report — NOT JSON. Output the complete formatted report with all sections: CALL SUMMARY, SCORECARD (showing your work), WHAT WORKED, COACHING FLAGS (each with What to say instead and Why this works), PRIORITY FOCUS, and KILL PHRASES DETECTED.
-
-Advisor: ${c.advisor || 'Unknown'}
-Vehicle: ${c.vehicle || 'Unknown'}
-Date: ${c.date || 'Unknown'}
-
-TRANSCRIPT:
-${transcript}`
-        }]
-      })
-    });
-    const data = await response.json();
-    const report = data.content?.[0]?.text || 'Error generating report';
-
-    document.getElementById('reportGenOutput').innerHTML = `
+    const report=await claudeCall(
+      `Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show all raw scores, scaling math, deductions), WHAT WORKED (3 specific behaviors with transcript references), COACHING FLAGS (each with What to say instead using this exact vehicle/symptom/moment, and Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${c.advisor||'Unknown'}\nVehicle: ${c.vehicle||'Unknown'}\nDate: ${c.date||'Unknown'}\n\nTRANSCRIPT:\n${tx}`, 4000);
+    document.getElementById('coachGenOut').innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;letter-spacing:1px;">✓ REPORT GENERATED</div>
-        <button class="print-btn" onclick="printCoachingReport()">⎙ PRINT THIS REPORT</button>
+        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ REPORT GENERATED</div>
+        <button class="print-btn" onclick="printCoachReport('${(c.advisor||'').replace(/'/g,"\\'")}','${(c.vehicle||'').replace(/'/g,"\\'")}','${(c.date||'').replace(/'/g,"\\'")}')">⎙ PRINT</button>
       </div>
-      <div class="report-output" id="coachingReportText">${escHtml(report)}</div>`;
-
-    btn.disabled = false; btn.textContent = 'REGENERATE REPORT';
+      <div class="report-output" id="coachRptTxt">${esc(report)}</div>`;
+    btn.disabled=false; btn.textContent='REGENERATE REPORT';
   } catch(e) {
-    document.getElementById('reportGenOutput').innerHTML = `<div class="coaching-box" style="border-color:var(--red);">Error generating report: ${e.message}</div>`;
-    btn.disabled = false; btn.textContent = 'GENERATE FULL COACHING REPORT';
+    document.getElementById('coachGenOut').innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error: ${e.message}</div>`;
+    btn.disabled=false; btn.textContent='GENERATE FULL COACHING REPORT';
   }
 }
 
-function printCoachingReport() {
-  const c = currentModalIdx >= 0 ? allCalls[currentModalIdx] : null;
-  const report = document.getElementById('coachingReportText')?.textContent || '';
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>ATR Coaching Report</title>
-    <style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;font-size:13px;line-height:1.7;color:#111;}
-    h1{font-size:18px;border-bottom:2px solid #C8102E;padding-bottom:8px;}
-    .meta{color:#666;font-size:12px;margin-bottom:24px;}
-    pre{white-space:pre-wrap;font-family:Arial,sans-serif;}</style></head><body>
-    <h1>ATR Call Coaching Report</h1>
-    <div class="meta">${c ? `${c.advisor} · ${c.vehicle} · ${formatDate(c.date)}` : ''}</div>
-    <pre>${escHtml(report)}</pre></body></html>`);
-  win.document.close(); win.print();
+function printCoachReport(advisor,vehicle,date) {
+  const report=document.getElementById('coachRptTxt')?.textContent||'';
+  printWindow(`ATR Coaching Report — ${advisor}`,`<h1>ATR Call Coaching Report</h1><div class="meta">${advisor} · ${vehicle} · ${date}</div><pre>${esc(report)}</pre>`);
 }
 
-// ─── WEEKLY REPORT VIEW ───────────────────────────────────────────────────────
-function goCurrentReportWeek() { reportWeekOffset = 0; renderWeeklyReport(); }
-function changeReportWeek(d) { reportWeekOffset += d; renderWeeklyReport(); }
+// WEEKLY REPORT
+function goRptNow() { rptWeekOff=0; renderReport(); }
+function changeRptWeek(d) { rptWeekOff+=d; renderReport(); }
 
-function renderWeeklyReport() {
-  document.getElementById('reportWeekLabel').textContent = formatWeekLabel(reportWeekOffset);
-  const wk = getCallsForWeek(reportWeekOffset);
-  const scored = wk.filter(c => c.total !== null);
+function renderReport() {
+  document.getElementById('rptWeekLabel').textContent=fmtWkLabel(rptWeekOff);
+  const wk=getWkCalls(rptWeekOff), scored=wk.filter(c=>c.total!==null);
 
-  if (!scored.length) {
-    document.getElementById('reportContent').innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div>No scored calls for this week</div></div>';
-    return;
-  }
+  if(!scored.length){document.getElementById('rptContent').innerHTML='<div class="empty-state"><div class="empty-icon">📊</div><div>No scored calls for this week</div></div>';return;}
 
-  const wkAvg = avg(scored.map(c=>c.total));
-  const appts = scored.filter(c=>c.apptBooked==='Yes').length;
+  const wkA=avg(scored.map(c=>c.total)), appts=scored.filter(c=>c.apptBooked==='Yes').length;
 
-  const advisorReports = ['Jack','Jay'].map(name => {
-    const mine = scored.filter(c=>(c.advisor||'').toLowerCase().includes(name.toLowerCase()));
-    if (!mine.length) return `<div class="weekly-report-card"><div class="wrc-header"><div class="wrc-name">${name}</div><div style="color:var(--text-muted);font-size:13px;">No calls this week</div></div></div>`;
+  const advisorCards=['Jack','Jay'].map(name=>{
+    const mine=scored.filter(c=>(c.advisor||'').toLowerCase().includes(name.toLowerCase()));
+    if(!mine.length) return `<div class="wrc"><div class="wrc-header"><div class="wrc-name">${name}</div><div style="color:var(--text-muted);">No calls this week</div></div></div>`;
 
-    const a = avg(mine.map(c=>c.total));
-    const band = getBand(a);
-    const bc = getBandColor(band);
-    const hi = Math.max(...mine.map(c=>c.total));
-    const lo = Math.min(...mine.map(c=>c.total));
-    const myAppts = mine.filter(c=>c.apptBooked==='Yes').length;
+    const a=avg(mine.map(c=>c.total)), band=getBand(a), bc=getBandColor(band);
+    const hi=Math.max(...mine.map(c=>c.total)), lo=Math.min(...mine.map(c=>c.total));
+    const myAppts=mine.filter(c=>c.apptBooked==='Yes').length;
+    const sorted=[...mine].sort((a,b)=>b.total-a.total);
+    const best=sorted[0], worst=sorted[sorted.length-1];
+    const mid=sorted.length>=3?sorted[Math.floor(sorted.length/2)]:null;
 
-    // Best, worst, middle calls
-    const sorted = [...mine].sort((a,b)=>b.total-a.total);
-    const best = sorted[0];
-    const worst = sorted[sorted.length-1];
-    const midIdx = Math.floor(sorted.length/2);
-    const middle = sorted.length >= 3 ? sorted[midIdx] : null;
-
-    const callItem = (c, dotColor, label) => {
-      const idx = allCalls.indexOf(c);
-      const transcript = getTranscript(c);
-      return `<li class="ctr-item">
-        <div class="ctr-dot" style="background:${dotColor}"></div>
-        <div class="ctr-content">
-          <div class="ctr-title">${label} · Score ${c.total} · ${c.vehicle || c.customerName || 'Unknown'}</div>
-          <div class="ctr-note">${c.topCoachingNote || '—'}</div>
-          ${c.flags ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>` : ''}
-          <div class="ctr-actions">
-            <button class="ctr-btn" onclick="openModal(${idx});event.stopPropagation()">VIEW SCORECARD</button>
-            <button class="ctr-btn" onclick="openModalOnTab(${idx},'transcript');event.stopPropagation()">VIEW TRANSCRIPT</button>
-            <button class="ctr-btn" onclick="openModalOnTab(${idx},'coaching');event.stopPropagation()">GENERATE REPORT</button>
-          </div>
-        </div>
-      </li>`;
+    const callItem=(c,color,label)=>{
+      const idx=allCalls.indexOf(c);
+      return `<div class="call-review-item">
+        <div class="cri-header"><div class="cri-dot" style="background:${color}"></div><div class="cri-title">${label} · Score ${c.total} · ${c.vehicle||c.customerName||'Unknown'}</div></div>
+        <div class="cri-note">${c.topCoachingNote||'—'}</div>
+        ${c.flags?`<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>`:''}
+        <button class="cri-btn" onclick="openModal(${idx})">VIEW SCORECARD</button>
+        <button class="cri-btn" onclick="openMTab(${idx},'transcript')">VIEW TRANSCRIPT</button>
+      </div>`;
     };
 
-    return `<div class="weekly-report-card print-section">
+    const key = name.toLowerCase();
+    return `<div class="wrc">
       <div class="wrc-header">
-        <div>
-          <div class="wrc-name">${name}</div>
-          <div style="font-size:12px;color:var(--text-muted);">${mine.length} calls · ${myAppts} appts booked · ${Math.round(myAppts/mine.length*100)}% booking rate</div>
-        </div>
-        <div style="text-align:right;">
-          <div class="wrc-score" style="color:${bc}">${a.toFixed(1)}</div>
-          <div style="font-size:11px;font-weight:600;letter-spacing:2px;color:${bc};text-transform:uppercase;">${band}</div>
-        </div>
+        <div><div class="wrc-name">${name}</div><div style="font-size:12px;color:var(--text-muted);">${mine.length} calls · ${myAppts} appts · ${Math.round(myAppts/mine.length*100)}% booking rate</div></div>
+        <div style="text-align:right;"><div class="wrc-score" style="color:${bc}">${a.toFixed(1)}</div><div style="font-size:11px;font-weight:600;letter-spacing:2px;color:${bc};text-transform:uppercase;">${band}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:20px;">
         <div style="background:var(--surface2);padding:12px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--green)">${hi.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Week High</div></div>
         <div style="background:var(--surface2);padding:12px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;">${a.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Week Avg</div></div>
         <div style="background:var(--surface2);padding:12px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${lo<5?'var(--red)':'var(--amber)'}">${lo.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Week Low</div></div>
       </div>
-      <div class="modal-section-title">Calls to Review</div>
-      <ul class="calls-to-review">
-        ${callItem(best, 'var(--green)', '🏆 Best Call')}
-        ${worst !== best ? callItem(worst, 'var(--red)', '⚠ Needs Most Work') : ''}
-        ${middle && middle !== best && middle !== worst ? callItem(middle, 'var(--amber)', '↗ Most Improvable') : ''}
-      </ul>
+      <button class="big-btn" id="wkRptBtn-${key}" onclick="genWeeklyAdvisorReport('${name}', ${rptWeekOff})">GENERATE ${name.toUpperCase()} WEEKLY COACHING REPORT</button>
+      <div id="wkRptOut-${key}"></div>
+      <div class="modal-section-title" style="margin-top:20px;">Calls to Review</div>
+      ${callItem(best,'var(--green)','🏆 Best Call')}
+      ${worst!==best?callItem(worst,'var(--red)','⚠ Needs Most Work'):''}
+      ${mid&&mid!==best&&mid!==worst?callItem(mid,'var(--amber)','↗ Most Improvable'):''}
     </div>`;
   }).join('');
 
-  document.getElementById('reportContent').innerHTML = `
-    <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
-      <div class="stat-card red"><div class="stat-label">Week Total Calls</div><div class="stat-value">${scored.length}</div></div>
-      <div class="stat-card green"><div class="stat-label">Week Avg Score</div><div class="stat-value">${wkAvg.toFixed(1)}</div></div>
+  document.getElementById('rptContent').innerHTML=`
+    <div class="stats-row">
+      <div class="stat-card red"><div class="stat-label">Week Calls</div><div class="stat-value">${scored.length}</div></div>
+      <div class="stat-card green"><div class="stat-label">Week Avg</div><div class="stat-value">${wkA.toFixed(1)}</div></div>
       <div class="stat-card amber"><div class="stat-label">Appts Booked</div><div class="stat-value">${appts}</div></div>
       <div class="stat-card blue"><div class="stat-label">Booking Rate</div><div class="stat-value">${Math.round(appts/scored.length*100)}%</div></div>
     </div>
-    ${advisorReports}`;
+    ${advisorCards}`;
 }
 
-function openModalOnTab(idx, tab) {
-  openModal(idx);
-  setTimeout(() => {
-    document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.modal-tab-content').forEach(t => t.classList.remove('active'));
-    const tabs = document.querySelectorAll('.modal-tab');
-    const tabMap = {score:0, transcript:1, coaching:2};
-    if (tabs[tabMap[tab]]) tabs[tabMap[tab]].classList.add('active');
-    document.getElementById('mtab-'+tab).classList.add('active');
-  }, 50);
-}
+async function genWeeklyAdvisorReport(name, wkOff) {
+  const key=name.toLowerCase();
+  const btn=document.getElementById(`wkRptBtn-${key}`);
+  const outEl=document.getElementById(`wkRptOut-${key}`);
+  const scored=getWkCalls(wkOff).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
 
-// ─── TOOLS ────────────────────────────────────────────────────────────────────
-async function getSystemPrompt() {
-  return `You are the ATR Call Intelligence AI for Advanced Transmission Repair, Phoenix AZ, 2849 E Bell Rd. You have been trained on the complete ATR Sales Playbook and apply it precisely when scoring calls, writing follow-up texts, and generating coaching notes.
+  if(!scored.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No scored calls for this advisor this week.</div>';return;}
 
-SHOP PROFILE: Owner Brian. Advisors: Jack (experienced, warm, technically strong), Jay (newer, building confidence on objections). Break-even $25-30K/week, revenue goal $40K/week.
+  const sorted=[...scored].sort((a,b)=>b.total-a.total);
+  const best=sorted[0], worst=sorted[sorted.length-1], mid=sorted.length>=3?sorted[Math.floor(sorted.length/2)]:null;
+  const callsToReport=[best,worst!==best?worst:null,mid&&mid!==best&&mid!==worst?mid:null].filter(Boolean);
 
-THE 4-PHASE CALL FRAMEWORK:
-Phase 1 — Establish Control (2.5 pts): Professional greeting, get name within 30 seconds, redirect to diagnostics before price.
-Phase 2 — Diagnostic Questions (2.5 pts): 5 questions before price — year/make/model, mileage, symptoms, prior diagnosis, CEL. Summarize back. Name the specific transmission model.
-Phase 3 — Delivering Price (3.0 pts): Sandwich method — value first, all-in range (parts/labor/fluids/tax), reassurance bridge. Bridge question IMMEDIATELY after price. Never apologize for price. Competing quote: educate don't discount.
-Phase 4 — Closing (2.0 pts): Alternative-choice close with two specific times. Get name and number. Committed next action.
+  const txAvailable=callsToReport.filter(c=>getTx(c).length>50);
+  if(!txAvailable.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcripts available for these calls. Cannot generate report.</div>';return;}
 
-PRICING: All-in quoting — includes parts, labor, fluids, estimated tax. Pre-inspection = range. Post-inspection = firm written estimate. Warranty: 1 year unlimited miles in writing. Financing: Snap and EasyPay — NEVER quote monthly payment before application.
+  btn.disabled=true; btn.textContent=`GENERATING ${name.toUpperCase()} REPORT... (60-90 SECONDS)`;
+  outEl.innerHTML='<div class="loading"><div class="spinner"></div>Generating weekly coaching report for '+name+'...<br><span style="font-size:11px;opacity:0.6;">Analyzing '+txAvailable.length+' calls — this takes 60-90 seconds</span></div>';
 
-SCORING BANDS: Elite 9.0+, Strong 7.5-8.9, Developing 6.0-7.4, Needs Work 4.0-5.9, Poor 0-3.9.
+  const a=avg(scored.map(c=>c.total));
+  const hi=Math.max(...scored.map(c=>c.total)), lo=Math.min(...scored.map(c=>c.total));
+  const myAppts=scored.filter(c=>c.apptBooked==='Yes').length;
 
-COACHING FLAG REQUIREMENT: Every flag MUST include:
-- What to say instead: Using the exact vehicle, exact symptom, exact moment from THIS call
-- Why this works: One sentence on the psychology/technique
+  const now=new Date(), d60=new Date(now); d60.setDate(d60.getDate()-60);
+  const rolling=allCalls.filter(c=>{const d=pd(c.date);return d&&d>=d60&&c.total!==null&&(c.advisor||'').toLowerCase().includes(key);});
+  const r60A=rolling.length?avg(rolling.map(c=>c.total)):null;
+  const lwScored=getWkCalls(wkOff-1).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
+  const lwA=lwScored.length?avg(lwScored.map(c=>c.total)):null;
 
-REPLACEMENT LANGUAGE RULES: Use the customer's actual vehicle and situation. Never write [vehicle] or [symptom]. Pick up from the exact moment the call went off track. Keep it natural and conversational — ready to read aloud.
-
-TRANSCRIPTION QUALITY: Garbled greetings = no deduction. Garbled words = score intent. Benefit of the doubt when unclear.
-
-FOLLOW-UP TEXT RULES: No m-dashes. First touch — specific to vehicle/issue, ends with "Is it drivable or is it down?" Mid touch — reference first call, find the barrier, offer specific times. Last touch — no question, short, human, low pressure.
-
-LAST TOUCH RULES: No question at end. "One last time" and "if things went a different direction, totally understood." Address specific barrier if known.`;
-}
-
-async function callClaude(userMessage, maxTokens = 1500) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: maxTokens,
-      system: await getSystemPrompt(),
-      messages: [{ role: 'user', content: userMessage }]
-    })
-  });
-  const data = await response.json();
-  return data.content?.[0]?.text || 'Error generating response';
-}
-
-async function runCallScorer() {
-  const transcript = document.getElementById('scorerTranscript').value.trim();
-  const advisor = document.getElementById('scorerAdvisor').value;
-  if (!transcript) { alert('Please paste a transcript first.'); return; }
-
-  const btn = document.getElementById('scorerBtn');
-  btn.disabled = true; btn.textContent = 'SCORING...';
-  const output = document.getElementById('scorerOutput');
-  output.className = 'tool-output visible';
-  output.textContent = 'Analyzing call... this takes 15-30 seconds';
+  const callPrompts=txAvailable.map((c,i)=>{
+    const labels=['BEST CALL','WORST CALL','MOST IMPROVABLE CALL'];
+    const dotColors=['Best performing','Lowest scoring','Middle/most improvable'];
+    return `--- ${labels[i]||dotColors[i]||'CALL '+(i+1)} (Score: ${c.total}, Band: ${c.band}) ---
+Vehicle: ${c.vehicle||'Unknown'} | Customer: ${c.customerName||'Unknown'}
+TRANSCRIPT:
+${getTx(c)}`;
+  }).join('\n\n');
 
   try {
-    const result = await callClaude(
-      `You are generating a full human-readable coaching report — NOT JSON. Output the complete formatted report with all sections: CALL SUMMARY, SCORECARD (showing your work with raw scores, scaling, and deductions for each phase), WHAT WORKED (3 specific behaviors), COACHING FLAGS (each with What to say instead and Why this works), PRIORITY FOCUS, and KILL PHRASES DETECTED.
+    const report=await claudeCall(
+      `Generate a complete weekly coaching report for ${name} at Advanced Transmission Repair.
 
-Advisor: ${advisor}
+WEEK SUMMARY FOR ${name.toUpperCase()}:
+Week: ${fmtWkLabel(wkOff)}
+Calls scored: ${scored.length}
+Week average: ${a.toFixed(1)} (${getBand(a)})
+Week high: ${hi.toFixed(1)} | Week low: ${lo.toFixed(1)}
+Last week average: ${lwA?lwA.toFixed(1):'No data'}
+60-day rolling average: ${r60A?r60A.toFixed(1):'Insufficient data'}
+Appointments booked: ${myAppts} of ${scored.length} (${Math.round(myAppts/scored.length*100)}%)
 
-TRANSCRIPT:
-${transcript}`, 4000);
+Generate the report in this exact structure:
 
-    output.textContent = result;
-    document.getElementById('scorerPrintBtn').style.display = 'inline-block';
+═══════════════════════════════════════
+WEEKLY COACHING REPORT — ${name.toUpperCase()}
+${fmtWkLabel(wkOff)}
+═══════════════════════════════════════
+
+WEEK AT A GLANCE
+[Summarize ${name}'s week in 3-4 sentences — trend direction, standout strengths, key areas to address]
+
+METRICS SUMMARY
+[Display the key numbers clearly]
+
+PATTERN ANALYSIS
+[What patterns do you see across all ${scored.length} calls this week? What is ${name} consistently doing well? What is the single most recurring gap?]
+
+═══════════════════════════════════════
+CALL REVIEWS
+═══════════════════════════════════════
+
+For each call below, provide the FULL coaching report including:
+- CALL SUMMARY (advisor, vehicle, customer type, situation type)
+- SCORECARD (show all raw scores with criteria, scaling math, deductions for each phase)
+- WHAT WORKED (3 specific behaviors with transcript references)
+- COACHING FLAGS (each with: what happened, where, impact, What to say instead using THIS vehicle/symptom/moment, Why this works)
+- PRIORITY FOCUS for this specific call
+
+${callPrompts}
+
+═══════════════════════════════════════
+WEEKLY PRIORITY FOCUS FOR ${name.toUpperCase()}
+═══════════════════════════════════════
+[The single highest-leverage improvement for ${name} to focus on next week — one clear, specific, actionable directive based on patterns across all calls reviewed]`, 6000);
+
+    outEl.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px;">
+        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ WEEKLY REPORT GENERATED</div>
+        <button class="print-btn" onclick="printWeeklyReport('${name}','${fmtWkLabel(wkOff).replace(/'/g,"\\'")}')">⎙ PRINT REPORT</button>
+      </div>
+      <div class="report-output" id="wkRptTxt-${key}">${esc(report)}</div>`;
+    btn.disabled=false; btn.textContent=`REGENERATE ${name.toUpperCase()} WEEKLY REPORT`;
   } catch(e) {
-    output.textContent = 'Error: ' + e.message;
+    outEl.innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error generating report: ${e.message}</div>`;
+    btn.disabled=false; btn.textContent=`GENERATE ${name.toUpperCase()} WEEKLY COACHING REPORT`;
   }
-  btn.disabled = false; btn.textContent = 'SCORE THIS CALL';
 }
 
-function printScorerReport() {
-  const report = document.getElementById('scorerOutput').textContent;
-  const advisor = document.getElementById('scorerAdvisor').value;
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>ATR Coaching Report — ${advisor}</title>
-    <style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;font-size:13px;line-height:1.8;color:#111;}
-    h1{font-size:18px;border-bottom:2px solid #C8102E;padding-bottom:8px;margin-bottom:6px;}
-    .meta{color:#666;font-size:11px;margin-bottom:24px;}
-    pre{white-space:pre-wrap;font-family:Arial,sans-serif;font-size:13px;}</style></head><body>
-    <h1>ATR Call Coaching Report</h1>
-    <div class="meta">Advisor: ${advisor} · Generated ${new Date().toLocaleDateString()}</div>
-    <pre>${escHtml(report)}</pre></body></html>`);
-  win.document.close(); win.print();
+function printWeeklyReport(name, week) {
+  const key=name.toLowerCase();
+  const report=document.getElementById(`wkRptTxt-${key}`)?.textContent||'';
+  printWindow(`ATR Weekly Coaching Report — ${name}`,
+    `<h1>ATR Weekly Coaching Report</h1><div class="meta">${name} · ${week}</div><pre>${esc(report)}</pre>`);
+}
+
+function openMTab(idx, tab) {
+  openModal(idx);
+  setTimeout(()=>{
+    document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active'));
+    const tabs=document.querySelectorAll('.modal-tab');
+    const map={score:0,transcript:1,coaching:2};
+    if(tabs[map[tab]]) tabs[map[tab]].classList.add('active');
+    document.getElementById('mtab-'+tab).classList.add('active');
+  },50);
+}
+
+// TOOLS
+async function runScorer() {
+  const tx=document.getElementById('scorerTx').value.trim();
+  const adv=document.getElementById('scorerAdv').value;
+  if(!tx){alert('Please paste a transcript first.');return;}
+  const btn=document.getElementById('scorerBtn');
+  btn.disabled=true; btn.textContent='SCORING...';
+  const out=document.getElementById('scorerOut');
+  out.className='tool-output visible'; out.textContent='Analyzing call... 15-30 seconds';
+  try {
+    const r=await claudeCall(`Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show raw scores for each criterion, scaling math, deductions per phase), WHAT WORKED (3 specific behaviors with exact transcript moments), COACHING FLAGS (each with: what happened, exact transcript quote where it occurred, point impact, What to say instead using THIS vehicle/symptom/moment, Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${adv}\n\nTRANSCRIPT:\n${tx}`, 4000);
+    out.textContent=r;
+    document.getElementById('scorerPrintBtn').style.display='inline-block';
+  } catch(e){out.textContent='Error: '+e.message;}
+  btn.disabled=false; btn.textContent='SCORE THIS CALL';
+}
+
+function printScorer() {
+  const adv=document.getElementById('scorerAdv').value;
+  const r=document.getElementById('scorerOut').textContent;
+  printWindow(`ATR Coaching Report — ${adv}`,`<h1>ATR Call Coaching Report</h1><div class="meta">Advisor: ${adv} · Generated ${new Date().toLocaleDateString()}</div><pre>${esc(r)}</pre>`);
 }
 
 async function runFollowup() {
-  const type = document.getElementById('followupType').value;
-  const context = document.getElementById('followupContext').value.trim();
-  if (!context) { alert('Please describe the customer situation first.'); return; }
-
-  const btn = document.getElementById('followupBtn');
-  btn.disabled = true; btn.textContent = 'GENERATING...';
-  const output = document.getElementById('followupOutput');
-  output.className = 'tool-output visible';
-  output.textContent = 'Generating...';
-
-  const typeLabels = { first: 'First Touch (Day 0 — same day)', mid: 'Mid Touch (Day 2-3 follow-up call or text)', last: 'Last Touch (Final contact before marking lost)' };
-
+  const type=document.getElementById('fuType').value, ctx=document.getElementById('fuCtx').value.trim();
+  if(!ctx){alert('Please describe the customer situation.');return;}
+  const btn=document.getElementById('fuBtn'); btn.disabled=true; btn.textContent='GENERATING...';
+  const out=document.getElementById('fuOut'); out.className='tool-output visible'; out.textContent='Generating...';
+  const guide={
+    first:'FIRST TOUCH (Day 0): Specific to this vehicle and issue. End with: "Is it drivable right now or is it down?" No generic language.',
+    mid:'MID TOUCH (Day 2-3): Reference the first conversation specifically. Never say "just following up." Find and address the real barrier. Offer specific appointment times.',
+    last:'LAST TOUCH (Final): No question at end. Short and human. Include "one last time" and "if things went a different direction, totally understood." No m-dashes.'
+  };
   try {
-    const result = await callClaude(`Generate a ${typeLabels[type]} text message for this customer situation. Follow ATR follow-up text rules strictly — no m-dashes, no generic language, specific to this vehicle and situation.
-
-${type === 'last' ? 'LAST TOUCH: No question at end. Short, human, low pressure. Include "one last time" and "if things went a different direction, totally understood." Address specific barrier if known.' : ''}
-${type === 'first' ? 'FIRST TOUCH: Specific to vehicle and issue. End with: Is it drivable right now or is it down?' : ''}
-${type === 'mid' ? 'MID TOUCH: Reference the first call specifically. Never say "just following up." Find and remove the real barrier. Can be a text or call script.' : ''}
-
-Customer situation: ${context}
-
-Output the message text only — no explanation, no preamble.`);
-    output.textContent = result;
-    document.getElementById('followupCopy').style.display = 'inline-block';
-  } catch(e) {
-    output.textContent = 'Error: ' + e.message;
-  }
-  btn.disabled = false; btn.textContent = 'GENERATE TEXT';
+    const r=await claudeCall(`Generate a ${type} follow-up text message. ${guide[type]} No m-dashes. Specific to this situation — no generic language.\n\nCustomer situation: ${ctx}\n\nOutput the message text only — no explanation, no preamble.`);
+    out.textContent=r; document.getElementById('fuCopy').style.display='inline-block';
+  } catch(e){out.textContent='Error: '+e.message;}
+  btn.disabled=false; btn.textContent='GENERATE TEXT';
 }
 
 async function runLastTouch() {
-  const type = document.getElementById('lastTouchType').value;
-  const context = document.getElementById('lastTouchContext').value.trim();
-  if (!context) { alert('Please describe the customer situation first.'); return; }
-
-  const btn = document.getElementById('lastTouchBtn');
-  btn.disabled = true; btn.textContent = 'GENERATING...';
-  const output = document.getElementById('lastTouchOutput');
-  output.className = 'tool-output visible';
-  output.textContent = 'Generating...';
-
-  const typeGuide = {
-    standard: 'Standard last touch. Include "one last time" and "if things went a different direction, totally understood."',
-    price: 'Customer went with a cheaper option. Acknowledge without judgment. Leave the door open professionally.',
-    towing: 'Towing or logistics was the barrier. Address that specific barrier. Offer the towing solution one last time.',
-    vacation: 'Customer mentioned they were going on vacation. Warm re-engage tone, not goodbye tone.',
-    keepvssell: 'Customer was deciding whether to keep or sell the vehicle. Address that decision directly.',
-    engaged: 'Customer was genuinely engaged but had a logistical barrier. Acknowledge their engagement and the barrier specifically.'
+  const type=document.getElementById('ltType').value, ctx=document.getElementById('ltCtx').value.trim();
+  if(!ctx){alert('Please describe the customer situation.');return;}
+  const btn=document.getElementById('ltBtn'); btn.disabled=true; btn.textContent='GENERATING...';
+  const out=document.getElementById('ltOut'); out.className='tool-output visible'; out.textContent='Generating...';
+  const guide={
+    standard:'Standard last touch. Include "one last time" and "if things went a different direction, totally understood."',
+    price:'Customer went with a cheaper option. Acknowledge without judgment. Leave door open professionally.',
+    towing:'Towing or logistics was the barrier. Address that specific barrier. Offer the towing solution one last time.',
+    vacation:'Customer was on vacation. Use warm re-engage tone, not goodbye tone.',
+    keepvssell:'Customer was deciding whether to keep or sell. Address that decision directly.',
+    engaged:'Customer was genuinely engaged but had a logistical barrier. Acknowledge their specific barrier.'
   };
-
   try {
-    const result = await callClaude(`Generate a last touch text message. No question at end. Short, human, low pressure. No m-dashes.
-
-Situation type: ${typeGuide[type]}
-Customer details: ${context}
-
-Output the message text only.`);
-    output.textContent = result;
-    document.getElementById('lastTouchCopy').style.display = 'inline-block';
-  } catch(e) {
-    output.textContent = 'Error: ' + e.message;
-  }
-  btn.disabled = false; btn.textContent = 'GENERATE LAST TOUCH';
+    const r=await claudeCall(`Generate a last touch text. No question at end. Short, human, low pressure. No m-dashes. Situation: ${guide[type]}\n\nCustomer details: ${ctx}\n\nOutput the message text only.`);
+    out.textContent=r; document.getElementById('ltCopy').style.display='inline-block';
+  } catch(e){out.textContent='Error: '+e.message;}
+  btn.disabled=false; btn.textContent='GENERATE LAST TOUCH';
 }
 
-function copyTool(outputId, btnId) {
-  const text = document.getElementById(outputId).textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById(btnId);
-    btn.textContent = 'COPIED ✓';
-    setTimeout(() => btn.textContent = 'COPY TEXT', 2000);
+function copyOut(outId,btnId) {
+  navigator.clipboard.writeText(document.getElementById(outId).textContent).then(()=>{
+    const b=document.getElementById(btnId); b.textContent='COPIED ✓';
+    setTimeout(()=>b.textContent='COPY',2000);
   });
 }
 
-// ─── NAV ──────────────────────────────────────────────────────────────────────
-function showView(name, el) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
-  el.classList.add('active');
-  if (name === 'report') renderWeeklyReport();
-  if (name === 'calls') renderCallLog();
+// CLAUDE API
+async function claudeCall(userMsg, maxTokens=1500) {
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-5-20251001',
+      max_tokens:maxTokens,
+      system:`You are the ATR Call Intelligence AI for Advanced Transmission Repair, Phoenix AZ. You score calls using the ATR Sales Playbook.
+
+4-PHASE FRAMEWORK:
+Phase 1 — Establish Control (2.5pts): Professional greeting, get name within 30 seconds, redirect to diagnostics before price.
+Phase 2 — Diagnostic Questions (2.5pts): 5 questions before price — year/make/model, mileage, symptoms, prior diagnosis, CEL. Summarize back. Name specific transmission model.
+Phase 3 — Delivering Price (3.0pts): Sandwich — value first, all-in range (parts/labor/fluids/tax), reassurance bridge. Bridge question IMMEDIATELY after price. Never apologize. Competing quote: educate don't discount. Financing: never quote monthly payment before application.
+Phase 4 — Closing (2.0pts): Alternative-choice close with two specific times. Get name and number. Committed next action.
+
+SCORING: Elite 9.0+, Strong 7.5-8.9, Developing 6.0-7.4, Needs Work 4.0-5.9, Poor 0-3.9.
+Show work: list each criterion with raw score (0/0.5/1/2), sum raw points, show scaling to phase max, apply deductions.
+
+COACHING FLAG REQUIREMENT — NON-NEGOTIABLE:
+Every flag MUST include:
+- What to say instead: Using the EXACT vehicle, EXACT symptom, EXACT moment from THIS call. Never write [vehicle] or [symptom]. Write it how a confident advisor would say it on the phone — natural, conversational, ready to read aloud.
+- Why this works: One sentence on the psychology or technique.
+
+TRANSCRIPTION QUALITY: Garbled greetings = no deduction. Obvious errors = score intent. Benefit of the doubt when unclear.
+
+FOLLOW-UP TEXT: No m-dashes. First touch ends with "Is it drivable or is it down?" Last touch: no question, short, human, "one last time" + "if things went a different direction, totally understood."`,
+      messages:[{role:'user',content:userMsg}]
+    })
+  });
+  const data=await res.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.content?.[0]?.text||'No response';
 }
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-function getBand(s) {
-  if (s===null) return '—';
-  if (s>=9.0) return 'Elite'; if (s>=7.5) return 'Strong';
-  if (s>=6.0) return 'Developing'; if (s>=4.0) return 'Needs Work'; return 'Poor';
+// NAV
+function showView(name,el) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='report') renderReport();
+  if(name==='calls') renderLog();
 }
-function getBandColor(b) {
-  return {Elite:'var(--elite)',Strong:'var(--strong)',Developing:'var(--developing)','Needs Work':'var(--needs-work)',Poor:'var(--poor)'}[b] || 'var(--text-muted)';
-}
-function getBandClass(b) {
-  return {Elite:'elite',Strong:'strong',Developing:'developing','Needs Work':'needs-work',Poor:'poor'}[b] || '';
-}
-function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
-function avg2(calls, field) {
-  const v = calls.map(c=>c[field]).filter(x=>x!==null);
-  return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null;
-}
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// HELPERS
+function getBand(s){if(s===null)return '—';if(s>=9)return 'Elite';if(s>=7.5)return 'Strong';if(s>=6)return 'Developing';if(s>=4)return 'Needs Work';return 'Poor';}
+function getBandColor(b){return {Elite:'var(--elite)',Strong:'var(--strong)',Developing:'var(--developing)','Needs Work':'var(--needs-work)',Poor:'var(--poor)'}[b]||'var(--text-muted)';}
+function getBandClass(b){return {Elite:'elite',Strong:'strong',Developing:'developing','Needs Work':'needs-work',Poor:'poor'}[b]||'';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function printWindow(title, body) {
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
+    <style>body{font-family:Arial,sans-serif;max-width:820px;margin:40px auto;font-size:13px;line-height:1.8;color:#111;}
+    h1{font-size:18px;border-bottom:2px solid #C8102E;padding-bottom:8px;margin-bottom:6px;}
+    .meta{color:#666;font-size:11px;margin-bottom:24px;}
+    pre{white-space:pre-wrap;font-family:Arial,sans-serif;font-size:13px;}</style>
+    </head><body>${body}</body></html>`);
+  w.document.close(); w.print();
 }
 </script>
 </body>
