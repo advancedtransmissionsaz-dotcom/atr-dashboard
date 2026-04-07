@@ -9,13 +9,11 @@
 :root {
   --red: #C8102E; --red-dark: #9e0d24; --red-glow: rgba(200,16,46,0.12);
   --black: #080808; --surface: #111111; --surface2: #181818; --surface3: #222222;
-  --border: #2a2a2a; --border2: #333;
-  --text: #f0f0f0; --text-muted: #888; --text-dim: #444;
+  --border: #2a2a2a; --border2: #333; --text: #f0f0f0; --text-muted: #888; --text-dim: #444;
   --green: #22c55e; --green-dim: rgba(34,197,94,0.15);
   --amber: #f59e0b; --amber-dim: rgba(245,158,11,0.15);
   --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.15);
-  --elite: #60a5fa; --strong: #22c55e; --developing: #fb923c;
-  --needs-work: #f59e0b; --poor: #C8102E;
+  --elite: #60a5fa; --strong: #22c55e; --developing: #fb923c; --needs-work: #f59e0b; --poor: #C8102E;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--black); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
@@ -80,9 +78,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-family: 'DM Mono', monospace; }
 .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 1px; line-height: 1; }
 .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-.delta-up { color: var(--green); }
-.delta-down { color: var(--red); }
-.delta-flat { color: var(--text-muted); }
+.delta-up { color: var(--green); } .delta-down { color: var(--red); } .delta-flat { color: var(--text-muted); }
 
 /* ADVISOR CARDS */
 .advisor-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; }
@@ -98,8 +94,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .mini-bar-label { font-size: 10px; color: var(--text-muted); font-family: 'DM Mono', monospace; width: 64px; flex-shrink: 0; }
 .mini-bar-track { flex: 1; height: 4px; background: var(--surface3); }
 .mini-bar-fill { height: 100%; background: var(--red); transition: width 0.8s ease; }
-.mini-bar-fill.g { background: var(--green); }
-.mini-bar-fill.a { background: var(--amber); }
+.mini-bar-fill.g { background: var(--green); } .mini-bar-fill.a { background: var(--amber); }
 .mini-bar-val { font-size: 10px; color: var(--text-muted); font-family: 'DM Mono', monospace; width: 28px; text-align: right; }
 .advisor-stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); }
 .advisor-stat { background: var(--surface2); padding: 10px; text-align: center; }
@@ -125,7 +120,9 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .search-input:focus { border-color: var(--red); }
 .search-input::placeholder { color: var(--text-dim); }
 .call-table { width: 100%; border-collapse: collapse; }
-.call-table th { text-align: left; padding: 9px 12px; font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border2); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.call-table th { text-align: left; padding: 9px 12px; font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border2); font-family: 'DM Mono', monospace; white-space: nowrap; cursor: pointer; }
+.call-table th:hover { color: var(--text); }
+.call-table th .sort-arrow { margin-left: 4px; font-size: 8px; }
 .call-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
 .call-table tr:hover td { background: var(--surface2); cursor: pointer; }
 .call-table tr:last-child td { border-bottom: none; }
@@ -184,6 +181,15 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .big-btn { width: 100%; padding: 14px; background: var(--red); border: none; color: white; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; cursor: pointer; transition: background 0.15s; margin-bottom: 16px; }
 .big-btn:hover { background: var(--red-dark); }
 .big-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+/* CHANGE #1: Two report mode buttons */
+.report-mode-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.report-mode-btn { padding: 14px; border: none; color: white; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: background 0.15s; }
+.report-mode-btn:hover { opacity: 0.9; }
+.report-mode-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.report-mode-btn.quick { background: var(--red); }
+.report-mode-btn.deep { background: var(--surface3); border: 1px solid var(--border2); color: var(--text); }
+.report-mode-desc { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-bottom: 16px; line-height: 1.5; }
+
 .print-btn { padding: 9px 18px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; letter-spacing: 1px; transition: all 0.15s; }
 .print-btn:hover { border-color: var(--green); color: var(--green); }
 .report-output { background: var(--surface2); border: 1px solid var(--border); padding: 20px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; min-height: 100px; }
@@ -218,6 +224,9 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .tool-output.visible { display: block; }
 .copy-btn { padding: 7px 14px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; letter-spacing: 1px; margin-top: 8px; transition: all 0.15s; }
 .copy-btn:hover { border-color: var(--green); color: var(--green); }
+/* CHANGE #3: Clear button styling */
+.clear-btn { padding: 7px 14px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; cursor: pointer; letter-spacing: 1px; margin-top: 8px; transition: all 0.15s; margin-left: 8px; }
+.clear-btn:hover { border-color: var(--amber); color: var(--amber); }
 
 /* LOADING */
 .loading { text-align: center; padding: 60px; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 12px; }
@@ -229,7 +238,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 
 /* PRINT */
 @media print {
-  #loginScreen, .header, .week-nav, .modal-overlay, .nav-tabs, .refresh-btn, .last-updated, .tool-btn, .print-btn, .big-btn, .cri-btn, .expand-btn, .copy-btn, .error-bar, .info-bar { display: none !important; }
+  #loginScreen, .header, .week-nav, .modal-overlay, .nav-tabs, .refresh-btn, .last-updated, .tool-btn, .print-btn, .big-btn, .report-mode-btn, .cri-btn, .expand-btn, .copy-btn, .clear-btn, .error-bar, .info-bar { display: none !important; }
   body { background: white !important; color: black !important; font-size: 12px; }
   .card, .wrc, .advisor-card, .stat-card { border: 1px solid #ddd !important; background: white !important; break-inside: avoid; }
   * { color: black !important; background: white !important; }
@@ -237,7 +246,6 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
   .transcript-collapsed { max-height: none !important; }
   .transcript-collapsed::after { display: none !important; }
 }
-
 @media (max-width: 900px) {
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .two-col, .tools-grid { grid-template-columns: 1fr; }
@@ -246,205 +254,209 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 </style>
 </head>
 <body>
-
 <!-- LOGIN -->
 <div id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="login-mark">ATR</div>
-      <div><div class="login-title">Call Intelligence</div><div class="login-sub">Advanced Transmission Repair</div></div>
-    </div>
-    <label class="login-label">Access Code</label>
-    <input type="password" class="login-input" id="loginInput" maxlength="6" placeholder="····" autocomplete="off" />
-    <button class="login-btn" onclick="tryLogin()">ENTER</button>
-    <div class="login-error" id="loginError"></div>
-  </div>
+<div class="login-box">
+<div class="login-logo">
+<div class="login-mark">ATR</div>
+<div><div class="login-title">Call Intelligence</div><div class="login-sub">Advanced Transmission Repair</div></div>
+</div>
+<label class="login-label">Access Code</label>
+<input type="password" class="login-input" id="loginInput" maxlength="6" placeholder="····" autocomplete="off" />
+<button class="login-btn" onclick="tryLogin()">ENTER</button>
+<div class="login-error" id="loginError"></div>
+</div>
 </div>
 
 <!-- APP -->
 <div id="app">
-  <div class="header">
-    <div class="header-logo">
-      <div class="logo-mark">ATR</div>
-      <div><div class="logo-text">Call Intelligence</div><div class="logo-sub">Advanced Transmission Repair · Phoenix AZ</div></div>
-    </div>
-    <div class="header-right">
-      <div class="nav-tabs">
-        <button class="nav-tab active" onclick="showView('week',this)">This Week</button>
-        <button class="nav-tab" onclick="showView('calls',this)">Call Log</button>
-        <button class="nav-tab" onclick="showView('report',this)">Weekly Report</button>
-        <button class="nav-tab" onclick="showView('tools',this)">Tools</button>
-      </div>
-      <button class="refresh-btn" onclick="loadData()">↻ REFRESH</button>
-      <div class="last-updated" id="lastUpdated">—</div>
-    </div>
-  </div>
+<div class="header">
+<div class="header-logo">
+<div class="logo-mark">ATR</div>
+<div><div class="logo-text">Call Intelligence</div><div class="logo-sub">Advanced Transmission Repair · Phoenix AZ</div></div>
+</div>
+<div class="header-right">
+<div class="nav-tabs">
+<button class="nav-tab active" onclick="showView('week',this)">This Week</button>
+<button class="nav-tab" onclick="showView('calls',this)">Call Log</button>
+<button class="nav-tab" onclick="showView('report',this)">Weekly Report</button>
+<button class="nav-tab" onclick="showView('tools',this)">Tools</button>
+</div>
+<button class="refresh-btn" onclick="loadData()">&#8635; REFRESH</button>
+<div class="last-updated" id="lastUpdated">&mdash;</div>
+</div>
+</div>
+<div class="container">
+<div class="error-bar" id="errorBar"></div>
 
-  <div class="container">
-    <div class="error-bar" id="errorBar"></div>
+<!-- THIS WEEK -->
+<div class="view active" id="view-week">
+<div class="week-nav">
+<button class="week-nav-btn" onclick="changeWeek(-1)">&larr; PREV</button>
+<div style="flex:1;text-align:center;">
+<div class="week-nav-label" id="weekLabel">&mdash;</div>
+<div class="week-nav-sub" id="weekSub">&mdash;</div>
+</div>
+<button class="week-nav-btn now" onclick="goNow()">THIS WEEK</button>
+<button class="week-nav-btn" onclick="changeWeek(1)">NEXT &rarr;</button>
+</div>
+<div class="stats-row">
+<!-- CHANGE #2: Jack/Jay tiles now show call count, not avg score -->
+<div class="stat-card red"><div class="stat-label">Calls Scored</div><div class="stat-value" id="wkTotal">&mdash;</div><div class="stat-sub" id="wkTotalSub">this week</div></div>
+<div class="stat-card green"><div class="stat-label">Week Avg</div><div class="stat-value" id="wkAvg">&mdash;</div><div class="stat-sub" id="wkAvgDelta">vs last week</div></div>
+<div class="stat-card amber"><div class="stat-label">Jack This Week</div><div class="stat-value" id="wkJack">&mdash;</div><div class="stat-sub" id="wkJackSub">&mdash;</div></div>
+<div class="stat-card blue"><div class="stat-label">Jay This Week</div><div class="stat-value" id="wkJay">&mdash;</div><div class="stat-sub" id="wkJaySub">&mdash;</div></div>
+</div>
+<div class="two-col">
+<div class="advisor-card">
+<div class="card-label">Advisor</div>
+<div class="advisor-name-big">JACK</div>
+<div class="advisor-score-big" id="jackBig">&mdash;</div>
+<div class="advisor-band-lbl" id="jackBandLbl">&mdash;</div>
+<div class="advisor-sub-stats" id="jackSubStats"></div>
+<div class="mini-bars" id="jackBars"></div>
+<div class="advisor-stat-row" id="jackStatRow"></div>
+</div>
+<div class="advisor-card">
+<div class="card-label">Advisor</div>
+<div class="advisor-name-big">JAY</div>
+<div class="advisor-score-big" id="jayBig">&mdash;</div>
+<div class="advisor-band-lbl" id="jayBandLbl">&mdash;</div>
+<div class="advisor-sub-stats" id="jaySubStats"></div>
+<div class="mini-bars" id="jayBars"></div>
+<div class="advisor-stat-row" id="jayStatRow"></div>
+</div>
+</div>
+<div class="two-col">
+<div class="card">
+<div class="card-header"><div class="card-title">8-Week Trend</div><div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">&#9642; calls &nbsp; &mdash; avg score</div></div>
+<div class="trend-container"><canvas id="trendChart"></canvas></div>
+</div>
+<div class="card">
+<div class="card-header"><div class="card-title">Score Distribution</div></div>
+<div class="band-dist" id="weekBandDist"></div>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<div class="card-title">This Week's Calls</div>
+<div id="weekCallCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;"></div>
+</div>
+<div id="weekCallsTable"></div>
+</div>
+</div>
 
-    <!-- THIS WEEK -->
-    <div class="view active" id="view-week">
-      <div class="week-nav">
-        <button class="week-nav-btn" onclick="changeWeek(-1)">← PREV</button>
-        <div style="flex:1;text-align:center;">
-          <div class="week-nav-label" id="weekLabel">—</div>
-          <div class="week-nav-sub" id="weekSub">—</div>
-        </div>
-        <button class="week-nav-btn now" onclick="goNow()">THIS WEEK</button>
-        <button class="week-nav-btn" onclick="changeWeek(1)">NEXT →</button>
-      </div>
+<!-- CALL LOG -->
+<div class="view" id="view-calls">
+<div class="card">
+<div class="card-header">
+<div class="card-title">Full Call Log</div>
+<div id="logCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;"></div>
+</div>
+<div class="table-filters">
+<select class="filter-select" id="fAdv" onchange="renderLog()"><option value="">All Advisors</option><option value="Jack">Jack</option><option value="Jay">Jay</option></select>
+<select class="filter-select" id="fBand" onchange="renderLog()"><option value="">All Bands</option><option value="Elite">Elite</option><option value="Strong">Strong</option><option value="Developing">Developing</option><option value="Needs Work">Needs Work</option><option value="Poor">Poor</option></select>
+<select class="filter-select" id="fAppt" onchange="renderLog()"><option value="">All Calls</option><option value="Yes">Appt Booked</option><option value="No">No Appt</option></select>
+<select class="filter-select" id="fScore" onchange="renderLog()"><option value="">All Types</option><option value="Yes">Scoreable</option><option value="No">Non-Scoreable</option></select>
+<select class="filter-select" id="fWk" onchange="renderLog()"><option value="">All Weeks</option></select>
+<input class="search-input" id="searchLog" placeholder="Vehicle, customer..." oninput="renderLog()" />
+</div>
+<div id="logWrap"></div>
+</div>
+</div>
 
-      <div class="stats-row">
-        <div class="stat-card red"><div class="stat-label">Calls Scored</div><div class="stat-value" id="wkTotal">—</div><div class="stat-sub" id="wkTotalSub">this week</div></div>
-        <div class="stat-card green"><div class="stat-label">Week Avg</div><div class="stat-value" id="wkAvg">—</div><div class="stat-sub" id="wkAvgDelta">vs last week</div></div>
-        <div class="stat-card amber"><div class="stat-label">Jack This Week</div><div class="stat-value" id="wkJack">—</div><div class="stat-sub" id="wkJackSub">—</div></div>
-        <div class="stat-card blue"><div class="stat-label">Jay This Week</div><div class="stat-value" id="wkJay">—</div><div class="stat-sub" id="wkJaySub">—</div></div>
-      </div>
+<!-- WEEKLY REPORT -->
+<div class="view" id="view-report">
+<div class="week-nav">
+<button class="week-nav-btn" onclick="changeRptWeek(-1)">&larr; PREV</button>
+<div style="flex:1;text-align:center;"><div class="week-nav-label" id="rptWeekLabel">&mdash;</div></div>
+<button class="week-nav-btn now" onclick="goRptNow()">THIS WEEK</button>
+<button class="week-nav-btn" onclick="changeRptWeek(1)">NEXT &rarr;</button>
+<button class="print-btn" onclick="window.print()">&#9114; PRINT PAGE</button>
+</div>
+<div id="rptContent"></div>
+</div>
 
-      <div class="two-col">
-        <div class="advisor-card">
-          <div class="card-label">Advisor</div>
-          <div class="advisor-name-big">JACK</div>
-          <div class="advisor-score-big" id="jackBig">—</div>
-          <div class="advisor-band-lbl" id="jackBandLbl">—</div>
-          <div class="advisor-sub-stats" id="jackSubStats"></div>
-          <div class="mini-bars" id="jackBars"></div>
-          <div class="advisor-stat-row" id="jackStatRow"></div>
-        </div>
-        <div class="advisor-card">
-          <div class="card-label">Advisor</div>
-          <div class="advisor-name-big">JAY</div>
-          <div class="advisor-score-big" id="jayBig">—</div>
-          <div class="advisor-band-lbl" id="jayBandLbl">—</div>
-          <div class="advisor-sub-stats" id="jaySubStats"></div>
-          <div class="mini-bars" id="jayBars"></div>
-          <div class="advisor-stat-row" id="jayStatRow"></div>
-        </div>
-      </div>
-
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header"><div class="card-title">8-Week Trend</div><div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">▪ calls &nbsp; — avg score</div></div>
-          <div class="trend-container"><canvas id="trendChart"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Score Distribution</div></div>
-          <div class="band-dist" id="weekBandDist"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">This Week's Calls</div>
-          <div id="weekCallCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;"></div>
-        </div>
-        <div id="weekCallsTable"></div>
-      </div>
-    </div>
-
-    <!-- CALL LOG -->
-    <div class="view" id="view-calls">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Full Call Log</div>
-          <div id="logCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;"></div>
-        </div>
-        <div class="table-filters">
-          <select class="filter-select" id="fAdv" onchange="renderLog()"><option value="">All Advisors</option><option value="Jack">Jack</option><option value="Jay">Jay</option></select>
-          <select class="filter-select" id="fBand" onchange="renderLog()"><option value="">All Bands</option><option value="Elite">Elite</option><option value="Strong">Strong</option><option value="Developing">Developing</option><option value="Needs Work">Needs Work</option><option value="Poor">Poor</option></select>
-          <select class="filter-select" id="fAppt" onchange="renderLog()"><option value="">All Calls</option><option value="Yes">Appt Booked</option><option value="No">No Appt</option></select>
-          <select class="filter-select" id="fScore" onchange="renderLog()"><option value="">All Types</option><option value="Yes">Scoreable</option><option value="No">Non-Scoreable</option></select>
-          <select class="filter-select" id="fWk" onchange="renderLog()"><option value="">All Weeks</option></select>
-          <input class="search-input" id="searchLog" placeholder="Vehicle, customer..." oninput="renderLog()" />
-        </div>
-        <div id="logWrap"></div>
-      </div>
-    </div>
-
-    <!-- WEEKLY REPORT -->
-    <div class="view" id="view-report">
-      <div class="week-nav">
-        <button class="week-nav-btn" onclick="changeRptWeek(-1)">← PREV</button>
-        <div style="flex:1;text-align:center;"><div class="week-nav-label" id="rptWeekLabel">—</div></div>
-        <button class="week-nav-btn now" onclick="goRptNow()">THIS WEEK</button>
-        <button class="week-nav-btn" onclick="changeRptWeek(1)">NEXT →</button>
-        <button class="print-btn" onclick="window.print()">⎙ PRINT PAGE</button>
-      </div>
-      <div id="rptContent"></div>
-    </div>
-
-    <!-- TOOLS -->
-    <div class="view" id="view-tools">
-      <div class="tools-grid">
-        <div class="tool-card" style="grid-column:1/-1;">
-          <div class="tool-title">Call Scorer</div>
-          <div class="tool-desc">Paste a call transcript to get a full ATR coaching report with phase-by-phase scoring, coaching flags, and specific replacement language. Printable for advisor coaching sessions.</div>
-          <select class="tool-select" id="scorerAdv" style="width:auto;display:inline-block;margin-right:8px;margin-bottom:0;">
-            <option value="Jack">Jack</option><option value="Jay">Jay</option>
-          </select>
-          <textarea class="tool-textarea" id="scorerTx" placeholder="Paste call transcript here..." style="min-height:160px;margin-top:12px;"></textarea>
-          <div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
-            <button class="tool-btn" id="scorerBtn" onclick="runScorer()" style="margin:0;">SCORE THIS CALL</button>
-            <button class="print-btn" id="scorerPrintBtn" onclick="printScorer()" style="display:none;">⎙ PRINT</button>
-          </div>
-          <div class="tool-output" id="scorerOut"></div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-title">Follow-Up Text</div>
-          <div class="tool-desc">Generate a follow-up text based on where the customer is in the funnel.</div>
-          <select class="tool-select" id="fuType">
-            <option value="first">First Touch (Day 0)</option>
-            <option value="mid">Mid Touch (Day 2-3)</option>
-            <option value="last">Last Touch (Final)</option>
-          </select>
-          <textarea class="tool-textarea" id="fuCtx" placeholder="Vehicle, issue, what was discussed, barriers..."></textarea>
-          <button class="tool-btn" id="fuBtn" onclick="runFollowup()">GENERATE TEXT</button>
-          <div class="tool-output" id="fuOut"></div>
-          <button class="copy-btn" id="fuCopy" onclick="copyOut('fuOut','fuCopy')" style="display:none;">COPY</button>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-title">Last Touch</div>
-          <div class="tool-desc">Final goodbye text for a cold lead. Short, human, no pressure.</div>
-          <select class="tool-select" id="ltType">
-            <option value="standard">Standard</option>
-            <option value="price">Went cheaper</option>
-            <option value="towing">Towing barrier</option>
-            <option value="vacation">On vacation</option>
-            <option value="keepvssell">Keep vs sell</option>
-            <option value="engaged">Was engaged, logistical barrier</option>
-          </select>
-          <textarea class="tool-textarea" id="ltCtx" placeholder="Vehicle, customer name, key details..."></textarea>
-          <button class="tool-btn" id="ltBtn" onclick="runLastTouch()">GENERATE LAST TOUCH</button>
-          <div class="tool-output" id="ltOut"></div>
-          <button class="copy-btn" id="ltCopy" onclick="copyOut('ltOut','ltCopy')" style="display:none;">COPY</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
+<!-- TOOLS -->
+<div class="view" id="view-tools">
+<div class="tools-grid">
+<div class="tool-card" style="grid-column:1/-1;">
+<div class="tool-title">Call Scorer</div>
+<div class="tool-desc">Paste a call transcript to get a full ATR coaching report with phase-by-phase scoring, coaching flags, and specific replacement language. Printable for advisor coaching sessions.</div>
+<select class="tool-select" id="scorerAdv" style="width:auto;display:inline-block;margin-right:8px;margin-bottom:0;">
+<option value="Jack">Jack</option><option value="Jay">Jay</option>
+</select>
+<textarea class="tool-textarea" id="scorerTx" placeholder="Paste call transcript here..." style="min-height:160px;margin-top:12px;"></textarea>
+<div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
+<button class="tool-btn" id="scorerBtn" onclick="runScorer()" style="margin:0;">SCORE THIS CALL</button>
+<button class="print-btn" id="scorerPrintBtn" onclick="printScorer()" style="display:none;">&#9114; PRINT</button>
+<!-- CHANGE #3: Clear button -->
+<button class="clear-btn" id="scorerClearBtn" onclick="clearScorer()" style="display:none;">CLEAR</button>
+</div>
+<div class="tool-output" id="scorerOut"></div>
+</div>
+<div class="tool-card">
+<div class="tool-title">Follow-Up Text</div>
+<div class="tool-desc">Generate a follow-up text based on transcript details and funnel position.</div>
+<select class="tool-select" id="fuType">
+<option value="same-day">Same Day (Day 0)</option>
+<option value="warm">Warm Follow-Up (Day 2-3)</option>
+<option value="re-intro">Re-Intro (7+ Days)</option>
+<option value="nudge">Gentle Nudge (Verbal Commit, No Show)</option>
+<option value="timing">Timing Constraint (Trip/Waiting)</option>
+</select>
+<textarea class="tool-textarea" id="fuCtx" placeholder="Paste the transcript or describe: customer name, vehicle, what was quoted, commitments made, drivable status, barriers discussed..."></textarea>
+<div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
+<button class="tool-btn" id="fuBtn" onclick="runFollowup()" style="margin:0;">GENERATE TEXT</button>
+<button class="copy-btn" id="fuCopy" onclick="copyOut('fuOut','fuCopy')" style="display:none;">COPY</button>
+<!-- CHANGE #3: Clear button -->
+<button class="clear-btn" id="fuClearBtn" onclick="clearFollowup()" style="display:none;">CLEAR</button>
+</div>
+<div class="tool-output" id="fuOut"></div>
+</div>
+<div class="tool-card">
+<div class="tool-title">Last Touch</div>
+<div class="tool-desc">Final goodbye text for a cold lead. Short, human, no pressure.</div>
+<select class="tool-select" id="ltType">
+<option value="standard">Standard</option>
+<option value="price">Went cheaper</option>
+<option value="towing">Towing barrier</option>
+<option value="vacation">On vacation</option>
+<option value="keepvssell">Keep vs sell</option>
+<option value="engaged">Was engaged, logistical barrier</option>
+</select>
+<textarea class="tool-textarea" id="ltCtx" placeholder="Vehicle, customer name, key details..."></textarea>
+<div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
+<button class="tool-btn" id="ltBtn" onclick="runLastTouch()" style="margin:0;">GENERATE LAST TOUCH</button>
+<button class="copy-btn" id="ltCopy" onclick="copyOut('ltOut','ltCopy')" style="display:none;">COPY</button>
+<!-- CHANGE #3: Clear button -->
+<button class="clear-btn" id="ltClearBtn" onclick="clearLastTouch()" style="display:none;">CLEAR</button>
+</div>
+<div class="tool-output" id="ltOut"></div>
+</div>
+</div>
+</div>
+</div>
 </div>
 
 <!-- MODAL -->
 <div class="modal-overlay" id="callModal" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <div><div class="modal-title" id="mTitle">—</div><div class="modal-meta" id="mMeta">—</div></div>
-      <button class="modal-close" onclick="closeModalDirect()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-tabs">
-        <button class="modal-tab active" onclick="switchMTab('score',this)">Score</button>
-        <button class="modal-tab" onclick="switchMTab('transcript',this)">Transcript</button>
-        <button class="modal-tab" onclick="switchMTab('coaching',this)">Full Report</button>
-      </div>
-      <div class="modal-tab-content active" id="mtab-score"></div>
-      <div class="modal-tab-content" id="mtab-transcript"></div>
-      <div class="modal-tab-content" id="mtab-coaching"></div>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-header">
+<div><div class="modal-title" id="mTitle">&mdash;</div><div class="modal-meta" id="mMeta">&mdash;</div></div>
+<button class="modal-close" onclick="closeModalDirect()">&#10005;</button>
+</div>
+<div class="modal-body">
+<div class="modal-tabs">
+<button class="modal-tab active" onclick="switchMTab('score',this)">Score</button>
+<button class="modal-tab" onclick="switchMTab('transcript',this)">Transcript</button>
+<button class="modal-tab" onclick="switchMTab('coaching',this)">Full Report</button>
+</div>
+<div class="modal-tab-content active" id="mtab-score"></div>
+<div class="modal-tab-content" id="mtab-transcript"></div>
+<div class="modal-tab-content" id="mtab-coaching"></div>
+</div>
+</div>
 </div>
 
 <script>
@@ -452,8 +464,8 @@ const SHEET_ID = '1VDs-N3l2sUBZFFVophcSVUvJxgT98Z5ETuLSlDhaMPY';
 const SHEET_NAME = 'Call Log';
 const PASSWORD = '1950';
 const API_KEY = ''; // API key stored in Cloudflare Worker
-
 let allCalls = [], weekOff = 0, rptWeekOff = 0, logPage = 1, curModalIdx = -1;
+let logSortCol = 'date', logSortDir = 'desc'; // CHANGE #5: default newest first
 const PAGE = 30;
 
 // LOGIN
@@ -485,7 +497,7 @@ async function loadData() {
     populateWeekFilter();
     renderAll();
   } catch(e) {
-    showErr('Could not load data. Make sure the Google Sheet is published to web (File → Share → Publish to web). ' + e.message);
+    showErr('Could not load data. Make sure the Google Sheet is published to web (File > Share > Publish to web). ' + e.message);
   }
 }
 
@@ -494,10 +506,7 @@ function parseSheet(json) {
     const c = row.c || [];
     const g = i => c[i]?.v != null ? String(c[i].v).trim() : '';
     const n = i => c[i]?.v != null ? parseFloat(c[i].v) : null;
-    return { date:g(0), advisor:g(1), customerName:g(2), customerPhone:g(3), vehicle:g(4),
-      callType:g(5), scoreable:g(6), phase1:n(7), phase2:n(8), phase3:n(9), phase4:n(10),
-      total:n(11), band:g(12), customerType:g(13), situationType:g(14),
-      apptBooked:g(15), topCoachingNote:g(16), transcriptRaw:g(17), flags:g(18) };
+    return { date:g(0), advisor:g(1), customerName:g(2), customerPhone:g(3), vehicle:g(4), callType:g(5), scoreable:g(6), phase1:n(7), phase2:n(8), phase3:n(9), phase4:n(10), total:n(11), band:g(12), customerType:g(13), situationType:g(14), apptBooked:g(15), topCoachingNote:g(16), transcriptRaw:g(17), flags:g(18) };
   }).filter(r => r.date || r.advisor);
 }
 
@@ -509,28 +518,17 @@ function getTx(c) {
 
 function showErr(msg) {
   const el = document.getElementById('errorBar');
-  el.textContent = msg; el.style.display = msg ? 'block' : 'none';
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
 }
 
 // WEEK HELPERS
-function getWkStart(off) {
-  const now = new Date(), day = now.getDay();
-  const diff = now.getDate() - day + (day===0?-6:1);
-  const mon = new Date(now); mon.setDate(diff); mon.setHours(0,0,0,0);
-  mon.setDate(mon.getDate() + off*7); return mon;
-}
+function getWkStart(off) { const now = new Date(), day = now.getDay(); const diff = now.getDate() - day + (day===0?-6:1); const mon = new Date(now); mon.setDate(diff); mon.setHours(0,0,0,0); mon.setDate(mon.getDate() + off*7); return mon; }
 function getWkEnd(s) { const e = new Date(s); e.setDate(e.getDate()+6); e.setHours(23,59,59,999); return e; }
-function getWkCalls(off) {
-  const s = getWkStart(off), e = getWkEnd(s);
-  return allCalls.filter(c => { const d = pd(c.date); return d && d>=s && d<=e; });
-}
-function fmtWkLabel(off) {
-  const s = getWkStart(off), e = getWkEnd(s);
-  const f = d => d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  return f(s)+' – '+f(e)+', '+e.getFullYear();
-}
+function getWkCalls(off) { const s = getWkStart(off), e = getWkEnd(s); return allCalls.filter(c => { const d = pd(c.date); return d && d>=s && d<=e; }); }
+function fmtWkLabel(off) { const s = getWkStart(off), e = getWkEnd(s); const f = d => d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); return f(s)+' \u2013 '+f(e)+', '+e.getFullYear(); }
 function pd(str) { if(!str) return null; try { const d=new Date(str); return isNaN(d)?null:d; } catch(e){return null;} }
-function fd(str) { if(!str) return '—'; try { return new Date(str).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){return str;} }
+function fd(str) { if(!str) return '\u2014'; try { return new Date(str).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){return str;} }
 function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
 function avg2(calls,f) { const v=calls.map(c=>c[f]).filter(x=>x!==null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }
 
@@ -540,33 +538,27 @@ function renderAll() { renderWeek(); renderLog(); renderReport(); }
 // THIS WEEK VIEW
 function goNow() { weekOff=0; renderWeek(); }
 function changeWeek(d) { weekOff+=d; renderWeek(); }
-
 function renderWeek() {
   document.getElementById('weekLabel').textContent = fmtWkLabel(weekOff);
   document.getElementById('weekSub').textContent = weekOff===0?'Current Week':weekOff===-1?'Last Week':`${Math.abs(weekOff)} weeks ${weekOff<0?'ago':'ahead'}`;
-
   const wk = getWkCalls(weekOff).filter(c=>c.total!==null);
   const pw = getWkCalls(weekOff-1).filter(c=>c.total!==null);
   const wkA = wk.length ? avg(wk.map(c=>c.total)) : null;
   const pwA = pw.length ? avg(pw.map(c=>c.total)) : null;
-
   document.getElementById('wkTotal').textContent = wk.length||'0';
-  document.getElementById('wkAvg').textContent = wkA ? wkA.toFixed(1) : '—';
-
+  document.getElementById('wkAvg').textContent = wkA ? wkA.toFixed(1) : '\u2014';
   if (wkA && pwA) {
     const d = wkA-pwA, cls = d>0?'delta-up':d<0?'delta-down':'delta-flat', sign = d>0?'+':'';
     document.getElementById('wkAvgDelta').innerHTML = `<span class="${cls}">${sign}${d.toFixed(1)} vs last week</span>`;
   }
-
   const jackW = wk.filter(c=>(c.advisor||'').toLowerCase().includes('jack'));
   const jayW = wk.filter(c=>(c.advisor||'').toLowerCase().includes('jay'));
-  const jackA = jackW.length ? avg(jackW.map(c=>c.total)) : null;
-  const jayA = jayW.length ? avg(jayW.map(c=>c.total)) : null;
 
-  document.getElementById('wkJack').textContent = jackA ? jackA.toFixed(1) : '—';
-  document.getElementById('wkJackSub').textContent = jackA ? getBand(jackA) : 'No calls';
-  document.getElementById('wkJay').textContent = jayA ? jayA.toFixed(1) : '—';
-  document.getElementById('wkJaySub').textContent = jayA ? getBand(jayA) : 'No calls';
+  // CHANGE #2: Show call count instead of average score
+  document.getElementById('wkJack').textContent = jackW.length ? jackW.length + ' calls' : '0';
+  document.getElementById('wkJackSub').textContent = jackW.length ? 'avg ' + avg(jackW.map(c=>c.total)).toFixed(1) + ' \u00b7 ' + getBand(avg(jackW.map(c=>c.total))) : 'No calls';
+  document.getElementById('wkJay').textContent = jayW.length ? jayW.length + ' calls' : '0';
+  document.getElementById('wkJaySub').textContent = jayW.length ? 'avg ' + avg(jayW.map(c=>c.total)).toFixed(1) + ' \u00b7 ' + getBand(avg(jayW.map(c=>c.total))) : 'No calls';
 
   renderAdvisorCard('jack', 'Jack', wk);
   renderAdvisorCard('jay', 'Jay', wk);
@@ -577,48 +569,33 @@ function renderWeek() {
 
 function renderAdvisorCard(key, name, wkScored) {
   const mine = wkScored.filter(c=>(c.advisor||'').toLowerCase().includes(key));
-
-  // 60-day rolling
   const now = new Date(), d60 = new Date(now); d60.setDate(d60.getDate()-60);
   const rolling = allCalls.filter(c=>{ const d=pd(c.date); return d && d>=d60 && c.total!==null && (c.advisor||'').toLowerCase().includes(key); });
-
-  // Last week
   const lw = getWkCalls(weekOff-1).filter(c=>c.total!==null && (c.advisor||'').toLowerCase().includes(key));
-
   if (!mine.length && !rolling.length) {
-    document.getElementById(key+'Big').textContent = '—';
+    document.getElementById(key+'Big').textContent = '\u2014';
     document.getElementById(key+'BandLbl').textContent = 'No data';
     document.getElementById(key+'SubStats').innerHTML = '';
     document.getElementById(key+'Bars').innerHTML = '';
     document.getElementById(key+'StatRow').innerHTML = '';
     return;
   }
-
   const a = mine.length ? avg(mine.map(c=>c.total)) : null;
-  const band = a ? getBand(a) : '—';
+  const band = a ? getBand(a) : '\u2014';
   const bc = getBandColor(band);
   const lwA = lw.length ? avg(lw.map(c=>c.total)) : null;
   const r60A = rolling.length ? avg(rolling.map(c=>c.total)) : null;
-
   const bigEl = document.getElementById(key+'Big');
-  bigEl.textContent = a ? a.toFixed(1) : '—'; bigEl.style.color = bc;
+  bigEl.textContent = a ? a.toFixed(1) : '\u2014';
+  bigEl.style.color = bc;
   const bandEl = document.getElementById(key+'BandLbl');
   bandEl.textContent = band; bandEl.style.color = bc;
-
   document.getElementById(key+'SubStats').innerHTML = `
-    <div class="advisor-sub-stat">
-      <div class="advisor-sub-label">Last Week</div>
-      <div class="advisor-sub-val" style="color:${lwA?(lwA>=(a||0)?'var(--green)':'var(--amber)'):'var(--text-muted)'}">${lwA?lwA.toFixed(1):'—'}</div>
-    </div>
-    <div class="advisor-sub-stat">
-      <div class="advisor-sub-label">60-Day Avg</div>
-      <div class="advisor-sub-val">${r60A?r60A.toFixed(1):'—'}</div>
-    </div>`;
-
+    <div class="advisor-sub-stat"><div class="advisor-sub-label">Last Week</div><div class="advisor-sub-val" style="color:${lwA?(lwA>=(a||0)?'var(--green)':'var(--amber)'):'var(--text-muted)'}">${lwA?lwA.toFixed(1):'\u2014'}</div></div>
+    <div class="advisor-sub-stat"><div class="advisor-sub-label">60-Day Avg</div><div class="advisor-sub-val">${r60A?r60A.toFixed(1):'\u2014'}</div></div>`;
   if (mine.length) {
     const p1=avg2(mine,'phase1'), p2=avg2(mine,'phase2'), p3=avg2(mine,'phase3'), p4=avg2(mine,'phase4');
-    document.getElementById(key+'Bars').innerHTML =
-      mBar('Phase 1',p1,2.5)+mBar('Phase 2',p2,2.5)+mBar('Phase 3',p3,3.0)+mBar('Phase 4',p4,2.0);
+    document.getElementById(key+'Bars').innerHTML = mBar('Phase 1',p1,2.5)+mBar('Phase 2',p2,2.5)+mBar('Phase 3',p3,3.0)+mBar('Phase 4',p4,2.0);
     const hi=Math.max(...mine.map(c=>c.total)), lo=Math.min(...mine.map(c=>c.total));
     document.getElementById(key+'StatRow').innerHTML = `
       <div class="advisor-stat"><div class="advisor-stat-val" style="color:var(--green)">${hi.toFixed(1)}</div><div class="advisor-stat-lbl">High</div></div>
@@ -633,7 +610,7 @@ function renderAdvisorCard(key, name, wkScored) {
 function mBar(label, val, max) {
   const pct = val ? Math.min((val/max)*100,100) : 0;
   const cls = pct>=85?'g':pct>=65?'a':'';
-  return `<div class="mini-bar-row"><div class="mini-bar-label">${label}</div><div class="mini-bar-track"><div class="mini-bar-fill ${cls}" style="width:${pct}%"></div></div><div class="mini-bar-val">${val?val.toFixed(1):'—'}</div></div>`;
+  return `<div class="mini-bar-row"><div class="mini-bar-label">${label}</div><div class="mini-bar-track"><div class="mini-bar-fill ${cls}" style="width:${pct}%"></div></div><div class="mini-bar-val">${val?val.toFixed(1):'\u2014'}</div></div>`;
 }
 
 function renderBandDist(calls) {
@@ -647,25 +624,26 @@ function renderBandDist(calls) {
 }
 
 function renderWeekTable(calls) {
+  // CHANGE #5: Sort newest first by default
   const scored = calls.filter(c=>c.total!==null).sort((a,b)=>new Date(b.date)-new Date(a.date));
   document.getElementById('weekCallCount').textContent = `${scored.length} scored calls`;
-  if (!scored.length) { document.getElementById('weekCallsTable').innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div>No scored calls this week</div></div>'; return; }
+  if (!scored.length) { document.getElementById('weekCallsTable').innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udccb</div><div>No scored calls this week</div></div>'; return; }
   const rows = scored.map(c => {
     const idx = allCalls.indexOf(c);
     return `<tr onclick="openModal(${idx})">
       <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;">${fd(c.date)}</td>
-      <td style="font-weight:500;">${c.advisor||'—'}</td>
-      <td style="font-size:12px;color:var(--text-muted);">${c.vehicle||'—'}</td>
-      <td style="font-size:12px;color:var(--text-muted);">${c.customerName||'—'}</td>
+      <td style="font-weight:500;">${c.advisor||'\u2014'}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${c.vehicle||'\u2014'}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${c.customerName||'\u2014'}</td>
       <td><span class="score-badge ${getBandClass(c.band)}">${c.total}</span></td>
-      <td><span style="font-size:11px;color:${getBandColor(c.band)};font-weight:600;text-transform:uppercase;letter-spacing:1px;">${c.band||'—'}</span></td>
+      <td><span style="font-size:11px;color:${getBandColor(c.band)};font-weight:600;text-transform:uppercase;letter-spacing:1px;">${c.band||'\u2014'}</span></td>
       <td><span class="${c.apptBooked==='Yes'?'appt-yes':'appt-no'}">${c.apptBooked==='Yes'?'YES':'NO'}</span></td>
     </tr>`;
   }).join('');
   document.getElementById('weekCallsTable').innerHTML = `
     <table class="call-table">
-      <thead><tr><th>Date</th><th>Advisor</th><th>Vehicle</th><th>Customer</th><th>Score</th><th>Band</th><th>Appt</th></tr></thead>
-      <tbody>${rows}</tbody>
+    <thead><tr><th>Date</th><th>Advisor</th><th>Vehicle</th><th>Customer</th><th>Score</th><th>Band</th><th>Appt</th></tr></thead>
+    <tbody>${rows}</tbody>
     </table>`;
 }
 
@@ -677,71 +655,34 @@ function renderTrend() {
   canvas.width = W*dpr; canvas.height = H*dpr;
   canvas.style.width = W+'px'; canvas.style.height = H+'px';
   const ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr);
-
   const weeks = [];
   for (let i=-7; i<=weekOff; i++) {
     const wk = getWkCalls(i).filter(c=>c.total!==null);
     weeks.push({ label: getWkStart(i).toLocaleDateString('en-US',{month:'short',day:'numeric'}), count: wk.length, avg: wk.length?avg(wk.map(c=>c.total)):0 });
   }
-
   if (weeks.length<2) { ctx.fillStyle='#444'; ctx.font='12px DM Sans'; ctx.textAlign='center'; ctx.fillText('More data needed',W/2,H/2); return; }
-
   const maxC = Math.max(...weeks.map(w=>w.count),1);
   const pad = {t:20,r:16,b:32,l:36};
   const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
   const step=cw/weeks.length, bw=Math.min(step*0.6,36);
-
   ctx.clearRect(0,0,W,H);
   ctx.strokeStyle='#222'; ctx.lineWidth=1;
   [0,.25,.5,.75,1].forEach(f=>{ const y=pad.t+ch*f; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke(); });
-
-  weeks.forEach((wk,i)=>{
-    const x=pad.l+i*step+step/2, barH=(wk.count/maxC)*ch, y=pad.t+ch-barH;
-    ctx.fillStyle=i===weeks.length-1?'rgba(200,16,46,0.55)':'rgba(200,16,46,0.2)';
-    ctx.fillRect(x-bw/2,y,bw,barH);
-    if(wk.count>0){ctx.fillStyle='#666';ctx.font='9px DM Mono';ctx.textAlign='center';ctx.fillText(wk.count,x,y-3);}
-  });
-
-  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
-  let first=true;
-  weeks.forEach((wk,i)=>{
-    if(!wk.avg) return;
-    const x=pad.l+i*step+step/2, y=pad.t+ch-(wk.avg/10)*ch;
-    if(first){ctx.moveTo(x,y);first=false;} else ctx.lineTo(x,y);
-  });
+  weeks.forEach((wk,i)=>{ const x=pad.l+i*step+step/2, barH=(wk.count/maxC)*ch, y=pad.t+ch-barH; ctx.fillStyle=i===weeks.length-1?'rgba(200,16,46,0.55)':'rgba(200,16,46,0.2)'; ctx.fillRect(x-bw/2,y,bw,barH); if(wk.count>0){ctx.fillStyle='#666';ctx.font='9px DM Mono';ctx.textAlign='center';ctx.fillText(wk.count,x,y-3);} });
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2; let first=true;
+  weeks.forEach((wk,i)=>{ if(!wk.avg) return; const x=pad.l+i*step+step/2, y=pad.t+ch-(wk.avg/10)*ch; if(first){ctx.moveTo(x,y);first=false;} else ctx.lineTo(x,y); });
   ctx.stroke();
-
-  weeks.forEach((wk,i)=>{
-    if(!wk.avg) return;
-    const x=pad.l+i*step+step/2, y=pad.t+ch-(wk.avg/10)*ch;
-    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle='#22c55e'; ctx.fill();
-    ctx.fillStyle='#555'; ctx.font='9px DM Mono'; ctx.textAlign='center';
-    ctx.fillText(wk.avg.toFixed(1),x,y-6);
-  });
-
-  ctx.fillStyle='#444'; ctx.font='9px DM Mono';
-  ctx.textAlign='right'; ctx.fillText('10',pad.l-3,pad.t+4);
-  ctx.fillText('5',pad.l-3,pad.t+ch/2+4);
-  ctx.fillText('0',pad.l-3,pad.t+ch+4);
-
-  weeks.forEach((wk,i)=>{
-    const x=pad.l+i*step+step/2;
-    ctx.fillStyle='#444'; ctx.font='8px DM Mono'; ctx.textAlign='center';
-    ctx.fillText(wk.label,x,H-4);
-  });
+  weeks.forEach((wk,i)=>{ if(!wk.avg) return; const x=pad.l+i*step+step/2, y=pad.t+ch-(wk.avg/10)*ch; ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle='#22c55e'; ctx.fill(); ctx.fillStyle='#555'; ctx.font='9px DM Mono'; ctx.textAlign='center'; ctx.fillText(wk.avg.toFixed(1),x,y-6); });
+  ctx.fillStyle='#444'; ctx.font='9px DM Mono'; ctx.textAlign='right';
+  ctx.fillText('10',pad.l-3,pad.t+4); ctx.fillText('5',pad.l-3,pad.t+ch/2+4); ctx.fillText('0',pad.l-3,pad.t+ch+4);
+  weeks.forEach((wk,i)=>{ const x=pad.l+i*step+step/2; ctx.fillStyle='#444'; ctx.font='8px DM Mono'; ctx.textAlign='center'; ctx.fillText(wk.label,x,H-4); });
 }
 
 // CALL LOG
 function populateWeekFilter() {
   const sel=document.getElementById('fWk'), seen=new Set();
   let opts='<option value="">All Weeks</option>';
-  allCalls.forEach(c=>{
-    const d=pd(c.date); if(!d) return;
-    const day=d.getDay(), diff=d.getDate()-day+(day===0?-6:1);
-    const mon=new Date(d); mon.setDate(diff); mon.setHours(0,0,0,0);
-    const key=mon.toISOString().split('T')[0];
-    if(!seen.has(key)){seen.add(key);opts+=`<option value="${key}">${fd(mon.toISOString())} week</option>`;}
-  });
+  allCalls.forEach(c=>{ const d=pd(c.date); if(!d) return; const day=d.getDay(), diff=d.getDate()-day+(day===0?-6:1); const mon=new Date(d); mon.setDate(diff); mon.setHours(0,0,0,0); const key=mon.toISOString().split('T')[0]; if(!seen.has(key)){seen.add(key);opts+=`<option value="${key}">${fd(mon.toISOString())} week</option>`;} });
   sel.innerHTML=opts;
 }
 
@@ -749,7 +690,7 @@ function getFiltered() {
   const adv=document.getElementById('fAdv').value, band=document.getElementById('fBand').value;
   const appt=document.getElementById('fAppt').value, score=document.getElementById('fScore').value;
   const wk=document.getElementById('fWk').value, srch=document.getElementById('searchLog').value.toLowerCase();
-  return allCalls.filter(c=>{
+  let results = allCalls.filter(c=>{
     if(adv && !(c.advisor||'').toLowerCase().includes(adv.toLowerCase())) return false;
     if(band && c.band!==band) return false;
     if(appt && c.apptBooked!==appt) return false;
@@ -758,116 +699,119 @@ function getFiltered() {
     if(srch && !(c.vehicle+c.customerName+c.advisor).toLowerCase().includes(srch)) return false;
     return true;
   });
+  // CHANGE #5: Sort by selected column
+  results.sort((a,b) => {
+    let va, vb;
+    switch(logSortCol) {
+      case 'date': va = pd(a.date)||new Date(0); vb = pd(b.date)||new Date(0); break;
+      case 'score': va = a.total||0; vb = b.total||0; break;
+      case 'advisor': va = (a.advisor||'').toLowerCase(); vb = (b.advisor||'').toLowerCase(); break;
+      case 'band': const bo = {Elite:5,Strong:4,Developing:3,'Needs Work':2,Poor:1}; va = bo[a.band]||0; vb = bo[b.band]||0; break;
+      default: va = pd(a.date)||new Date(0); vb = pd(b.date)||new Date(0);
+    }
+    if (va < vb) return logSortDir === 'asc' ? -1 : 1;
+    if (va > vb) return logSortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return results;
+}
+
+function toggleLogSort(col) {
+  if (logSortCol === col) { logSortDir = logSortDir === 'desc' ? 'asc' : 'desc'; }
+  else { logSortCol = col; logSortDir = col === 'date' ? 'desc' : 'asc'; }
+  renderLog();
 }
 
 function renderLog() { logPage=1; renderLogPage(); }
-
 function renderLogPage() {
   const f=getFiltered(), total=f.length;
   document.getElementById('logCount').textContent=`${total} calls`;
-  if(!total){document.getElementById('logWrap').innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div>No calls match filters</div></div>';return;}
+  if(!total){document.getElementById('logWrap').innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udccb</div><div>No calls match filters</div></div>';return;}
   const start=(logPage-1)*PAGE, page=f.slice(start,start+PAGE), totalPages=Math.ceil(total/PAGE);
+  const sortArrow = (col) => logSortCol===col ? `<span class="sort-arrow">${logSortDir==='asc'?'\u25b2':'\u25bc'}</span>` : '';
   const rows=page.map(c=>{
     const idx=allCalls.indexOf(c);
     return `<tr onclick="openModal(${idx})">
       <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:11px;">${fd(c.date)}</td>
-      <td style="font-weight:500;">${c.advisor||'—'}</td>
-      <td style="font-size:12px;color:var(--text-muted);">${c.vehicle||'—'}</td>
-      <td style="font-size:12px;color:var(--text-muted);">${c.customerName||'—'}</td>
-      <td>${c.total!==null?`<span class="score-badge ${getBandClass(c.band)}">${c.total}</span>`:'—'}</td>
-      <td><span style="font-size:11px;color:${getBandColor(c.band)};font-weight:600;text-transform:uppercase;letter-spacing:1px;">${c.band||'—'}</span></td>
+      <td style="font-weight:500;">${c.advisor||'\u2014'}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${c.vehicle||'\u2014'}</td>
+      <td style="font-size:12px;color:var(--text-muted);">${c.customerName||'\u2014'}</td>
+      <td>${c.total!==null?`<span class="score-badge ${getBandClass(c.band)}">${c.total}</span>`:'\u2014'}</td>
+      <td><span style="font-size:11px;color:${getBandColor(c.band)};font-weight:600;text-transform:uppercase;letter-spacing:1px;">${c.band||'\u2014'}</span></td>
       <td><span class="${c.apptBooked==='Yes'?'appt-yes':'appt-no'}">${c.apptBooked==='Yes'?'YES':'NO'}</span></td>
-      <td style="font-size:11px;color:var(--text-muted);">${c.customerType||'—'}</td>
+      <td style="font-size:11px;color:var(--text-muted);">${c.customerType||'\u2014'}</td>
     </tr>`;
   }).join('');
   document.getElementById('logWrap').innerHTML=`
     <table class="call-table">
-      <thead><tr><th>Date</th><th>Advisor</th><th>Vehicle</th><th>Customer</th><th>Score</th><th>Band</th><th>Appt</th><th>Type</th></tr></thead>
-      <tbody>${rows}</tbody>
+    <thead><tr>
+      <th onclick="toggleLogSort('date')">Date${sortArrow('date')}</th>
+      <th onclick="toggleLogSort('advisor')">Advisor${sortArrow('advisor')}</th>
+      <th>Vehicle</th><th>Customer</th>
+      <th onclick="toggleLogSort('score')">Score${sortArrow('score')}</th>
+      <th onclick="toggleLogSort('band')">Band${sortArrow('band')}</th>
+      <th>Appt</th><th>Type</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
     </table>
     <div class="pagination">
-      <div class="page-info">Showing ${start+1}–${Math.min(start+PAGE,total)} of ${total}</div>
-      <div class="page-btns">
-        <button class="page-btn" onclick="chLogPage(-1)" ${logPage===1?'disabled':''}>← Prev</button>
-        <button class="page-btn cur">${logPage}/${totalPages}</button>
-        <button class="page-btn" onclick="chLogPage(1)" ${logPage>=totalPages?'disabled':''}>Next →</button>
-      </div>
+    <div class="page-info">Showing ${start+1}\u2013${Math.min(start+PAGE,total)} of ${total}</div>
+    <div class="page-btns">
+      <button class="page-btn" onclick="chLogPage(-1)" ${logPage===1?'disabled':''}>\u2190 Prev</button>
+      <button class="page-btn cur">${logPage}/${totalPages}</button>
+      <button class="page-btn" onclick="chLogPage(1)" ${logPage>=totalPages?'disabled':''}>Next \u2192</button>
+    </div>
     </div>`;
 }
 
-function chLogPage(d) {
-  const totalPages=Math.ceil(getFiltered().length/PAGE);
-  logPage=Math.max(1,Math.min(totalPages,logPage+d)); renderLogPage();
-}
+function chLogPage(d) { const totalPages=Math.ceil(getFiltered().length/PAGE); logPage=Math.max(1,Math.min(totalPages,logPage+d)); renderLogPage(); }
 
 // MODAL
 function openModal(idx) {
-  const c=allCalls[idx]; if(!c) return;
-  curModalIdx=idx;
+  const c=allCalls[idx]; if(!c) return; curModalIdx=idx;
   document.getElementById('mTitle').textContent=c.vehicle||c.customerName||'Call Detail';
-  document.getElementById('mMeta').textContent=[c.advisor,fd(c.date),c.customerPhone].filter(Boolean).join(' · ');
-
+  document.getElementById('mMeta').textContent=[c.advisor,fd(c.date),c.customerPhone].filter(Boolean).join(' \u00b7 ');
   const band=c.band||getBand(c.total), bc=getBandColor(band);
   document.getElementById('mtab-score').innerHTML=`
-    <div class="modal-total"><div class="modal-total-score" style="color:${bc}">${c.total!==null?c.total:'—'}</div><div class="modal-total-band" style="color:${bc}">${band||'—'}</div></div>
+    <div class="modal-total"><div class="modal-total-score" style="color:${bc}">${c.total!==null?c.total:'\u2014'}</div><div class="modal-total-band" style="color:${bc}">${band||'\u2014'}</div></div>
     <div class="modal-score-row">
-      ${[['Phase 1',c.phase1,2.5],['Phase 2',c.phase2,2.5],['Phase 3',c.phase3,3.0],['Phase 4',c.phase4,2.0]].map(([p,v,m])=>{
-        const pct=v?(v/m)*100:0;
-        return `<div class="modal-phase"><div class="modal-phase-label">${p}</div><div class="modal-phase-score" style="color:${pct>=85?'var(--green)':pct>=65?'var(--amber)':'var(--red)'}">${v!==null?v:'—'}<span style="font-size:13px;color:var(--text-muted)">/${m}</span></div></div>`;
-      }).join('')}
+    ${[['Phase 1',c.phase1,2.5],['Phase 2',c.phase2,2.5],['Phase 3',c.phase3,3.0],['Phase 4',c.phase4,2.0]].map(([p,v,m])=>{
+      const pct=v?(v/m)*100:0;
+      return `<div class="modal-phase"><div class="modal-phase-label">${p}</div><div class="modal-phase-score" style="color:${pct>=85?'var(--green)':pct>=65?'var(--amber)':'var(--red)'}">${v!==null?v:'\u2014'}<span style="font-size:13px;color:var(--text-muted)">/${m}</span></div></div>`;
+    }).join('')}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div class="modal-section"><div class="modal-section-title">Call Details</div>
-        ${dr('Customer',c.customerName)}${dr('Phone',c.customerPhone)}${dr('Vehicle',c.vehicle)}
-        ${dr('Appt',c.apptBooked,c.apptBooked==='Yes'?'var(--green)':'')}
-        ${dr('Type',c.customerType)}${dr('Situation',c.situationType)}${dr('Scoreable',c.scoreable)}
-      </div>
-      <div class="modal-section"><div class="modal-section-title">Top Coaching Note</div>
-        <div class="coaching-box">${c.topCoachingNote||'No note available'}</div>
-        ${c.flags?`<div class="modal-section-title" style="margin-top:12px;">Flags</div><div class="modal-tags">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>`:''}
-      </div>
-    </div>`;
-
+    <div class="modal-section"><div class="modal-section-title">Call Details</div>
+    ${dr('Customer',c.customerName)}${dr('Phone',c.customerPhone)}${dr('Vehicle',c.vehicle)}
+    ${dr('Appt',c.apptBooked,c.apptBooked==='Yes'?'var(--green)':'')}
+    ${dr('Type',c.customerType)}${dr('Situation',c.situationType)}${dr('Scoreable',c.scoreable)}
+    </div>
+    <div class="modal-section"><div class="modal-section-title">Top Coaching Note</div>
+    <div class="coaching-box">${c.topCoachingNote||'No note available'}</div>
+    ${c.flags?`<div class="modal-section-title" style="margin-top:12px;">Flags</div><div class="modal-tags">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>`:''}
+    </div></div>`;
   const tx=getTx(c);
   document.getElementById('mtab-transcript').innerHTML=tx?`
     <div class="modal-section-title">Full Transcript</div>
     <div class="transcript-box transcript-collapsed" id="txBox">${esc(tx)}</div>
-    <button class="expand-btn" id="txBtn" onclick="toggleTx()">▼ SHOW FULL TRANSCRIPT</button>`
-    :'<div class="empty-state"><div class="empty-icon">📝</div><div>No transcript available</div></div>';
-
+    <button class="expand-btn" id="txBtn" onclick="toggleTx()">\u25bc SHOW FULL TRANSCRIPT</button>`
+    :'<div class="empty-state"><div class="empty-icon">\ud83d\udcdd</div><div>No transcript available</div></div>';
   document.getElementById('mtab-coaching').innerHTML=`
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Generate a complete ATR coaching report for this call — full phase scoring with work shown, coaching flags with specific replacement language, and priority focus. Printable for advisor sessions.</p>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Generate a complete ATR coaching report for this call \u2014 full phase scoring with work shown, coaching flags with specific replacement language, and priority focus. Printable for advisor sessions.</p>
     <button class="big-btn" id="coachGenBtn" onclick="genCoachReport(${idx})">GENERATE FULL COACHING REPORT</button>
     <div id="coachGenOut"></div>`;
-
   document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelector('.modal-tab').classList.add('active');
   document.getElementById('mtab-score').classList.add('active');
-
   document.getElementById('callModal').classList.add('open');
 }
 
-function toggleTx() {
-  const box=document.getElementById('txBox'), btn=document.getElementById('txBtn');
-  const exp=box.classList.contains('transcript-collapsed');
-  box.classList.toggle('transcript-collapsed',!exp);
-  btn.textContent=exp?'▲ COLLAPSE TRANSCRIPT':'▼ SHOW FULL TRANSCRIPT';
-}
-
-function switchMTab(name,el) {
-  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active'); document.getElementById('mtab-'+name).classList.add('active');
-}
-
+function toggleTx() { const box=document.getElementById('txBox'), btn=document.getElementById('txBtn'); const exp=box.classList.contains('transcript-collapsed'); box.classList.toggle('transcript-collapsed',!exp); btn.textContent=exp?'\u25b2 COLLAPSE TRANSCRIPT':'\u25bc SHOW FULL TRANSCRIPT'; }
+function switchMTab(name,el) { document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active')); el.classList.add('active'); document.getElementById('mtab-'+name).classList.add('active'); }
 function closeModal(e) { if(e.target.id==='callModal') closeModalDirect(); }
 function closeModalDirect() { document.getElementById('callModal').classList.remove('open'); }
-
-function dr(label,val,color) {
-  if(!val) return '';
-  return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">${label}</span><span style="color:${color||'var(--text)'};font-weight:500;">${val}</span></div>`;
-}
+function dr(label,val,color) { if(!val) return ''; return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">${label}</span><span style="color:${color||'var(--text)'};font-weight:500;">${val}</span></div>`; }
 
 // COACHING REPORT (single call)
 async function genCoachReport(idx) {
@@ -881,8 +825,8 @@ async function genCoachReport(idx) {
       `Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show all raw scores, scaling math, deductions), WHAT WORKED (3 specific behaviors with transcript references), COACHING FLAGS (each with What to say instead using this exact vehicle/symptom/moment, and Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${c.advisor||'Unknown'}\nVehicle: ${c.vehicle||'Unknown'}\nDate: ${c.date||'Unknown'}\n\nTRANSCRIPT:\n${tx}`, 4000);
     document.getElementById('coachGenOut').innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ REPORT GENERATED</div>
-        <button class="print-btn" onclick="printCoachReport('${(c.advisor||'').replace(/'/g,"\\'")}','${(c.vehicle||'').replace(/'/g,"\\'")}','${(c.date||'').replace(/'/g,"\\'")}')">⎙ PRINT</button>
+      <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">\u2713 REPORT GENERATED</div>
+      <button class="print-btn" onclick="printCoachReport('${(c.advisor||'').replace(/'/g,"\\'")}','${(c.vehicle||'').replace(/'/g,"\\'")}','${(c.date||'').replace(/'/g,"\\'")}')">&#9114; PRINT</button>
       </div>
       <div class="report-output" id="coachRptTxt">${esc(report)}</div>`;
     btn.disabled=false; btn.textContent='REGENERATE REPORT';
@@ -894,7 +838,7 @@ async function genCoachReport(idx) {
 
 function printCoachReport(advisor,vehicle,date) {
   const report=document.getElementById('coachRptTxt')?.textContent||'';
-  printWindow(`ATR Coaching Report — ${advisor}`,`<h1>ATR Call Coaching Report</h1><div class="meta">${advisor} · ${vehicle} · ${date}</div><pre>${esc(report)}</pre>`);
+  printWindow(`ATR Coaching Report \u2014 ${advisor}`,`<h1>ATR Call Coaching Report</h1><div class="meta">${advisor} \u00b7 ${vehicle} \u00b7 ${date}</div><pre>${esc(report)}</pre>`);
 }
 
 // WEEKLY REPORT
@@ -904,37 +848,32 @@ function changeRptWeek(d) { rptWeekOff+=d; renderReport(); }
 function renderReport() {
   document.getElementById('rptWeekLabel').textContent=fmtWkLabel(rptWeekOff);
   const wk=getWkCalls(rptWeekOff), scored=wk.filter(c=>c.total!==null);
-
-  if(!scored.length){document.getElementById('rptContent').innerHTML='<div class="empty-state"><div class="empty-icon">📊</div><div>No scored calls for this week</div></div>';return;}
-
+  if(!scored.length){document.getElementById('rptContent').innerHTML='<div class="empty-state"><div class="empty-icon">\ud83d\udcca</div><div>No scored calls for this week</div></div>';return;}
   const wkA=avg(scored.map(c=>c.total)), appts=scored.filter(c=>c.apptBooked==='Yes').length;
-
   const advisorCards=['Jack','Jay'].map(name=>{
     const mine=scored.filter(c=>(c.advisor||'').toLowerCase().includes(name.toLowerCase()));
     if(!mine.length) return `<div class="wrc"><div class="wrc-header"><div class="wrc-name">${name}</div><div style="color:var(--text-muted);">No calls this week</div></div></div>`;
-
     const a=avg(mine.map(c=>c.total)), band=getBand(a), bc=getBandColor(band);
     const hi=Math.max(...mine.map(c=>c.total)), lo=Math.min(...mine.map(c=>c.total));
     const myAppts=mine.filter(c=>c.apptBooked==='Yes').length;
     const sorted=[...mine].sort((a,b)=>b.total-a.total);
     const best=sorted[0], worst=sorted[sorted.length-1];
     const mid=sorted.length>=3?sorted[Math.floor(sorted.length/2)]:null;
-
     const callItem=(c,color,label)=>{
       const idx=allCalls.indexOf(c);
       return `<div class="call-review-item">
-        <div class="cri-header"><div class="cri-dot" style="background:${color}"></div><div class="cri-title">${label} · Score ${c.total} · ${c.vehicle||c.customerName||'Unknown'}</div></div>
-        <div class="cri-note">${c.topCoachingNote||'—'}</div>
+        <div class="cri-header"><div class="cri-dot" style="background:${color}"></div><div class="cri-title">${label} \u00b7 Score ${c.total} \u00b7 ${c.vehicle||c.customerName||'Unknown'}</div></div>
+        <div class="cri-note">${c.topCoachingNote||'\u2014'}</div>
         ${c.flags?`<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>`:''}
         <button class="cri-btn" onclick="openModal(${idx})">VIEW SCORECARD</button>
         <button class="cri-btn" onclick="openMTab(${idx},'transcript')">VIEW TRANSCRIPT</button>
       </div>`;
     };
-
     const key = name.toLowerCase();
+    // CHANGE #1: Two report mode buttons instead of single generate button
     return `<div class="wrc">
       <div class="wrc-header">
-        <div><div class="wrc-name">${name}</div><div style="font-size:12px;color:var(--text-muted);">${mine.length} calls · ${myAppts} appts · ${Math.round(myAppts/mine.length*100)}% booking rate</div></div>
+        <div><div class="wrc-name">${name}</div><div style="font-size:12px;color:var(--text-muted);">${mine.length} calls \u00b7 ${myAppts} appts \u00b7 ${Math.round(myAppts/mine.length*100)}% booking rate</div></div>
         <div style="text-align:right;"><div class="wrc-score" style="color:${bc}">${a.toFixed(1)}</div><div style="font-size:11px;font-weight:600;letter-spacing:2px;color:${bc};text-transform:uppercase;">${band}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:20px;">
@@ -942,47 +881,53 @@ function renderReport() {
         <div style="background:var(--surface2);padding:12px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;">${a.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Week Avg</div></div>
         <div style="background:var(--surface2);padding:12px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${lo<5?'var(--red)':'var(--amber)'}">${lo.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Week Low</div></div>
       </div>
-      <button class="big-btn" id="wkRptBtn-${key}" onclick="genWeeklyAdvisorReport('${name}', ${rptWeekOff})">GENERATE ${name.toUpperCase()} WEEKLY COACHING REPORT</button>
+      <div class="report-mode-btns">
+        <button class="report-mode-btn quick" id="wkRptBtnQuick-${key}" onclick="genWeeklyAdvisorReport('${name}', ${rptWeekOff}, 'quick')">QUICK REVIEW</button>
+        <button class="report-mode-btn deep" id="wkRptBtnDeep-${key}" onclick="genWeeklyAdvisorReport('${name}', ${rptWeekOff}, 'deep')">DEEP DIVE</button>
+      </div>
+      <div class="report-mode-desc" id="wkRptDesc-${key}">
+        <strong>Quick Review</strong> \u2014 Monday coaching format. Pattern + 3 calls + replacement language. Print and walk through in 20 min.<br>
+        <strong>Deep Dive</strong> \u2014 Phase-by-phase educational breakdown. For onboarding or poor call analysis.
+      </div>
       <div id="wkRptOut-${key}"></div>
       <div class="modal-section-title" style="margin-top:20px;">Calls to Review</div>
-      ${callItem(best,'var(--green)','🏆 Best Call')}
-      ${worst!==best?callItem(worst,'var(--red)','⚠ Needs Most Work'):''}
-      ${mid&&mid!==best&&mid!==worst?callItem(mid,'var(--amber)','↗ Most Improvable'):''}
+      ${callItem(best,'var(--green)','\ud83c\udfc6 Best Call')}
+      ${worst!==best?callItem(worst,'var(--red)','\u26a0 Needs Most Work'):''}
+      ${mid&&mid!==best&&mid!==worst?callItem(mid,'var(--amber)','\u2197 Most Improvable'):''}
     </div>`;
   }).join('');
-
   document.getElementById('rptContent').innerHTML=`
     <div class="stats-row">
-      <div class="stat-card red"><div class="stat-label">Week Calls</div><div class="stat-value">${scored.length}</div></div>
-      <div class="stat-card green"><div class="stat-label">Week Avg</div><div class="stat-value">${wkA.toFixed(1)}</div></div>
-      <div class="stat-card amber"><div class="stat-label">Appts Booked</div><div class="stat-value">${appts}</div></div>
-      <div class="stat-card blue"><div class="stat-label">Booking Rate</div><div class="stat-value">${Math.round(appts/scored.length*100)}%</div></div>
+    <div class="stat-card red"><div class="stat-label">Week Calls</div><div class="stat-value">${scored.length}</div></div>
+    <div class="stat-card green"><div class="stat-label">Week Avg</div><div class="stat-value">${wkA.toFixed(1)}</div></div>
+    <div class="stat-card amber"><div class="stat-label">Appts Booked</div><div class="stat-value">${appts}</div></div>
+    <div class="stat-card blue"><div class="stat-label">Booking Rate</div><div class="stat-value">${Math.round(appts/scored.length*100)}%</div></div>
     </div>
     ${advisorCards}`;
 }
 
-async function genWeeklyAdvisorReport(name, wkOff) {
+// CHANGE #1: Two-mode weekly report generation
+async function genWeeklyAdvisorReport(name, wkOff, mode) {
   const key=name.toLowerCase();
-  const btn=document.getElementById(`wkRptBtn-${key}`);
+  const btnQuick=document.getElementById(`wkRptBtnQuick-${key}`);
+  const btnDeep=document.getElementById(`wkRptBtnDeep-${key}`);
   const outEl=document.getElementById(`wkRptOut-${key}`);
   const scored=getWkCalls(wkOff).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
-
   if(!scored.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No scored calls for this advisor this week.</div>';return;}
-
   const sorted=[...scored].sort((a,b)=>b.total-a.total);
   const best=sorted[0], worst=sorted[sorted.length-1], mid=sorted.length>=3?sorted[Math.floor(sorted.length/2)]:null;
   const callsToReport=[best,worst!==best?worst:null,mid&&mid!==best&&mid!==worst?mid:null].filter(Boolean);
-
   const txAvailable=callsToReport.filter(c=>getTx(c).length>50);
   if(!txAvailable.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcripts available for these calls. Cannot generate report.</div>';return;}
-
-  btn.disabled=true; btn.textContent=`GENERATING ${name.toUpperCase()} REPORT... (60-90 SECONDS)`;
-  outEl.innerHTML='<div class="loading"><div class="spinner"></div>Generating weekly coaching report for '+name+'...<br><span style="font-size:11px;opacity:0.6;">Analyzing '+txAvailable.length+' calls — this takes 60-90 seconds</span></div>';
+  btnQuick.disabled=true; btnDeep.disabled=true;
+  const modeLabel = mode==='quick' ? 'QUICK REVIEW' : 'DEEP DIVE';
+  btnQuick.textContent=mode==='quick'?`GENERATING ${modeLabel}...`:'QUICK REVIEW';
+  btnDeep.textContent=mode==='deep'?`GENERATING ${modeLabel}...`:'DEEP DIVE';
+  outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Generating ${modeLabel.toLowerCase()} for ${name}...<br><span style="font-size:11px;opacity:0.6;">Analyzing ${txAvailable.length} calls \u2014 this takes 60-90 seconds</span></div>`;
 
   const a=avg(scored.map(c=>c.total));
   const hi=Math.max(...scored.map(c=>c.total)), lo=Math.min(...scored.map(c=>c.total));
   const myAppts=scored.filter(c=>c.apptBooked==='Yes').length;
-
   const now=new Date(), d60=new Date(now); d60.setDate(d60.getDate()-60);
   const rolling=allCalls.filter(c=>{const d=pd(c.date);return d&&d>=d60&&c.total!==null&&(c.advisor||'').toLowerCase().includes(key);});
   const r60A=rolling.length?avg(rolling.map(c=>c.total)):null;
@@ -993,57 +938,134 @@ async function genWeeklyAdvisorReport(name, wkOff) {
   const callReports=[];
 
   try {
-    // Generate each call report separately to avoid payload size limits
     for(let i=0;i<txAvailable.length;i++){
       const c=txAvailable[i];
       const tx=getTx(c);
       const truncTx=tx.length>4000?tx.substring(0,4000)+'...[transcript truncated for length]':tx;
-      btn.textContent=`GENERATING ${name.toUpperCase()} REPORT... (CALL ${i+1} OF ${txAvailable.length})`;
+      const activeBtn = mode==='quick' ? btnQuick : btnDeep;
+      activeBtn.textContent=`GENERATING... (CALL ${i+1} OF ${txAvailable.length})`;
       outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Analyzing ${callLabels[i].toLowerCase()} (${i+1} of ${txAvailable.length})...<br><span style="font-size:11px;opacity:0.6;">Each call takes 20-40 seconds</span></div>`;
+
+      let prompt;
+      if (mode === 'quick') {
+        // CHANGE #1: Quick Review prompt - coach reviewing film
+        prompt = `You are generating a QUICK REVIEW coaching report for a Monday coaching session at Advanced Transmission Repair. This is NOT a grading rubric. Write like a coach reviewing game film with a player.
+
+CALL INFO:
+Advisor: ${name}
+Customer: ${c.customerName||'Unknown'} | Vehicle: ${c.vehicle||'Unknown'}
+Score: ${c.total} (${c.band}) | Appt: ${c.apptBooked||'Unknown'}
+This is the ${callLabels[i]} of the week.
+
+FORMAT (follow exactly):
+---
+${c.customerName||'Customer'} | ${c.vehicle||'Vehicle'} | ${c.total} ${c.band} | ${callLabels[i]}
+
+WHAT WORKED:
+[1-2 lines. What the advisor did well on this specific call. Reference a specific moment.]
+
+MAKE IT BETTER:
+[2-4 coaching flags. Each one follows this EXACT format:]
+
+> "[exact quote from transcript where the mistake happened]"
+> SAY THIS: "[specific replacement using this customer's actual name, vehicle, and situation - written exactly how a confident advisor would say it on the phone, ready to read aloud]"
+> PATTERN: "[reusable template version with [Customer], [vehicle], [symptom] placeholders]"
+> WHY: [one sentence on the psychology or technique]
+
+[blank line between each flag]
+---
+
+RULES:
+- No scoring tables, no phase breakdowns, no point math
+- No headers like "SCORECARD" or "PHASE 1"
+- Write replacement language using the ACTUAL customer name, vehicle, and symptom from this call
+- Tone: direct, constructive, like a coach who wants this advisor to win
+- Keep it tight - this gets printed and discussed in 20 minutes
+
+TRANSCRIPT:
+${truncTx}`;
+      } else {
+        // CHANGE #1: Deep Dive prompt - educational phase-by-phase
+        prompt = `You are generating a DEEP DIVE educational coaching report for Advanced Transmission Repair. This format walks through each phase of the call framework and explains what happened, what should have happened, and why it matters. Used for onboarding new advisors or breaking down poor calls.
+
+CALL INFO:
+Advisor: ${name}
+Customer: ${c.customerName||'Unknown'} | Vehicle: ${c.vehicle||'Unknown'}
+Score: ${c.total} (${c.band}) | Appt: ${c.apptBooked||'Unknown'}
+This is the ${callLabels[i]} of the week.
+
+FORMAT (follow exactly):
+---
+${c.customerName||'Customer'} | ${c.vehicle||'Vehicle'} | ${c.total} ${c.band} | ${callLabels[i]}
+
+PHASE 1 - ESTABLISH CONTROL (${c.phase1||'?'}/2.5)
+[Plain language explanation of what happened in the opening. What did the advisor do or miss? Example: "${name} answered professionally but jumped straight to 'how can I help you' without taking control of the conversation. The customer immediately asked for a price, and ${name} gave it." Then explain WHY this phase matters - not rubric language, coach language. Include specific transcript moments.]
+
+PHASE 2 - DIAGNOSTIC QUESTIONS (${c.phase2||'?'}/2.5)
+[Same format. What diagnostic questions were asked or skipped? Did the advisor name the transmission model? Summarize back before quoting? Explain why the diagnostic phase earns the right to quote premium.]
+
+PHASE 3 - DELIVERING PRICE (${c.phase3||'?'}/3.0)
+[Same format. Was value stated before price? Was the confirmation hook used? Bridge question? How was a competing quote handled if applicable? Explain the sandwich method and why each element matters.]
+
+PHASE 4 - CLOSING (${c.phase4||'?'}/2.0)
+[Same format. Was a two-choice close attempted? Were specific times offered? Was a callback number captured? Explain why "let me know" is a lost lead.]
+
+KEY COACHING FLAGS:
+[2-3 most impactful flags, each with:]
+> "[exact transcript quote]"
+> SAY THIS: "[specific replacement using actual customer details]"
+> WHY: [educational explanation of the technique]
+
+PRIORITY FOCUS:
+[Single most important thing to work on next call. One sentence.]
+---
+
+RULES:
+- Write like a coach explaining the game to someone learning it
+- Show phase scores but explain them in context, not as math tables
+- Use actual transcript quotes to illustrate points
+- Replacement language must use THIS customer's name, vehicle, and situation
+- This is educational - explain the WHY behind every observation
+
+TRANSCRIPT:
+${truncTx}`;
+      }
+
       try {
-        const r=await claudeCall(
-          `Generate a complete ATR coaching report for this single call. Include all sections:\n\nCALL SUMMARY (advisor, vehicle, customer type, situation type)\nSCORECARD (show raw score for each criterion, scaling math, deductions per phase)\nWHAT WORKED (3 specific behaviors with exact transcript references)\nCOACHING FLAGS (each with: what happened, exact transcript quote, point impact, What to say instead using THIS vehicle/symptom/moment ready to read aloud, Why this works)\nPRIORITY FOCUS (single most impactful improvement for next call)\nKILL PHRASES DETECTED\n\nAdvisor: ${name}\nVehicle: ${c.vehicle||'Unknown'}\nScore: ${c.total} (${c.band})\n\nTRANSCRIPT:\n${truncTx}`, 2000);
-        callReports.push(`${'═'.repeat(55)}\n${callLabels[i]} — Score ${c.total} (${c.band})\nVehicle: ${c.vehicle||'Unknown'} | Customer: ${c.customerName||'Unknown'}\n${'═'.repeat(55)}\n${r}`);
+        const r=await claudeCall(prompt, 2000);
+        callReports.push(r);
       } catch(callErr) {
-        callReports.push(`${'═'.repeat(55)}\n${callLabels[i]} — Score ${c.total}\n${'═'.repeat(55)}\nCould not generate report for this call: ${callErr.message}`);
+        callReports.push(`${callLabels[i]} \u2014 Score ${c.total}\nCould not generate report for this call: ${callErr.message}`);
       }
     }
 
-    // Build the full weekly report from stats + individual call reports
-    const weeklyReport=`${'═'.repeat(55)}
-WEEKLY COACHING REPORT — ${name.toUpperCase()}
-${fmtWkLabel(wkOff)}
-${'═'.repeat(55)}
+    // Build header
+    const header = mode === 'quick'
+      ? `QUICK REVIEW \u2014 ${name.toUpperCase()} \u2014 ${fmtWkLabel(wkOff)}\n${'='.repeat(55)}\n${scored.length} calls scored | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)} | Appts: ${myAppts}/${scored.length}\nLast week: ${lwA?lwA.toFixed(1):'N/A'} | 60-day rolling: ${r60A?r60A.toFixed(1):'N/A'}\n\nTHIS WEEK'S FOCUS:\n[See pattern across the calls below]\n${'='.repeat(55)}\n\n`
+      : `DEEP DIVE \u2014 ${name.toUpperCase()} \u2014 ${fmtWkLabel(wkOff)}\n${'='.repeat(55)}\n${scored.length} calls scored | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)} | Appts: ${myAppts}/${scored.length}\n${'='.repeat(55)}\n\n`;
 
-WEEK AT A GLANCE
-Calls scored: ${scored.length} | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)}
-Last week avg: ${lwA?lwA.toFixed(1):'No data'} | 60-day rolling avg: ${r60A?r60A.toFixed(1):'Insufficient data'}
-Appointments booked: ${myAppts} of ${scored.length} (${Math.round(myAppts/scored.length*100)}%)
-
-${'═'.repeat(55)}
-CALL REVIEWS
-${'═'.repeat(55)}
-
-${callReports.join('\n\n')}`;
+    const weeklyReport = header + callReports.join('\n\n' + '='.repeat(55) + '\n\n');
 
     outEl.innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px;">
-        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ WEEKLY REPORT GENERATED — ${txAvailable.length} CALLS ANALYZED</div>
-        <button class="print-btn" onclick="printWeeklyReport('${name}','${fmtWkLabel(wkOff).replace(/'/g,"\\'")}')">⎙ PRINT REPORT</button>
+      <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">\u2713 ${modeLabel} GENERATED \u2014 ${txAvailable.length} CALLS ANALYZED</div>
+      <button class="print-btn" onclick="printWeeklyReport('${name}','${fmtWkLabel(wkOff).replace(/'/g,"\\'")}')">&#9114; PRINT REPORT</button>
       </div>
       <div class="report-output" id="wkRptTxt-${key}">${esc(weeklyReport)}</div>`;
-    btn.disabled=false; btn.textContent=`REGENERATE ${name.toUpperCase()} WEEKLY REPORT`;
+    btnQuick.disabled=false; btnDeep.disabled=false;
+    btnQuick.textContent='QUICK REVIEW'; btnDeep.textContent='DEEP DIVE';
   } catch(e) {
     outEl.innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error generating report: ${e.message}</div>`;
-    btn.disabled=false; btn.textContent=`GENERATE ${name.toUpperCase()} WEEKLY COACHING REPORT`;
+    btnQuick.disabled=false; btnDeep.disabled=false;
+    btnQuick.textContent='QUICK REVIEW'; btnDeep.textContent='DEEP DIVE';
   }
 }
 
 function printWeeklyReport(name, week) {
   const key=name.toLowerCase();
   const report=document.getElementById(`wkRptTxt-${key}`)?.textContent||'';
-  printWindow(`ATR Weekly Coaching Report — ${name}`,
-    `<h1>ATR Weekly Coaching Report</h1><div class="meta">${name} · ${week}</div><pre>${esc(report)}</pre>`);
+  printWindow(`ATR Weekly Coaching Report \u2014 ${name}`,
+    `<h1>ATR Weekly Coaching Report</h1><div class="meta">${name} \u00b7 ${week}</div><pre>${esc(report)}</pre>`);
 }
 
 function openMTab(idx, tab) {
@@ -1066,11 +1088,13 @@ async function runScorer() {
   const btn=document.getElementById('scorerBtn');
   btn.disabled=true; btn.textContent='SCORING...';
   const out=document.getElementById('scorerOut');
-  out.className='tool-output visible'; out.textContent='Analyzing call... 15-30 seconds';
+  out.className='tool-output visible';
+  out.textContent='Analyzing call... 15-30 seconds';
   try {
     const r=await claudeCall(`Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show raw scores for each criterion, scaling math, deductions per phase), WHAT WORKED (3 specific behaviors with exact transcript moments), COACHING FLAGS (each with: what happened, exact transcript quote where it occurred, point impact, What to say instead using THIS vehicle/symptom/moment, Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${adv}\n\nTRANSCRIPT:\n${tx}`, 4000);
     out.textContent=r;
     document.getElementById('scorerPrintBtn').style.display='inline-block';
+    document.getElementById('scorerClearBtn').style.display='inline-block';
   } catch(e){out.textContent='Error: '+e.message;}
   btn.disabled=false; btn.textContent='SCORE THIS CALL';
 }
@@ -1078,22 +1102,81 @@ async function runScorer() {
 function printScorer() {
   const adv=document.getElementById('scorerAdv').value;
   const r=document.getElementById('scorerOut').textContent;
-  printWindow(`ATR Coaching Report — ${adv}`,`<h1>ATR Call Coaching Report</h1><div class="meta">Advisor: ${adv} · Generated ${new Date().toLocaleDateString()}</div><pre>${esc(r)}</pre>`);
+  printWindow(`ATR Coaching Report \u2014 ${adv}`,`<h1>ATR Call Coaching Report</h1><div class="meta">Advisor: ${adv} \u00b7 Generated ${new Date().toLocaleDateString()}</div><pre>${esc(r)}</pre>`);
 }
 
+// CHANGE #3: Clear functions for all three tools
+function clearScorer() {
+  document.getElementById('scorerTx').value='';
+  document.getElementById('scorerOut').className='tool-output';
+  document.getElementById('scorerOut').textContent='';
+  document.getElementById('scorerPrintBtn').style.display='none';
+  document.getElementById('scorerClearBtn').style.display='none';
+}
+
+function clearFollowup() {
+  document.getElementById('fuCtx').value='';
+  document.getElementById('fuOut').className='tool-output';
+  document.getElementById('fuOut').textContent='';
+  document.getElementById('fuCopy').style.display='none';
+  document.getElementById('fuClearBtn').style.display='none';
+}
+
+function clearLastTouch() {
+  document.getElementById('ltCtx').value='';
+  document.getElementById('ltOut').className='tool-output';
+  document.getElementById('ltOut').textContent='';
+  document.getElementById('ltCopy').style.display='none';
+  document.getElementById('ltClearBtn').style.display='none';
+}
+
+// CHANGE #4: Rewritten follow-up text tool
 async function runFollowup() {
   const type=document.getElementById('fuType').value, ctx=document.getElementById('fuCtx').value.trim();
-  if(!ctx){alert('Please describe the customer situation.');return;}
-  const btn=document.getElementById('fuBtn'); btn.disabled=true; btn.textContent='GENERATING...';
-  const out=document.getElementById('fuOut'); out.className='tool-output visible'; out.textContent='Generating...';
-  const guide={
-    first:'FIRST TOUCH (Day 0): Specific to this vehicle and issue. End with: "Is it drivable right now or is it down?" No generic language.',
-    mid:'MID TOUCH (Day 2-3): Reference the first conversation specifically. Never say "just following up." Find and address the real barrier. Offer specific appointment times.',
-    last:'LAST TOUCH (Final): No question at end. Short and human. Include "one last time" and "if things went a different direction, totally understood." No m-dashes.'
-  };
+  if(!ctx){alert('Please describe the customer situation or paste the transcript.');return;}
+  const btn=document.getElementById('fuBtn');
+  btn.disabled=true; btn.textContent='GENERATING...';
+  const out=document.getElementById('fuOut');
+  out.className='tool-output visible';
+  out.textContent='Generating...';
+
+  const prompt = `You are generating a follow-up text message for Advanced Transmission Repair (ATR) in Phoenix, AZ.
+
+STEP 1 - EXTRACT FROM INPUT:
+Read the transcript or situation description and extract: customer first name, vehicle (year make model), what was quoted or discussed, any commitments made, drivable status, customer type (price shopper, researcher, overwhelmed, etc.), days since the call, any timing details or barriers mentioned.
+
+STEP 2 - ASSESS FUNNEL POSITION:
+The selected type is: ${type}
+- same-day: Short info drop. Reinforce one key point from the call. End with "Is it drivable right now or is it down?"
+- warm: Day 2-3. Reference the specific conversation. Never say "just following up" or "just checking in." Find and address the real barrier. Offer two specific appointment times.
+- re-intro: 7+ days out. Low pressure re-introduction. Lead with free diagnostic if not yet diagnosed. Brief, warm, no guilt.
+- nudge: Customer verbally committed but never showed. Gentle, assumes life got in the way, not that they ghosted. Reference the specific appointment or commitment they made.
+- timing: Customer has a trip, is waiting on something, or gave a specific timeline. Factor their timing. Don't push before their stated date.
+
+STEP 3 - WRITE THE TEXT:
+Rules:
+- Use their actual name and vehicle from the input
+- Never ask a question the transcript already answered
+- Never echo negative language the customer used
+- Lead with free diagnostic if vehicle hasn't been diagnosed yet
+- Recommend ONE specific option based on their situation (don't list multiple options equally)
+- Match tone to customer type (direct for price shoppers, reassuring for overwhelmed, respectful for researchers)
+- End with ONE specific next step (never "let me know")
+- No m-dashes (use commas or periods instead)
+- No generic filler ("hope you're doing well", "wanted to reach out")
+- Sign off as the advisor name if mentioned, otherwise just "- ATR"
+- Keep it under 3-4 sentences for same-day and nudge, 4-6 for warm and re-intro
+
+Output ONLY the text message. No explanation, no preamble, no quotes around it.
+
+CUSTOMER SITUATION:
+${ctx}`;
+
   try {
-    const r=await claudeCall(`Generate a ${type} follow-up text message. ${guide[type]} No m-dashes. Specific to this situation — no generic language.\n\nCustomer situation: ${ctx}\n\nOutput the message text only — no explanation, no preamble.`);
-    out.textContent=r; document.getElementById('fuCopy').style.display='inline-block';
+    const r=await claudeCall(prompt, 1500);
+    out.textContent=r;
+    document.getElementById('fuCopy').style.display='inline-block';
+    document.getElementById('fuClearBtn').style.display='inline-block';
   } catch(e){out.textContent='Error: '+e.message;}
   btn.disabled=false; btn.textContent='GENERATE TEXT';
 }
@@ -1101,8 +1184,11 @@ async function runFollowup() {
 async function runLastTouch() {
   const type=document.getElementById('ltType').value, ctx=document.getElementById('ltCtx').value.trim();
   if(!ctx){alert('Please describe the customer situation.');return;}
-  const btn=document.getElementById('ltBtn'); btn.disabled=true; btn.textContent='GENERATING...';
-  const out=document.getElementById('ltOut'); out.className='tool-output visible'; out.textContent='Generating...';
+  const btn=document.getElementById('ltBtn');
+  btn.disabled=true; btn.textContent='GENERATING...';
+  const out=document.getElementById('ltOut');
+  out.className='tool-output visible';
+  out.textContent='Generating...';
   const guide={
     standard:'Standard last touch. Include "one last time" and "if things went a different direction, totally understood."',
     price:'Customer went with a cheaper option. Acknowledge without judgment. Leave door open professionally.',
@@ -1113,15 +1199,16 @@ async function runLastTouch() {
   };
   try {
     const r=await claudeCall(`Generate a last touch text. No question at end. Short, human, low pressure. No m-dashes. Situation: ${guide[type]}\n\nCustomer details: ${ctx}\n\nOutput the message text only.`);
-    out.textContent=r; document.getElementById('ltCopy').style.display='inline-block';
+    out.textContent=r;
+    document.getElementById('ltCopy').style.display='inline-block';
+    document.getElementById('ltClearBtn').style.display='inline-block';
   } catch(e){out.textContent='Error: '+e.message;}
   btn.disabled=false; btn.textContent='GENERATE LAST TOUCH';
 }
 
 function copyOut(outId,btnId) {
   navigator.clipboard.writeText(document.getElementById(outId).textContent).then(()=>{
-    const b=document.getElementById(btnId); b.textContent='COPIED ✓';
-    setTimeout(()=>b.textContent='COPY',2000);
+    const b=document.getElementById(btnId); b.textContent='COPIED \u2713'; setTimeout(()=>b.textContent='COPY',2000);
   });
 }
 
@@ -1136,17 +1223,17 @@ async function claudeCall(userMsg, maxTokens=1500) {
       system:`You are the ATR Call Intelligence AI for Advanced Transmission Repair, Phoenix AZ. You score calls using the ATR Sales Playbook.
 
 4-PHASE FRAMEWORK:
-Phase 1 — Establish Control (2.5pts): Professional greeting, get name within 30 seconds, redirect to diagnostics before price.
-Phase 2 — Diagnostic Questions (2.5pts): 5 questions before price — year/make/model, mileage, symptoms, prior diagnosis, CEL. Summarize back. Name specific transmission model.
-Phase 3 — Delivering Price (3.0pts): Sandwich — value first, all-in range (parts/labor/fluids/tax), reassurance bridge. Bridge question IMMEDIATELY after price. Never apologize. Competing quote: educate don't discount. Financing: never quote monthly payment before application.
-Phase 4 — Closing (2.0pts): Alternative-choice close with two specific times. Get name and number. Committed next action.
+Phase 1 \u2014 Establish Control (2.5pts): Professional greeting, get name within 30 seconds, redirect to diagnostics before price.
+Phase 2 \u2014 Diagnostic Questions (2.5pts): 5 questions before price \u2014 year/make/model, mileage, symptoms, prior diagnosis, CEL. Summarize back. Name specific transmission model.
+Phase 3 \u2014 Delivering Price (3.0pts): Sandwich \u2014 value first, price range (parts/labor/fluids), reassurance bridge. Confirmation Hook: "We can get that down to an exact number once we get eyes on it \u2014 the diagnostic is free and takes about an hour." Bridge question IMMEDIATELY after price. Never apologize. Competing quote: educate don't discount. Financing: never quote monthly payment before application. 7 criteria.
+Phase 4 \u2014 Closing (2.0pts): Alternative-choice close with two specific times. Get name and number. Committed next action.
 
 SCORING: Elite 9.0+, Strong 7.5-8.9, Developing 6.0-7.4, Needs Work 4.0-5.9, Poor 0-3.9.
 Show work: list each criterion with raw score (0/0.5/1/2), sum raw points, show scaling to phase max, apply deductions.
 
-COACHING FLAG REQUIREMENT — NON-NEGOTIABLE:
+COACHING FLAG REQUIREMENT \u2014 NON-NEGOTIABLE:
 Every flag MUST include:
-- What to say instead: Using the EXACT vehicle, EXACT symptom, EXACT moment from THIS call. Never write [vehicle] or [symptom]. Write it how a confident advisor would say it on the phone — natural, conversational, ready to read aloud.
+- What to say instead: Using the EXACT vehicle, EXACT symptom, EXACT moment from THIS call. Never write [vehicle] or [symptom]. Write it how a confident advisor would say it on the phone \u2014 natural, conversational, ready to read aloud.
 - Why this works: One sentence on the psychology or technique.
 
 TRANSCRIPTION QUALITY: Garbled greetings = no deduction. Obvious errors = score intent. Benefit of the doubt when unclear.
@@ -1171,18 +1258,18 @@ function showView(name,el) {
 }
 
 // HELPERS
-function getBand(s){if(s===null)return '—';if(s>=9)return 'Elite';if(s>=7.5)return 'Strong';if(s>=6)return 'Developing';if(s>=4)return 'Needs Work';return 'Poor';}
+function getBand(s){if(s===null)return '\u2014';if(s>=9)return 'Elite';if(s>=7.5)return 'Strong';if(s>=6)return 'Developing';if(s>=4)return 'Needs Work';return 'Poor';}
 function getBandColor(b){return {Elite:'var(--elite)',Strong:'var(--strong)',Developing:'var(--developing)','Needs Work':'var(--needs-work)',Poor:'var(--poor)'}[b]||'var(--text-muted)';}
 function getBandClass(b){return {Elite:'elite',Strong:'strong',Developing:'developing','Needs Work':'needs-work',Poor:'poor'}[b]||'';}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function printWindow(title, body) {
   const w=window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
-    <style>body{font-family:Arial,sans-serif;max-width:820px;margin:40px auto;font-size:13px;line-height:1.8;color:#111;}
-    h1{font-size:18px;border-bottom:2px solid #C8102E;padding-bottom:8px;margin-bottom:6px;}
-    .meta{color:#666;font-size:11px;margin-bottom:24px;}
-    pre{white-space:pre-wrap;font-family:Arial,sans-serif;font-size:13px;}</style>
-    </head><body>${body}</body></html>`);
+  <style>body{font-family:Arial,sans-serif;max-width:820px;margin:40px auto;font-size:13px;line-height:1.8;color:#111;}
+  h1{font-size:18px;border-bottom:2px solid #C8102E;padding-bottom:8px;margin-bottom:6px;}
+  .meta{color:#666;font-size:11px;margin-bottom:24px;}
+  pre{white-space:pre-wrap;font-family:Arial,sans-serif;font-size:13px;}</style>
+  </head><body>${body}</body></html>`);
   w.document.close(); w.print();
 }
 </script>
