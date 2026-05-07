@@ -1659,19 +1659,22 @@ function parseSalesCSV(text) {
     rows.push(fields);
   }
   if (rows.length < 2) return [];
+  // Schema: Date_Sold | RO Number | Customer_Name | Customer_Phone | Vehicle | Advisor | Job_Type | Transmission_Type | Sale_Amount | Notes
   return rows.slice(1).map(r => ({
     dateSold: (r[0]||'').trim(),
-    customerName: (r[1]||'').trim(),
-    customerPhone: (r[2]||'').trim(),
-    vehicle: (r[3]||'').trim(),
-    advisor: (r[4]||'').trim(),
-    jobType: (r[5]||'').trim(),
-    saleAmount: parseFloat(String(r[6]||'0').replace(/[^0-9.\-]/g,'')) || 0,
-    quoteAmount: parseFloat(String(r[7]||'0').replace(/[^0-9.\-]/g,'')) || 0,
-    transType: (r[8]||'').trim(),
-    warranty: (r[9]||'').trim(),
-    notes: (r[10]||'').trim()
-  })).filter(r => r.dateSold || r.customerName);
+    roNumber: (r[1]||'').trim(),
+    customerName: (r[2]||'').trim(),
+    customerPhone: (r[3]||'').trim(),
+    vehicle: (r[4]||'').trim(),
+    advisor: (r[5]||'').trim(),
+    jobType: (r[6]||'').trim(),
+    transType: (r[7]||'').trim(),
+    saleAmount: parseFloat(String(r[8]||'0').replace(/[^0-9.\-]/g,'')) || 0,
+    notes: (r[9]||'').trim(),
+    // Legacy fields (no longer in sheet but referenced elsewhere — kept as defaults)
+    quoteAmount: 0,
+    warranty: ''
+  })).filter(r => r.dateSold || r.customerName || r.roNumber);
 }
 
 function normalizePhone(phone) {
@@ -1887,9 +1890,11 @@ function renderSalesLog(wk) {
     const idx = matched ? allCalls.indexOf(matched) : -1;
     const onclick = matched ? `onclick="openModal(${idx})"` : '';
     const cursor = matched ? 'cursor:pointer;' : '';
+    const customerDisplay = s.customerName || (s.roNumber ? `(no name)` : '—');
     return `<tr ${onclick} style="${cursor}">
       <td>${esc(fd(s.dateSold))}</td>
-      <td>${esc(s.customerName||'—')}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--text-muted);">${esc(s.roNumber||'—')}</td>
+      <td>${esc(customerDisplay)}</td>
       <td>${esc(s.vehicle||'—')}</td>
       <td>${esc(s.advisor||'—')}</td>
       <td>${esc(s.jobType||'—')}</td>
@@ -1901,7 +1906,7 @@ function renderSalesLog(wk) {
   document.getElementById('sLogWrap').innerHTML = `
     <table class="call-table">
       <thead><tr>
-        <th>Date</th><th>Customer</th><th>Vehicle</th><th>Advisor</th><th>Job Type</th><th>Amount</th><th>Trans Type</th><th>Match</th>
+        <th>Date</th><th>RO #</th><th>Customer</th><th>Vehicle</th><th>Advisor</th><th>Job Type</th><th>Amount</th><th>Trans Type</th><th>Match</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
