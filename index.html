@@ -660,6 +660,23 @@ function fd(str) { if(!str) return '\u2014'; try { return new Date(str).toLocale
 function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
 function avg2(calls,f) { const v=calls.map(c=>c[f]).filter(x=>x!==null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }
 
+// v7: Detect if a call is the customer's FIRST contact (vs a follow-up).
+// Returns true if no earlier call exists with the same phone number.
+// Used to filter follow-ups (financing check-ins, scheduling callbacks) out of
+// coaching analysis since the scoring rubric is built for first-contact intake.
+function isFirstContact(call) {
+  const phone = normalizePhone(call.customerPhone);
+  if (!phone) return true; // no phone — can't dedupe, include it
+  const callDate = pd(call.date);
+  if (!callDate) return true;
+  const earlierWithSamePhone = allCalls.some(c =>
+    c !== call &&
+    normalizePhone(c.customerPhone) === phone &&
+    pd(c.date) && pd(c.date) < callDate
+  );
+  return !earlierWithSamePhone;
+}
+
 // RENDER ALL
 function renderAll() { renderWeek(); renderLog(); renderReport(); renderSales(); }
 
@@ -1071,7 +1088,13 @@ function renderReport() {
     const a=avg(mine.map(c=>c.total)), band=getBand(a), bc=getBandColor(band);
     const hi=Math.max(...mine.map(c=>c.total)), lo=Math.min(...mine.map(c=>c.total));
     const myAppts=mine.filter(c=>c.apptBooked==='Yes').length;
-    const sorted=[...mine].sort((a,b)=>b.total-a.total);
+    // v7: Filter out follow-up calls before picking Best/Worst/Most Improvable.
+    // Follow-ups (same customer phone seen earlier) score badly because the
+    // rubric assumes first-contact intake. They stay in the count and avg, but
+    // don't get pulled for coaching review.
+    const firstContact = mine.filter(isFirstContact);
+    const followUpCount = mine.length - firstContact.length;
+    const sorted=[...firstContact].sort((a,b)=>b.total-a.total);
     const best=sorted[0], worst=sorted[sorted.length-1];
     const mid=sorted.length>=3?sorted[Math.floor(sorted.length/2)]:null;
     const callItem=(c,color,label)=>{
@@ -1081,6 +1104,7 @@ function renderReport() {
         <div class="cri-note">${c.topCoachingNote||'\u2014'}</div>
         ${c.flags?`<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>`:''}
         <button class="cri-btn" onclick="openModal(${idx})">VIEW SCORECARD</button>
+        <button class="cri-btn" onclick="openMTab(${idx},'audio')">▶ LISTEN</button>
         <button class="cri-btn" onclick="openMTab(${idx},'transcript')">VIEW TRANSCRIPT</button>
       </div>`;
     };
@@ -1088,7 +1112,7 @@ function renderReport() {
     // CHANGE #1: Two report mode buttons instead of single generate button
     return `<div class="wrc">
       <div class="wrc-header">
-        <div><div class="wrc-name">${name}</div><div style="font-size:12px;color:var(--text-muted);">${mine.length} calls \u00b7 ${myAppts} appts \u00b7 ${Math.round(myAppts/mine.length*100)}% booking rate</div></div>
+        <div><div class="wrc-name">${name}</div><div style="font-size:12px;color:var(--text-muted);">${mine.length} calls \u00b7 ${myAppts} appts \u00b7 ${Math.round(myAppts/mine.length*100)}% booking rate${followUpCount > 0 ? ` \u00b7 ${followUpCount} follow-up${followUpCount===1?'':'s'} excluded from coaching` : ''}</div></div>
         <div style="text-align:right;"><div class="wrc-score" style="color:${bc}">${a.toFixed(1)}</div><div style="font-size:11px;font-weight:600;letter-spacing:2px;color:${bc};text-transform:uppercase;">${band}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:20px;">
@@ -1106,9 +1130,9 @@ function renderReport() {
       </div>
       <div id="wkRptOut-${key}"></div>
       <div class="modal-section-title" style="margin-top:20px;">Calls to Review</div>
-      ${callItem(best,'var(--green)','\ud83c\udfc6 Best Call')}
-      ${worst!==best?callItem(worst,'var(--red)','\u26a0 Needs Most Work'):''}
-      ${mid&&mid!==best&&mid!==worst?callItem(mid,'var(--amber)','\u2197 Most Improvable'):''}
+      ${best ? callItem(best,'var(--green)','\ud83c\udfc6 Best Call') : '<div style="font-size:13px;color:var(--text-muted);padding:14px 0;font-style:italic;">No first-contact calls this week to coach on (all calls were follow-ups from existing leads).</div>'}
+      ${best && worst!==best?callItem(worst,'var(--red)','\u26a0 Needs Most Work'):''}
+      ${best && mid&&mid!==best&&mid!==worst?callItem(mid,'var(--amber)','\u2197 Most Improvable'):''}
     </div>`;
   }).join('');
   document.getElementById('rptContent').innerHTML=`
@@ -1306,7 +1330,7 @@ function openMTab(idx, tab) {
     document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active'));
     const tabs=document.querySelectorAll('.modal-tab');
-    const map={score:0,transcript:1,coaching:2};
+    const map={score:0,audio:1,transcript:2,coaching:3};
     if(tabs[map[tab]]) tabs[map[tab]].classList.add('active');
     document.getElementById('mtab-'+tab).classList.add('active');
   },50);
