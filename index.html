@@ -216,6 +216,17 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .empty-state { text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px; }
 .empty-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.4; }
 
+/* v7: RECONCILIATION */
+.recon-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+.recon-tile { background: var(--surface2); border: 1px solid var(--border); padding: 14px; }
+.recon-tile-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.recon-tile-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; }
+.recon-badge { display: inline-block; padding: 3px 8px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; white-space: nowrap; }
+.recon-badge.orphan-sale { background: var(--amber-dim); color: var(--amber); }
+.recon-badge.orphan-payment { background: var(--red-glow); color: var(--red); }
+.recon-badge.underpaid { background: var(--amber-dim); color: var(--amber); }
+.recon-badge.overpaid { background: rgba(96,165,250,0.15); color: var(--elite); }
+
 /* TRANSCRIPT */
 .transcript-box { background: var(--surface2); border: 1px solid var(--border); padding: 20px; font-size: 13px; line-height: 1.8; overflow-y: auto; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; color: var(--text); }
 .transcript-collapsed { max-height: 120px; overflow: hidden; position: relative; }
@@ -538,6 +549,19 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 
 <div class="card">
 <div class="card-header">
+<div class="card-title">Reconciliation</div>
+<div style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;">last 30 days &middot; Sales Tracker vs Payments</div>
+</div>
+<div class="recon-summary">
+<div class="recon-tile"><div class="recon-tile-label">Sold, Not Paid</div><div class="recon-tile-val" id="sReconOrphanSales">&mdash;</div></div>
+<div class="recon-tile"><div class="recon-tile-label">Paid, Not Logged</div><div class="recon-tile-val" id="sReconOrphanPayments">&mdash;</div></div>
+<div class="recon-tile"><div class="recon-tile-label">Amount Mismatches</div><div class="recon-tile-val" id="sReconMismatches">&mdash;</div></div>
+</div>
+<div id="sReconBody"></div>
+</div>
+
+<div class="card">
+<div class="card-header">
 <div class="card-title">Sales Log</div>
 <div id="sLogCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;"></div>
 </div>
@@ -604,6 +628,7 @@ async function loadData() {
     document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     populateWeekFilter();
     await loadSalesData();
+    await loadPaymentsData();
     renderAll();
   } catch(e) {
     showErr('Could not load data. Make sure the Google Sheet is published to web (File > Share > Publish to web). ' + e.message);
@@ -1660,7 +1685,7 @@ function parseSalesCSV(text) {
   }
   if (rows.length < 2) return [];
   // Schema: Date_Sold | RO Number | Customer_Name | Customer_Phone | Vehicle | Advisor | Job_Type | Transmission_Type | Sale_Amount | Notes
-  return rows.slice(1).map(r => ({
+  const parsed = rows.slice(1).map(r => ({
     dateSold: (r[0]||'').trim(),
     roNumber: (r[1]||'').trim(),
     customerName: (r[2]||'').trim(),
@@ -1675,6 +1700,38 @@ function parseSalesCSV(text) {
     quoteAmount: 0,
     warranty: ''
   })).filter(r => r.dateSold || r.customerName || r.roNumber);
+  // v7: Tag each row as primary or add-on. First row chronologically per RO =
+  // primary sale; subsequent rows = add-ons. Used downstream to keep ARO and
+  // Sale Count clean while still showing add-on revenue in Sales Total.
+  return tagPrimaryVsAddOn(parsed);
+}
+
+function tagPrimaryVsAddOn(rows) {
+  const byRO = {};
+  for (const r of rows) {
+    const ro = (r.roNumber || '').trim();
+    if (!ro) {
+      r.isPrimary = true;
+      r.isAddOn = false;
+      continue;
+    }
+    if (!byRO[ro]) byRO[ro] = [];
+    byRO[ro].push(r);
+  }
+  for (const ro in byRO) {
+    const group = byRO[ro];
+    group.sort((a, b) => {
+      const da = pd(a.dateSold), db = pd(b.dateSold);
+      return (da ? da.getTime() : 0) - (db ? db.getTime() : 0);
+    });
+    group[0].isPrimary = true;
+    group[0].isAddOn = false;
+    for (let i = 1; i < group.length; i++) {
+      group[i].isPrimary = false;
+      group[i].isAddOn = true;
+    }
+  }
+  return rows;
 }
 
 function normalizePhone(phone) {
@@ -1709,26 +1766,36 @@ function renderSales() {
   const wk = getSalesForWeek(salesWeekOff);
   const lw = getSalesForWeek(salesWeekOff - 1);
 
-  const total = wk.reduce((a,b) => a + (b.saleAmount||0), 0);
-  const count = wk.length;
-  const aro = count ? total / count : 0;
+  // v7: Split rows into primary sales vs add-ons (rows on existing ROs).
+  const wkPrimary = wk.filter(s => s.isPrimary);
+  const wkAddOn = wk.filter(s => s.isAddOn);
+  const lwPrimary = lw.filter(s => s.isPrimary);
+
+  const total = wk.reduce((a,b) => a + (b.saleAmount||0), 0); // includes add-ons
+  const primaryTotal = wkPrimary.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const addOnTotal = wkAddOn.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const count = wkPrimary.length; // new deals only
+  const aro = count ? primaryTotal / count : 0; // avg new deal size
   const lwTotal = lw.reduce((a,b) => a + (b.saleAmount||0), 0);
-  const bridged = wk.filter(s => matchSaleToCall(s)).length;
+  const bridged = wkPrimary.filter(s => matchSaleToCall(s)).length;
 
   document.getElementById('sTotal').textContent = '$' + Math.round(total).toLocaleString();
   document.getElementById('sCount').textContent = count;
-  document.getElementById('sARO').textContent = '$' + Math.round(aro).toLocaleString();
+  document.getElementById('sARO').textContent = count ? '$' + Math.round(aro).toLocaleString() : '—';
   document.getElementById('sBridged').textContent = bridged + ' / ' + count;
 
+  // v7: Sales Total subtitle — show add-on revenue distinctly when present
   if (lwTotal > 0 && total > 0) {
     const d = total - lwTotal;
     const pct = lwTotal > 0 ? Math.round((d / lwTotal) * 100) : 0;
     const cls = d > 0 ? 'delta-up' : d < 0 ? 'delta-down' : 'delta-flat';
-    document.getElementById('sTotalDelta').innerHTML = `<span class="${cls}">${d>0?'+':''}$${Math.round(Math.abs(d)).toLocaleString()} (${pct>0?'+':''}${pct}%) vs last week</span>`;
+    const addOnNote = addOnTotal > 0 ? `<br><span style="color:var(--text-muted);font-size:10px;">incl. $${Math.round(addOnTotal).toLocaleString()} in add-ons</span>` : '';
+    document.getElementById('sTotalDelta').innerHTML = `<span class="${cls}">${d>0?'+':''}$${Math.round(Math.abs(d)).toLocaleString()} (${pct>0?'+':''}${pct}%) vs last week</span>${addOnNote}`;
   } else {
-    document.getElementById('sTotalDelta').textContent = 'this week';
+    const addOnNote = addOnTotal > 0 ? `<br><span style="color:var(--text-muted);font-size:10px;">incl. $${Math.round(addOnTotal).toLocaleString()} in add-ons</span>` : '';
+    document.getElementById('sTotalDelta').innerHTML = 'this week' + addOnNote;
   }
-  document.getElementById('sCountSub').textContent = lw.length ? `${lw.length} last week` : 'this week';
+  document.getElementById('sCountSub').textContent = lwPrimary.length ? `${lwPrimary.length} new last week` : 'new deals';
 
   renderSalesAdvisor('Jack', 'sAdvJackStats', wk);
   renderSalesAdvisor('Jay', 'sAdvJayStats', wk);
@@ -1744,6 +1811,7 @@ function renderSales() {
   renderJobTypeBreakdown(wk);
   renderTransTypeBreakdown(wk);
   renderSalesTrend();
+  renderReconciliation();
   renderSalesLog(wk);
 }
 
@@ -1755,15 +1823,18 @@ function renderSalesAdvisor(name, elId, allWk) {
 
 function renderSalesAdvisorStatsHTML(mySales, weekTotal) {
   if (!mySales.length) return '<div style="font-size:13px;color:var(--text-muted);padding:14px 0 4px;">No sales this week</div>';
+  // v7: Primary sales only count for jobs/ARO. Add-ons still count for total.
+  const myPrimary = mySales.filter(s => s.isPrimary);
   const myTotal = mySales.reduce((a,b) => a + (b.saleAmount||0), 0);
-  const myCount = mySales.length;
-  const myAro = myCount ? myTotal / myCount : 0;
+  const myPrimaryTotal = myPrimary.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const myCount = myPrimary.length;
+  const myAro = myCount ? myPrimaryTotal / myCount : 0;
   const sharePct = weekTotal ? Math.round((myTotal / weekTotal) * 100) : 0;
   return `
     <div class="sales-adv-stats">
       <div class="sales-adv-stat"><div class="sales-adv-stat-label">Sales</div><div class="sales-adv-stat-val">$${Math.round(myTotal).toLocaleString()}</div></div>
-      <div class="sales-adv-stat"><div class="sales-adv-stat-label">Jobs</div><div class="sales-adv-stat-val">${myCount}</div></div>
-      <div class="sales-adv-stat"><div class="sales-adv-stat-label">ARO</div><div class="sales-adv-stat-val">$${Math.round(myAro).toLocaleString()}</div></div>
+      <div class="sales-adv-stat"><div class="sales-adv-stat-label">New Deals</div><div class="sales-adv-stat-val">${myCount}</div></div>
+      <div class="sales-adv-stat"><div class="sales-adv-stat-label">ARO</div><div class="sales-adv-stat-val">${myCount ? '$' + Math.round(myAro).toLocaleString() : '—'}</div></div>
       <div class="sales-adv-stat"><div class="sales-adv-stat-label">Share</div><div class="sales-adv-stat-val">${sharePct}%</div></div>
     </div>`;
 }
@@ -1891,9 +1962,10 @@ function renderSalesLog(wk) {
     const onclick = matched ? `onclick="openModal(${idx})"` : '';
     const cursor = matched ? 'cursor:pointer;' : '';
     const customerDisplay = s.customerName || (s.roNumber ? `(no name)` : '—');
+    const addOnBadge = s.isAddOn ? ' <span class="recon-badge underpaid" style="font-size:9px;padding:1px 5px;">ADD-ON</span>' : '';
     return `<tr ${onclick} style="${cursor}">
       <td>${esc(fd(s.dateSold))}</td>
-      <td style="font-family:'DM Mono',monospace;color:var(--text-muted);">${esc(s.roNumber||'—')}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--text-muted);">${esc(s.roNumber||'—')}${addOnBadge}</td>
       <td>${esc(customerDisplay)}</td>
       <td>${esc(s.vehicle||'—')}</td>
       <td>${esc(s.advisor||'—')}</td>
@@ -1911,6 +1983,265 @@ function renderSalesLog(wk) {
       <tbody>${rows}</tbody>
     </table>`;
 }
+
+// ============================================================================
+// v7: RECONCILIATION (Sales Tracker x Payments cross-reference)
+// ============================================================================
+const PAYMENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRmTR058Oz3C6kc0jHx_pyhRGov7Z2sJLY-v7lb2UDeXUxaqIbWXr9lthWlWk2a052CK8VY3ED9YBN_/pub?gid=610158593&single=true&output=csv';
+let allPayments = [];
+
+async function loadPaymentsData() {
+  try {
+    const res = await fetch(PAYMENTS_CSV_URL);
+    const txt = await res.text();
+    allPayments = parsePaymentsCSV(txt);
+  } catch (e) {
+    console.error('Payments data fetch failed:', e);
+    allPayments = [];
+  }
+}
+
+function parsePaymentsCSV(text) {
+  const rows = [];
+  const lines = text.split(/\r?\n/);
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const fields = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQ) {
+        if (ch === '"' && line[i+1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQ = false;
+        else cur += ch;
+      } else {
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { fields.push(cur); cur = ''; }
+        else cur += ch;
+      }
+    }
+    fields.push(cur);
+    rows.push(fields);
+  }
+  if (rows.length < 2) return [];
+  // Schema: Payment_Date | Invoice_Number | Customer_Name | Customer_Phone | Amount_Paid | Tax | Notes
+  return rows.slice(1).map(r => ({
+    paymentDate: (r[0]||'').trim(),
+    invoiceNumber: (r[1]||'').trim(),
+    customerName: (r[2]||'').trim(),
+    customerPhone: (r[3]||'').trim(),
+    amountPaid: parseFloat(String(r[4]||'0').replace(/[^0-9.\-]/g,'')) || 0,
+    tax: parseFloat(String(r[5]||'0').replace(/[^0-9.\-]/g,'')) || 0,
+    notes: (r[6]||'').trim()
+  })).filter(r => r.paymentDate || r.invoiceNumber);
+}
+
+// Find all payment rows that match a sale (by invoice primary, phone fallback).
+function getPaymentsForSale(sale) {
+  const inv = (sale.roNumber || '').trim();
+  const phone = normalizePhone(sale.customerPhone);
+  return allPayments.filter(p => {
+    const pInv = (p.invoiceNumber || '').trim();
+    const pPhone = normalizePhone(p.customerPhone);
+    if (inv && pInv && pInv === inv) return true;
+    if (phone && pPhone && pPhone === phone && phone.length >= 10) return true;
+    return false;
+  });
+}
+
+// Find a sale row matching a payment (by invoice primary, phone fallback).
+function getSaleForPayment(payment) {
+  const inv = (payment.invoiceNumber || '').trim();
+  const phone = normalizePhone(payment.customerPhone);
+  return allSales.find(s => {
+    const sInv = (s.roNumber || '').trim();
+    const sPhone = normalizePhone(s.customerPhone);
+    if (inv && sInv && sInv === inv) return true;
+    if (phone && sPhone && sPhone === phone && phone.length >= 10) return true;
+    return false;
+  });
+}
+
+function computeReconciliationFlags() {
+  const flags = [];
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const fourteenDaysAgo = new Date(now); fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+  const sixtyDaysAgo = new Date(now); sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+  const MISMATCH_THRESHOLD = 200;
+
+  // v7: Group sales BY RO so multi-row deals (primary + add-ons) reconcile as
+  // a single deal against the matching RO's total payments.
+  const salesByRO = {};
+  for (const s of allSales) {
+    const ro = (s.roNumber || '').trim();
+    if (!ro) continue; // can't reconcile without RO
+    if (!salesByRO[ro]) {
+      salesByRO[ro] = {
+        ro: ro,
+        totalSold: 0,
+        firstDate: s.dateSold,
+        primary: s,
+        rows: []
+      };
+    }
+    salesByRO[ro].rows.push(s);
+    salesByRO[ro].totalSold += (s.saleAmount || 0);
+    const sd = pd(s.dateSold), fd1 = pd(salesByRO[ro].firstDate);
+    if (sd && fd1 && sd < fd1) {
+      salesByRO[ro].firstDate = s.dateSold;
+      salesByRO[ro].primary = s;
+    }
+  }
+
+  // Group payments by RO (or by phone for invoice-less rows)
+  const paymentsByRO = {};
+  const paymentsByPhone = {};
+  for (const p of allPayments) {
+    const ro = (p.invoiceNumber || '').trim();
+    const phone = normalizePhone(p.customerPhone);
+    if (ro) {
+      if (!paymentsByRO[ro]) paymentsByRO[ro] = { totalPaid: 0, rows: [] };
+      paymentsByRO[ro].totalPaid += (p.amountPaid || 0);
+      paymentsByRO[ro].rows.push(p);
+    } else if (phone) {
+      if (!paymentsByPhone[phone]) paymentsByPhone[phone] = { totalPaid: 0, rows: [] };
+      paymentsByPhone[phone].totalPaid += (p.amountPaid || 0);
+      paymentsByPhone[phone].rows.push(p);
+    }
+  }
+
+  // 1) ORPHAN SALES — RO sold but no payment found. Only flag after 14 days.
+  for (const ro in salesByRO) {
+    const deal = salesByRO[ro];
+    const firstDate = pd(deal.firstDate);
+    if (!firstDate || firstDate < thirtyDaysAgo) continue;
+    if (firstDate > fourteenDaysAgo) continue;
+    const phone = normalizePhone(deal.primary.customerPhone);
+    const paid = (paymentsByRO[ro] && paymentsByRO[ro].totalPaid) || (phone && paymentsByPhone[phone] && paymentsByPhone[phone].totalPaid) || 0;
+    if (paid === 0) {
+      flags.push({
+        type: 'ORPHAN_SALE',
+        invoice: ro,
+        customer: deal.primary.customerName || '(no name)',
+        saleAmount: deal.totalSold,
+        paidAmount: 0,
+        date: deal.firstDate,
+        issue: 'Sold but no payment found — possibly backed out or financing fall-through'
+      });
+    }
+  }
+
+  // 2) ORPHAN PAYMENTS — RO paid but no sale logged. Always flag.
+  const flaggedPaymentROs = new Set();
+  for (const ro in paymentsByRO) {
+    if (salesByRO[ro]) continue; // matched
+    // Also check phone fallback for any payment in this RO group
+    const sample = paymentsByRO[ro].rows[0];
+    const samplePhone = normalizePhone(sample.customerPhone);
+    if (samplePhone) {
+      // If any sale matches this phone, skip (matched via phone fallback)
+      const matchedByPhone = allSales.find(s => normalizePhone(s.customerPhone) === samplePhone && samplePhone.length >= 10);
+      if (matchedByPhone) continue;
+    }
+    const paymentDate = pd(sample.paymentDate);
+    if (!paymentDate || paymentDate < thirtyDaysAgo) continue;
+    flags.push({
+      type: 'ORPHAN_PAYMENT',
+      invoice: ro,
+      customer: sample.customerName || '(no name)',
+      saleAmount: 0,
+      paidAmount: paymentsByRO[ro].totalPaid,
+      date: sample.paymentDate,
+      issue: 'Payment received but no sale was logged — manager may have missed entry'
+    });
+    flaggedPaymentROs.add(ro);
+  }
+
+  // 3) AMOUNT MISMATCHES — RO totals diverge between sales and payments.
+  for (const ro in salesByRO) {
+    const deal = salesByRO[ro];
+    const firstDate = pd(deal.firstDate);
+    if (!firstDate || firstDate < thirtyDaysAgo) continue;
+    const phone = normalizePhone(deal.primary.customerPhone);
+    const paid = (paymentsByRO[ro] && paymentsByRO[ro].totalPaid) || (phone && paymentsByPhone[phone] && paymentsByPhone[phone].totalPaid) || 0;
+    if (paid === 0) continue; // already flagged as orphan
+    const diff = deal.totalSold - paid;
+    if (Math.abs(diff) <= MISMATCH_THRESHOLD) continue;
+    if (diff > 0 && firstDate > sixtyDaysAgo) continue; // financing in progress
+    flags.push({
+      type: diff > 0 ? 'UNDERPAID' : 'OVERPAID',
+      invoice: ro,
+      customer: deal.primary.customerName || '(no name)',
+      saleAmount: deal.totalSold,
+      paidAmount: paid,
+      date: deal.firstDate,
+      issue: diff > 0
+        ? `Outstanding $${Math.round(diff).toLocaleString()} (sold $${Math.round(deal.totalSold).toLocaleString()}, paid $${Math.round(paid).toLocaleString()})`
+        : `Overpaid by $${Math.round(Math.abs(diff)).toLocaleString()} — possible discount or refund`
+    });
+  }
+
+  return flags;
+}
+
+function renderReconciliation() {
+  const el = document.getElementById('sReconBody');
+  if (!el) return;
+
+  const flags = computeReconciliationFlags();
+  const orphanSales = flags.filter(f => f.type === 'ORPHAN_SALE').length;
+  const orphanPayments = flags.filter(f => f.type === 'ORPHAN_PAYMENT').length;
+  const mismatches = flags.filter(f => f.type === 'UNDERPAID' || f.type === 'OVERPAID').length;
+
+  document.getElementById('sReconOrphanSales').textContent = orphanSales;
+  document.getElementById('sReconOrphanPayments').textContent = orphanPayments;
+  document.getElementById('sReconMismatches').textContent = mismatches;
+
+  if (allPayments.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><div>No payment data yet</div><div style="margin-top:6px;font-size:11px;opacity:0.7;">Reconciliation activates once advisors start logging payments in the Payments tab</div></div>';
+    return;
+  }
+
+  if (flags.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div><div>No reconciliation issues in the last 30 days</div><div style="margin-top:6px;font-size:11px;opacity:0.7;">Sales Tracker and Payments are aligned</div></div>';
+    return;
+  }
+
+  flags.sort((a,b) => {
+    const da = pd(a.date), db = pd(b.date);
+    return (db?db.getTime():0) - (da?da.getTime():0);
+  });
+
+  const typeBadge = type => ({
+    'ORPHAN_SALE': '<span class="recon-badge orphan-sale">SOLD, NOT PAID</span>',
+    'ORPHAN_PAYMENT': '<span class="recon-badge orphan-payment">PAID, NOT LOGGED</span>',
+    'UNDERPAID': '<span class="recon-badge underpaid">UNDERPAID</span>',
+    'OVERPAID': '<span class="recon-badge overpaid">OVERPAID</span>'
+  })[type] || type;
+
+  const rows = flags.map(f => `<tr>
+    <td>${esc(fd(f.date))}</td>
+    <td>${typeBadge(f.type)}</td>
+    <td style="font-family:'DM Mono',monospace;color:var(--text-muted);">${esc(f.invoice)}</td>
+    <td>${esc(f.customer)}</td>
+    <td class="sale-amount">${f.saleAmount ? '$' + Math.round(f.saleAmount).toLocaleString() : '—'}</td>
+    <td class="sale-amount">${f.paidAmount ? '$' + Math.round(f.paidAmount).toLocaleString() : '—'}</td>
+    <td style="font-size:12px;">${esc(f.issue)}</td>
+  </tr>`).join('');
+
+  el.innerHTML = `
+    <table class="call-table">
+      <thead><tr>
+        <th>Date</th><th>Type</th><th>Invoice</th><th>Customer</th><th>Sale $</th><th>Paid $</th><th>Issue</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ============================================================================
+// END RECONCILIATION
+// ============================================================================
 // ============================================================================
 // END SALES TAB
 // ============================================================================
