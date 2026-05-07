@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence</title>
+<title>ATR Call Intelligence v7</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -170,6 +170,51 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; }
 .modal-tag { padding: 3px 10px; background: var(--surface3); border: 1px solid var(--border2); font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
 
+/* v7: AUDIO TAB */
+.audio-wrap { padding: 8px 0; }
+.audio-player-card { background: var(--surface2); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
+.audio-player-card audio { width: 100%; outline: none; }
+.audio-player-card audio::-webkit-media-controls-panel { background: var(--surface3); }
+.audio-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.audio-meta-row { display: flex; justify-content: space-between; font-size: 12px; }
+.audio-meta-label { color: var(--text-muted); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.audio-meta-val { color: var(--text); font-weight: 500; }
+.audio-empty { background: var(--surface2); border: 1px dashed var(--border2); padding: 32px; text-align: center; color: var(--text-muted); font-size: 13px; }
+.audio-empty-icon { font-size: 28px; margin-bottom: 12px; opacity: 0.4; }
+.audio-link { display: inline-block; margin-top: 12px; padding: 7px 14px; background: var(--surface3); border: 1px solid var(--border2); color: var(--text-muted); font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 1px; text-decoration: none; transition: all 0.15s; }
+.audio-link:hover { border-color: var(--red); color: var(--text); }
+
+/* v7: OUTCOME PANEL (read-only) */
+.outcome-panel { background: var(--surface2); border-left: 3px solid var(--blue); padding: 14px 16px; margin-top: 18px; }
+.outcome-panel-title { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); font-family: 'DM Mono', monospace; margin-bottom: 10px; }
+.outcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; font-size: 12px; }
+.outcome-cell { display: flex; justify-content: space-between; padding: 3px 0; }
+.outcome-cell-label { color: var(--text-muted); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.outcome-cell-val { color: var(--text); font-weight: 500; }
+.outcome-cell-val.yes { color: var(--green); }
+.outcome-cell-val.no { color: var(--text-muted); }
+.outcome-cell-val.pending { color: var(--amber); }
+.outcome-empty-msg { font-size: 12px; color: var(--text-muted); font-style: italic; margin-top: 4px; }
+
+/* v7: SALES TAB */
+.sales-adv-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin-top: 12px; }
+.sales-adv-stat { background: var(--surface2); padding: 12px; }
+.sales-adv-stat-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.sales-adv-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+.jt-bar-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.jt-bar-row:last-child { border-bottom: none; }
+.jt-bar-label { font-size: 12px; width: 170px; flex-shrink: 0; }
+.jt-bar-track { flex: 1; height: 6px; background: var(--surface3); }
+.jt-bar-fill { height: 100%; background: var(--green); transition: width 0.5s ease; }
+.jt-bar-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; width: 40px; text-align: right; }
+.jt-bar-total { font-size: 12px; color: var(--text); font-family: 'DM Mono', monospace; width: 90px; text-align: right; font-weight: 500; }
+.sale-amount { font-family: 'DM Mono', monospace; font-weight: 500; }
+.match-badge { display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.match-badge.matched { background: var(--green-dim); color: var(--green); }
+.match-badge.unmatched { background: var(--surface3); color: var(--text-muted); }
+.empty-state { text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px; }
+.empty-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.4; }
+
 /* TRANSCRIPT */
 .transcript-box { background: var(--surface2); border: 1px solid var(--border); padding: 20px; font-size: 13px; line-height: 1.8; overflow-y: auto; white-space: pre-wrap; font-family: 'DM Sans', sans-serif; color: var(--text); }
 .transcript-collapsed { max-height: 120px; overflow: hidden; position: relative; }
@@ -280,6 +325,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 <button class="nav-tab active" onclick="showView('week',this)">This Week</button>
 <button class="nav-tab" onclick="showView('calls',this)">Call Log</button>
 <button class="nav-tab" onclick="showView('report',this)">Weekly Report</button>
+<button class="nav-tab" onclick="showView('sales',this)">Sales</button>
 <button class="nav-tab" onclick="showView('tools',this)">Tools</button>
 </div>
 <button class="refresh-btn" onclick="loadData()">&#8635; REFRESH</button>
@@ -439,6 +485,65 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 </div>
 </div>
 
+<!-- v7: SALES VIEW -->
+<div class="view" id="view-sales">
+<div class="week-nav">
+<button class="week-nav-btn" onclick="changeSalesWeek(-1)">&larr; PREV</button>
+<div style="flex:1;text-align:center;">
+<div class="week-nav-label" id="salesWeekLabel">&mdash;</div>
+<div class="week-nav-sub" id="salesWeekSub">&mdash;</div>
+</div>
+<button class="week-nav-btn now" onclick="goSalesNow()">THIS WEEK</button>
+<button class="week-nav-btn" onclick="changeSalesWeek(1)">NEXT &rarr;</button>
+</div>
+
+<div class="stats-row">
+<div class="stat-card green"><div class="stat-label">Sales Total</div><div class="stat-value" id="sTotal">&mdash;</div><div class="stat-sub" id="sTotalDelta">&mdash;</div></div>
+<div class="stat-card blue"><div class="stat-label">Sale Count</div><div class="stat-value" id="sCount">&mdash;</div><div class="stat-sub" id="sCountSub">&mdash;</div></div>
+<div class="stat-card amber"><div class="stat-label">Avg Repair Order</div><div class="stat-value" id="sARO">&mdash;</div><div class="stat-sub">per sold job</div></div>
+<div class="stat-card red"><div class="stat-label">Bridged to Calls</div><div class="stat-value" id="sBridged">&mdash;</div><div class="stat-sub">phone match in scored calls</div></div>
+</div>
+
+<div class="two-col">
+<div class="advisor-card">
+<div class="card-label">Advisor</div>
+<div class="advisor-name-big">JACK</div>
+<div id="sAdvJackStats"></div>
+</div>
+<div class="advisor-card">
+<div class="card-label">Advisor</div>
+<div class="advisor-name-big">JAY</div>
+<div id="sAdvJayStats"></div>
+</div>
+</div>
+
+<div id="sBrianCardWrap"></div>
+
+<div class="two-col">
+<div class="card">
+<div class="card-header"><div class="card-title">By Job Type</div></div>
+<div id="sJobTypeBreakdown"></div>
+</div>
+<div class="card">
+<div class="card-header"><div class="card-title">By Transmission Type</div></div>
+<div id="sTransTypeBreakdown"></div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-header"><div class="card-title">8-Week Sales Trend</div><div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">&#9642; sale count &nbsp; &mdash; weekly total</div></div>
+<div class="trend-container"><canvas id="salesTrendChart"></canvas></div>
+</div>
+
+<div class="card">
+<div class="card-header">
+<div class="card-title">Sales Log</div>
+<div id="sLogCount" style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;"></div>
+</div>
+<div id="sLogWrap"></div>
+</div>
+</div>
+
 <!-- MODAL -->
 <div class="modal-overlay" id="callModal" onclick="closeModal(event)">
 <div class="modal">
@@ -449,10 +554,12 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 <div class="modal-body">
 <div class="modal-tabs">
 <button class="modal-tab active" onclick="switchMTab('score',this)">Score</button>
+<button class="modal-tab" onclick="switchMTab('audio',this)">Audio</button>
 <button class="modal-tab" onclick="switchMTab('transcript',this)">Transcript</button>
 <button class="modal-tab" onclick="switchMTab('coaching',this)">Full Report</button>
 </div>
 <div class="modal-tab-content active" id="mtab-score"></div>
+<div class="modal-tab-content" id="mtab-audio"></div>
 <div class="modal-tab-content" id="mtab-transcript"></div>
 <div class="modal-tab-content" id="mtab-coaching"></div>
 </div>
@@ -495,6 +602,7 @@ async function loadData() {
     allCalls = parseSheet(json);
     document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     populateWeekFilter();
+    await loadSalesData();
     renderAll();
   } catch(e) {
     showErr('Could not load data. Make sure the Google Sheet is published to web (File > Share > Publish to web). ' + e.message);
@@ -506,14 +614,33 @@ function parseSheet(json) {
     const c = row.c || [];
     const g = i => c[i]?.v != null ? String(c[i].v).trim() : '';
     const n = i => c[i]?.v != null ? parseFloat(c[i].v) : null;
-    return { date:g(0), advisor:g(1), customerName:g(2), customerPhone:g(3), vehicle:g(4), callType:g(5), scoreable:g(6), phase1:n(7), phase2:n(8), phase3:n(9), phase4:n(10), total:n(11), band:g(12), customerType:g(13), situationType:g(14), apptBooked:g(15), topCoachingNote:g(16), transcriptRaw:g(17), flags:g(18) };
+    return {
+      date:g(0), advisor:g(1), customerName:g(2), customerPhone:g(3), vehicle:g(4),
+      callType:g(5), scoreable:g(6),
+      phase1:n(7), phase2:n(8), phase3:n(9), phase4:n(10),
+      total:n(11), band:g(12), customerType:g(13), situationType:g(14),
+      apptBooked:g(15), topCoachingNote:g(16), transcriptRaw:g(17), flags:g(18),
+      // v7: Recording URL + outcome columns (T-AA)
+      recordingUrl:g(19),
+      showed:g(20), diagnosed:g(21), sold:g(22),
+      saleAmount:n(23), jobType:g(24), outcomeNotes:g(25), dateClosed:g(26)
+    };
   }).filter(r => r.date || r.advisor);
 }
 
+// v7: Deepgram transcripts come as plain text. Removed dead AssemblyAI URL prefix handling.
 function getTx(c) {
-  const raw = c.transcriptRaw || '';
-  const pfx = 'https://app.assemblyai.com/transcript/';
-  return raw.startsWith(pfx) ? raw.substring(pfx.length).trim() : raw.trim();
+  return (c.transcriptRaw || '').trim();
+}
+
+// v7: Returns the Drive webContentLink URL for HTML5 audio streaming.
+function getAudioUrl(c) {
+  return c.recordingUrl || '';
+}
+
+// v7: Detect if a call has any outcome data populated.
+function hasOutcome(c) {
+  return !!(c.showed || c.diagnosed || c.sold || c.saleAmount || c.jobType || c.outcomeNotes || c.dateClosed);
 }
 
 function showErr(msg) {
@@ -533,7 +660,7 @@ function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
 function avg2(calls,f) { const v=calls.map(c=>c[f]).filter(x=>x!==null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }
 
 // RENDER ALL
-function renderAll() { renderWeek(); renderLog(); renderReport(); }
+function renderAll() { renderWeek(); renderLog(); renderReport(); renderSales(); }
 
 // THIS WEEK VIEW
 function goNow() { weekOff=0; renderWeek(); }
@@ -789,8 +916,10 @@ function openModal(idx) {
     <div class="modal-section"><div class="modal-section-title">Top Coaching Note</div>
     <div class="coaching-box">${c.topCoachingNote||'No note available'}</div>
     ${c.flags?`<div class="modal-section-title" style="margin-top:12px;">Flags</div><div class="modal-tags">${c.flags.split(',').map(f=>`<span class="modal-tag">${f.trim()}</span>`).join('')}</div>`:''}
-    </div></div>`;
+    </div></div>
+    ${renderOutcomePanel(c)}`;
   const tx=getTx(c);
+  document.getElementById('mtab-audio').innerHTML=renderAudioTab(c);
   document.getElementById('mtab-transcript').innerHTML=tx?`
     <div class="modal-section-title">Full Transcript</div>
     <div class="transcript-box transcript-collapsed" id="txBox">${esc(tx)}</div>
@@ -810,8 +939,76 @@ function openModal(idx) {
 function toggleTx() { const box=document.getElementById('txBox'), btn=document.getElementById('txBtn'); const exp=box.classList.contains('transcript-collapsed'); box.classList.toggle('transcript-collapsed',!exp); btn.textContent=exp?'\u25b2 COLLAPSE TRANSCRIPT':'\u25bc SHOW FULL TRANSCRIPT'; }
 function switchMTab(name,el) { document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active')); el.classList.add('active'); document.getElementById('mtab-'+name).classList.add('active'); }
 function closeModal(e) { if(e.target.id==='callModal') closeModalDirect(); }
-function closeModalDirect() { document.getElementById('callModal').classList.remove('open'); }
+function closeModalDirect() {
+  // v7: Stop any playing audio when modal closes
+  const audioEl = document.getElementById('callAudio');
+  if (audioEl) { try { audioEl.pause(); } catch(e) {} }
+  document.getElementById('callModal').classList.remove('open');
+}
 function dr(label,val,color) { if(!val) return ''; return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">${label}</span><span style="color:${color||'var(--text)'};font-weight:500;">${val}</span></div>`; }
+
+// v7: Render the Audio tab content. HTML5 audio player + call metadata + Drive link.
+function renderAudioTab(c) {
+  const url = getAudioUrl(c);
+  if (!url) {
+    return `<div class="audio-wrap"><div class="audio-empty">
+      <div class="audio-empty-icon">🔇</div>
+      <div>No recording URL on file for this call.</div>
+      <div style="margin-top:6px;font-size:11px;opacity:0.7;">Calls scored before the Apr 30 pipeline refactor don't have archived audio.</div>
+    </div></div>`;
+  }
+  return `<div class="audio-wrap">
+    <div class="audio-player-card">
+      <audio id="callAudio" controls preload="none" src="${esc(url)}">
+        Your browser does not support the audio element.
+      </audio>
+      <div class="audio-meta-grid">
+        <div class="audio-meta-row"><span class="audio-meta-label">Date</span><span class="audio-meta-val">${esc(fd(c.date))}</span></div>
+        <div class="audio-meta-row"><span class="audio-meta-label">Advisor</span><span class="audio-meta-val">${esc(c.advisor||'—')}</span></div>
+        <div class="audio-meta-row"><span class="audio-meta-label">Customer</span><span class="audio-meta-val">${esc(c.customerName||'—')}</span></div>
+        <div class="audio-meta-row"><span class="audio-meta-label">Phone</span><span class="audio-meta-val">${esc(c.customerPhone||'—')}</span></div>
+        <div class="audio-meta-row"><span class="audio-meta-label">Vehicle</span><span class="audio-meta-val">${esc(c.vehicle||'—')}</span></div>
+        <div class="audio-meta-row"><span class="audio-meta-label">Score</span><span class="audio-meta-val">${c.total!==null?c.total+' · '+(c.band||''):'—'}</span></div>
+      </div>
+      <a class="audio-link" href="${esc(url)}" target="_blank" rel="noopener">↱ OPEN IN GOOGLE DRIVE</a>
+    </div>
+  </div>`;
+}
+
+// v7: Render the read-only outcome panel inside the Score tab.
+// Shows current outcome data from Sheet columns U-AA. Edit happens in v7.1 entry UI.
+function renderOutcomePanel(c) {
+  if (!hasOutcome(c)) {
+    return `<div class="outcome-panel">
+      <div class="outcome-panel-title">Outcome · Not Yet Marked</div>
+      <div class="outcome-empty-msg">Outcome data appears here once it's entered. Use the Sheet directly until the v7.1 entry UI ships.</div>
+    </div>`;
+  }
+  const valClass = v => {
+    const norm = (v||'').toString().toLowerCase().trim();
+    if (norm === 'yes') return 'yes';
+    if (norm === 'no') return 'no';
+    if (norm === 'pending') return 'pending';
+    return '';
+  };
+  const oc = (label, val) => {
+    if (val === null || val === undefined || val === '') return '';
+    return `<div class="outcome-cell"><span class="outcome-cell-label">${label}</span><span class="outcome-cell-val ${valClass(val)}">${esc(val)}</span></div>`;
+  };
+  const money = v => v != null && !isNaN(v) ? '$' + Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
+  return `<div class="outcome-panel">
+    <div class="outcome-panel-title">Outcome · Conversion Tracking</div>
+    <div class="outcome-grid">
+      ${oc('Showed', c.showed)}
+      ${oc('Diagnosed', c.diagnosed)}
+      ${oc('Sold', c.sold)}
+      ${oc('Sale Amount', money(c.saleAmount))}
+      ${oc('Job Type', c.jobType)}
+      ${oc('Date Closed', c.dateClosed ? fd(c.dateClosed) : '')}
+    </div>
+    ${c.outcomeNotes ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--text);"><span style="color:var(--text-muted);font-family:'DM Mono',monospace;letter-spacing:0.5px;">Notes: </span>${esc(c.outcomeNotes)}</div>` : ''}
+  </div>`;
+}
 
 // COACHING REPORT (single call)
 async function genCoachReport(idx) {
@@ -965,14 +1162,13 @@ WHAT WORKED:
 [1-2 lines. What the advisor did well on this specific call. Reference a specific moment.]
 
 MAKE IT BETTER:
-[2-4 coaching flags. Each one follows this EXACT format:]
+[1-2 coaching flags MAXIMUM. Pick only the highest-impact moments. Each one follows this EXACT format:]
 
 > "[exact quote from transcript where the mistake happened]"
 > SAY THIS: "[specific replacement using this customer's actual name, vehicle, and situation - written exactly how a confident advisor would say it on the phone, ready to read aloud]"
-> PATTERN: "[reusable template version with [Customer], [vehicle], [symptom] placeholders]"
 > WHY: [one sentence on the psychology or technique]
 
-[blank line between each flag]
+[blank line between each flag. Do NOT include a PATTERN line - that belongs in Deep Dive only.]
 ---
 
 RULES:
@@ -1039,9 +1235,27 @@ ${truncTx}`;
       }
     }
 
+    // Generate THIS WEEK'S FOCUS for Quick Review (after all calls analyzed)
+    let weekFocus = '';
+    if (mode === 'quick') {
+      try {
+        const focusPrompt = `You are analyzing ${name}'s calls this week at Advanced Transmission Repair. Based on these coaching reports, identify the SINGLE biggest pattern across all calls.
+
+Write 2-3 specific sentences. Reference actual call data — number of calls, specific behaviors observed, where the money is walking out. Do NOT use placeholders or punt with "see below." Be direct and specific.
+
+Example of good output: "${name} is losing customers at the close. 3 of ${scored.length} calls ended with 'I'll call you back' instead of a booked appointment. The diagnostic questions and price delivery are improving — the close is where the money is walking out the door."
+
+Here are the coaching reports from this week's calls:
+${callReports.join('\n---\n')}
+
+Write ONLY the 2-3 sentence focus summary. No headers, no labels, no preamble.`;
+        weekFocus = await claudeCall(focusPrompt, 500);
+      } catch(e) { weekFocus = 'Could not generate focus summary.'; }
+    }
+
     // Build header
     const header = mode === 'quick'
-      ? `QUICK REVIEW \u2014 ${name.toUpperCase()} \u2014 ${fmtWkLabel(wkOff)}\n${'='.repeat(55)}\n${scored.length} calls scored | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)} | Appts: ${myAppts}/${scored.length}\nLast week: ${lwA?lwA.toFixed(1):'N/A'} | 60-day rolling: ${r60A?r60A.toFixed(1):'N/A'}\n\nTHIS WEEK'S FOCUS:\n[See pattern across the calls below]\n${'='.repeat(55)}\n\n`
+      ? `QUICK REVIEW \u2014 ${name.toUpperCase()} \u2014 ${fmtWkLabel(wkOff)}\n${'='.repeat(55)}\n${scored.length} calls scored | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)} | Appts: ${myAppts}/${scored.length}\nLast week: ${lwA?lwA.toFixed(1):'N/A'} | 60-day rolling: ${r60A?r60A.toFixed(1):'N/A'}\n\nTHIS WEEK'S FOCUS:\n${weekFocus}\n${'='.repeat(55)}\n\n`
       : `DEEP DIVE \u2014 ${name.toUpperCase()} \u2014 ${fmtWkLabel(wkOff)}\n${'='.repeat(55)}\n${scored.length} calls scored | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)} | Appts: ${myAppts}/${scored.length}\n${'='.repeat(55)}\n\n`;
 
     const weeklyReport = header + callReports.join('\n\n' + '='.repeat(55) + '\n\n');
@@ -1051,7 +1265,7 @@ ${truncTx}`;
       <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">\u2713 ${modeLabel} GENERATED \u2014 ${txAvailable.length} CALLS ANALYZED</div>
       <button class="print-btn" onclick="printWeeklyReport('${name}','${fmtWkLabel(wkOff).replace(/'/g,"\\'")}')">&#9114; PRINT REPORT</button>
       </div>
-      <div class="report-output" id="wkRptTxt-${key}">${esc(weeklyReport)}</div>`;
+      <div class="report-output" id="wkRptTxt-${key}" style="white-space:normal;line-height:1.7;">${mdToHtml(weeklyReport)}</div>`;
     btnQuick.disabled=false; btnDeep.disabled=false;
     btnQuick.textContent='QUICK REVIEW'; btnDeep.textContent='DEEP DIVE';
   } catch(e) {
@@ -1063,9 +1277,9 @@ ${truncTx}`;
 
 function printWeeklyReport(name, week) {
   const key=name.toLowerCase();
-  const report=document.getElementById(`wkRptTxt-${key}`)?.textContent||'';
+  const report=document.getElementById(`wkRptTxt-${key}`)?.innerHTML||'';
   printWindow(`ATR Weekly Coaching Report \u2014 ${name}`,
-    `<h1>ATR Weekly Coaching Report</h1><div class="meta">${name} \u00b7 ${week}</div><pre>${esc(report)}</pre>`);
+    `<h1>ATR Weekly Coaching Report</h1><div class="meta">${name} \u00b7 ${week}</div><div style="font-size:13px;line-height:1.8;">${report}</div>`);
 }
 
 function openMTab(idx, tab) {
@@ -1101,7 +1315,7 @@ async function runScorer() {
 
 function printScorer() {
   const adv=document.getElementById('scorerAdv').value;
-  const r=document.getElementById('scorerOut').textContent;
+  const r=document.getElementById('scorerOut').innerHTML||document.getElementById('scorerOut').textContent;
   printWindow(`ATR Coaching Report \u2014 ${adv}`,`<h1>ATR Call Coaching Report</h1><div class="meta">Advisor: ${adv} \u00b7 Generated ${new Date().toLocaleDateString()}</div><pre>${esc(r)}</pre>`);
 }
 
@@ -1140,32 +1354,27 @@ async function runFollowup() {
   out.className='tool-output visible';
   out.textContent='Generating...';
 
-  const prompt = `You are generating a follow-up text message for Advanced Transmission Repair (ATR) in Phoenix, AZ.
+  const prompt = `Generate a follow-up text for ATR.
 
 STEP 1 - EXTRACT FROM INPUT:
-Read the transcript or situation description and extract: customer first name, vehicle (year make model), what was quoted or discussed, any commitments made, drivable status, customer type (price shopper, researcher, overwhelmed, etc.), days since the call, any timing details or barriers mentioned.
+Read the transcript or situation description and extract: customer first name, advisor first name, vehicle (year make model), what was quoted or discussed, any commitments made (including callbacks promised), drivable status, whether money or financing was discussed, days since the call, and any barriers mentioned.
 
 STEP 2 - ASSESS FUNNEL POSITION:
 The selected type is: ${type}
-- same-day: Short info drop. Reinforce one key point from the call. End with "Is it drivable right now or is it down?"
-- warm: Day 2-3. Reference the specific conversation. Never say "just following up" or "just checking in." Find and address the real barrier. Offer two specific appointment times.
+- same-day: Short info drop. Reinforce one key point from the call. If drivable status is unknown, ask.
+- warm: Day 2-3. Reference the specific conversation. Find and address the real barrier.
 - re-intro: 7+ days out. Low pressure re-introduction. Lead with free diagnostic if not yet diagnosed. Brief, warm, no guilt.
-- nudge: Customer verbally committed but never showed. Gentle, assumes life got in the way, not that they ghosted. Reference the specific appointment or commitment they made.
-- timing: Customer has a trip, is waiting on something, or gave a specific timeline. Factor their timing. Don't push before their stated date.
+- nudge: Customer verbally committed but never showed. Gentle, assumes life got in the way. Reference the specific commitment they made.
+- timing: Customer gave a specific timeline or is waiting on something. Factor their timing. Do not push before their stated date.
 
 STEP 3 - WRITE THE TEXT:
-Rules:
 - Use their actual name and vehicle from the input
 - Never ask a question the transcript already answered
 - Never echo negative language the customer used
-- Lead with free diagnostic if vehicle hasn't been diagnosed yet
-- Recommend ONE specific option based on their situation (don't list multiple options equally)
-- Match tone to customer type (direct for price shoppers, reassuring for overwhelmed, respectful for researchers)
-- End with ONE specific next step (never "let me know")
-- No m-dashes (use commas or periods instead)
-- No generic filler ("hope you're doing well", "wanted to reach out")
-- Sign off as the advisor name if mentioned, otherwise just "- ATR"
-- Keep it under 3-4 sentences for same-day and nudge, 4-6 for warm and re-intro
+- Pick the 1-2 things that matter most from the call. Do not restate everything.
+- End with a question or clear next action that creates gentle momentum
+- Sign with advisor first name only on its own line. No dash before the name.
+- 5 sentences maximum. Shorter is better.
 
 Output ONLY the text message. No explanation, no preamble, no quotes around it.
 
@@ -1173,7 +1382,7 @@ CUSTOMER SITUATION:
 ${ctx}`;
 
   try {
-    const r=await claudeCall(prompt, 1500, ATR_TEXT_SYSTEM);
+    const r=await claudeCall(prompt, 1500, ATR_TEXT_SYSTEM_PROMPT);
     out.textContent=r;
     document.getElementById('fuCopy').style.display='inline-block';
     document.getElementById('fuClearBtn').style.display='inline-block';
@@ -1198,7 +1407,7 @@ async function runLastTouch() {
     engaged:'Customer was genuinely engaged but had a logistical barrier. Acknowledge their specific barrier.'
   };
   try {
-    const r=await claudeCall(`Generate a last touch text. No question at end. Short, human, low pressure. No m-dashes. Situation: ${guide[type]}\n\nCustomer details: ${ctx}\n\nOutput the message text only.`, 1500, ATR_TEXT_SYSTEM);
+    const r=await claudeCall(`Generate a last touch text. No question at end. Short, human, low pressure. No m-dashes. Sign with advisor first name only on its own line, no dash before it. Situation: ${guide[type]}\n\nCustomer details: ${ctx}\n\nOutput the message text only.`, 1500, ATR_TEXT_SYSTEM_PROMPT);
     out.textContent=r;
     document.getElementById('ltCopy').style.display='inline-block';
     document.getElementById('ltClearBtn').style.display='inline-block';
@@ -1212,73 +1421,111 @@ function copyOut(outId,btnId) {
   });
 }
 
-// CLAUDE API
 
-// TEXT-SPECIFIC SYSTEM PROMPT — used by Follow-Up Text and Last Touch tools only
-const ATR_TEXT_SYSTEM = `You are the text message writer for Advanced Transmission Repair (ATR) in Phoenix, AZ. You write follow-up and last-touch texts to customers who called about transmission repair.
+// MARKDOWN TO HTML CONVERTER (v6)
+function mdToHtml(text) {
+  if (!text) return '';
+  let html = text;
+  // Escape HTML entities first
+  html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Horizontal rules
+  html = html.replace(/^---+$/gm, '<hr style="border:none;border-top:2px solid #C8102E;margin:16px 0;">');
+  html = html.replace(/^===+$/gm, '<hr style="border:none;border-top:3px solid #333;margin:20px 0;">');
+  // Headers
+  html = html.replace(/^### (.+)$/gm, '<h3 style="font-size:14px;font-weight:700;margin:16px 0 8px;letter-spacing:1px;">$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2 style="font-size:16px;font-weight:700;margin:20px 0 10px;letter-spacing:1px;">$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1 style="font-size:18px;font-weight:700;margin:24px 0 12px;border-bottom:2px solid #C8102E;padding-bottom:6px;">$1</h1>');
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Italic
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  // Blockquotes - styled as coaching callouts
+  html = html.replace(/^&gt; (.+)$/gm, '<div style="border-left:3px solid #C8102E;padding:4px 12px;margin:6px 0;background:rgba(200,16,46,0.05);font-size:13px;">$1</div>');
+  // Line breaks
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
 
-ATR IDENTITY:
-- Transmission rebuild and repair specialist. 2849 E Bell Rd, Phoenix AZ 85032.
-- 1-year unlimited-mile warranty, in writing, before work starts.
-- Free diagnostic (no charge, no obligation, about an hour).
-- Free towing for vehicles that aren't drivable.
-- Financing through two partners (Snap and EasyPay). Never quote monthly payment or imply "manageable payments" before customer applies. Present as: "worth a quick application to see what you qualify for."
-- Written estimate before any work. No-surprise billing. If anything changes, we stop and call for approval.
-- Advisors: Jack (Service Manager) and Jay (Advisor). Sign off as advisor name if known, otherwise "- ATR".
+// TEXT TOOL DEDICATED SYSTEM PROMPT (v6)
+const ATR_TEXT_SYSTEM_PROMPT = `You generate follow-up text messages for ATR (Advanced Transmission Repair) in Phoenix AZ. Write short, human-sounding texts that a real service advisor would send from their phone. Not a CRM template.
 
-ATR VOICE - HOW WE SOUND IN TEXTS:
-- Direct, warm, human. Like a confident friend who happens to be a transmission expert.
-- Short sentences. No corporate speak. No filler.
-- We reference the customer's specific vehicle and situation, never generic placeholders.
-- We lead with something useful (information, a reminder, a specific offer), not with "just following up."
-- We end with ONE clear next step, never "let me know" or "feel free to reach out."
+TONE AND FORMAT
+- Short. Readable in 15 seconds or less.
+- Slightly formal but human. No corporate language.
+- No m-dashes or em-dashes anywhere.
+- No sycophantic openers like 'Really appreciate you sharing' or 'It was great speaking with you'.
+- Sign with advisor first name only on its own line. No dash before it.
+- Never use 'still thinking about [vehicle]' - it frames the customer as hesitant.
 
-CUSTOMER TYPES - MATCH TONE:
-- Price Shopper: Direct, value-focused. Lead with warranty comparison and what's included. Don't chase on price.
-- Researcher: Technical respect. Don't over-explain. Reference specifics they mentioned.
-- Overwhelmed: Simple language, reassuring, one clear next step. Normalize their situation.
-- Skeptic: Specific details, invite them to verify. No vague promises.
-- Third-Party (calling for someone else): Offer to contact the decision-maker directly or send a written summary they can forward.
-- Repeat Customer: Acknowledge the relationship. Don't treat them like a new lead.
-- Fleet/Insurance: Professional B2B tone, process focus.
+TIMING LANGUAGE
+- Call was today: 'Good talking with you today' is acceptable.
+- Call was yesterday: use 'Good talking with you yesterday'.
+- Call was 2 or more days ago: skip the timing reference entirely.
 
-URGENCY TRACKS:
-- Track 1 (vehicle down): Urgent tone. Towing offer. Same-day language. "Let's get it in today."
-- Track 2 (drivable): Consideration window. No manufactured urgency. But if symptoms are progressing, honest cost-of-waiting language: "catching it earlier almost always means a lower repair cost than waiting."
+CONTENT RULES
+- Do not restate everything from the call. Pick the 1-2 things that matter most.
+- Do not list warranty terms, diagnostic process, AND financing all in one text.
+- Do not offer specific appointment days unless the advisor confirmed real availability on the call.
+- Never quote a monthly payment.
+- Never mention competitors.
 
-BARRIER RESPONSES - WEAVE IN NATURALLY:
-- Cost barrier: Mention financing (two partners, terms vary, worth exploring). Never promise specific terms.
-- Still shopping: Warranty comparison (1 year unlimited vs typical 90-day). "When you're comparing, make sure you're looking at warranty terms side by side."
-- Spouse/family: Offer written summary or direct call to decision-maker.
-- Timing: Respect their timeline. Don't push before their stated date.
-- Vehicle getting worse: Honest cost-of-waiting. Not scare tactics. "Once internal material starts breaking down, it accelerates wear elsewhere."
-- Vague/no reason: "What would need to be true for you to feel comfortable moving forward?"
+SITUATION-SPECIFIC RULES
 
-NEVER USE THESE IN TEXTS:
-- "Just following up" / "Just checking in" / "Wanted to reach out"
-- "Hope you're doing well" / "Hope all is well"
-- "Let me know" as a close (always give a specific next step)
-- "Manageable monthly payments" or any implied financing terms before application
-- M-dashes (use commas or periods)
-- "Out the door" (eliminated from all ATR materials)
-- Generic filler that adds no value
-- Questions the transcript already answered
-- Echoing negative language the customer used
+Emergency or Deteriorating (car is down or getting worse):
+- Mention free towing once, briefly, at the end only.
+- Create urgency around vehicle condition without being alarmist.
+- End with a question that invites a response.
 
-EXAMPLE VOICE (Day 0):
-"Hi Edgar, this is Jack with Advanced Transmissions. Thanks for calling in today about your 2012 Scion tC. Just wanted to make sure you have our info - we're at 2849 E Bell Rd in Phoenix. The diagnostic is on us and we cover towing if you need it. Quick question - is the Scion drivable right now, or is it down?"
+Driveable vehicle, no money concern mentioned on call:
+- Skip financing entirely. Do not introduce it.
 
-EXAMPLE VOICE (Day 3-5):
-"Hi Marcus, Jack here from Advanced Transmissions. Still thinking about your 2019 Ram? Quick reminder - the diagnostic is on us, towing is on us, and if cost is a concern we have financing available. Terms depend on your situation but worth a quick application. If you're ready to get it taken care of, just reply here or call us. If the timing isn't right yet, no pressure."
+Financing was already discussed on the call:
+- Follow up on the specific action already taken. Example: 'Did the financing link come through okay?'
+- Do not re-introduce financing as if it was never discussed.
+- End with forward momentum on ATR's side: 'Once you apply we will get you scheduled' - not 'whenever you are ready'.
 
-EXAMPLE VOICE (Deteriorating):
-"Checking in on your Accord - when transmission symptoms are progressing, catching it earlier almost always means a lower repair cost than waiting. The diagnostic is still on us and we can tow it in if it's not comfortable to drive."
+Third-party caller (calling for spouse, parent, or employer):
+- Give them 2-3 soundbites they can relay to the decision maker.
+- Do not pressure them with specific appointment times.
+- Close with: 'Whenever he/she is ready just have them give us a call or reply here'
 
-EXAMPLE VOICE (Competing quote):
-"Still deciding on your Silverado? When you're comparing shops, make sure to look at warranty terms side by side - ours is 1 year, unlimited miles, in writing. The diagnostic is on us whenever you're ready."`;
+Advisor already promised a callback on the call:
+- Do not repeat the callback promise - it tells the customer to wait.
+- End with a question that invites the customer to respond now instead.
 
-// DEFAULT SYSTEM PROMPT — used by scoring, coaching reports, and weekly reports
-const ATR_SCORING_SYSTEM = `You are the ATR Call Intelligence AI for Advanced Transmission Repair, Phoenix AZ. You score calls using the ATR Sales Playbook.
+Price not discussed on the call:
+- Do not introduce a number in the text.
+
+Vehicle may not be driveable:
+- Mention towing as practical reassurance at the end, one sentence only.
+- Example: 'If the truck is not driveable at that point, towing is on us.'
+
+CLOSING RULES
+- Always end with a question or a clear next action that creates gentle momentum toward the customer responding.
+- Never end with 'let me know if you have questions' - dead end.
+- Never end with 'we will be in touch' - removes all urgency.
+- For financing leads: 'Once you apply we will get you scheduled'.
+- For leads where advisor promised a callback: end with a question instead.
+
+WARRANTY
+- ATR warranty is 1 year unlimited miles in writing.
+- Only mention if directly relevant to the customer's concern.
+- Never lead with the warranty.
+
+FINANCING
+- ATR uses Snap Finance and EasyPay.
+- 90-day or 12-month same as cash options.
+- Never quote a monthly payment in a text.
+- Only mention financing if the customer raised money as a concern on the call.`;
+
+async function claudeCall(userMsg, maxTokens=1500, systemOverride=null) {
+  const res=await fetch('https://atr-proxy.advancedtransmissionsaz.workers.dev/',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:maxTokens,
+      system:systemOverride||`You are the ATR Call Intelligence AI for Advanced Transmission Repair, Phoenix AZ. You score calls using the ATR Sales Playbook.
 
 4-PHASE FRAMEWORK:
 Phase 1 \u2014 Establish Control (2.5pts): Professional greeting, get name within 30 seconds, redirect to diagnostics before price.
@@ -1294,16 +1541,7 @@ Every flag MUST include:
 - What to say instead: Using the EXACT vehicle, EXACT symptom, EXACT moment from THIS call. Never write [vehicle] or [symptom]. Write it how a confident advisor would say it on the phone \u2014 natural, conversational, ready to read aloud.
 - Why this works: One sentence on the psychology or technique.
 
-TRANSCRIPTION QUALITY: Garbled greetings = no deduction. Obvious errors = score intent. Benefit of the doubt when unclear.`;
-
-async function claudeCall(userMsg, maxTokens=1500, systemOverride=null) {
-  const res=await fetch('https://atr-proxy.advancedtransmissionsaz.workers.dev/',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-6',
-      max_tokens:maxTokens,
-      system: systemOverride || ATR_SCORING_SYSTEM,
+TRANSCRIPTION QUALITY: Garbled greetings = no deduction. Obvious errors = score intent. Benefit of the doubt when unclear.`,
       messages:[{role:'user',content:userMsg}]
     })
   });
@@ -1337,6 +1575,299 @@ function printWindow(title, body) {
   </head><body>${body}</body></html>`);
   w.document.close(); w.print();
 }
+
+// ============================================================================
+// v7: SALES TAB
+// ============================================================================
+const SALES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRmTR058Oz3C6kc0jHx_pyhRGov7Z2sJLY-v7lb2UDeXUxaqIbWXr9lthWlWk2a052CK8VY3ED9YBN_/pub?gid=0&single=true&output=csv';
+let allSales = [];
+let salesWeekOff = 0;
+
+async function loadSalesData() {
+  try {
+    const res = await fetch(SALES_CSV_URL);
+    const txt = await res.text();
+    allSales = parseSalesCSV(txt);
+  } catch (e) {
+    console.error('Sales data fetch failed:', e);
+    allSales = [];
+  }
+}
+
+function parseSalesCSV(text) {
+  const rows = [];
+  const lines = text.split(/\r?\n/);
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const fields = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQ) {
+        if (ch === '"' && line[i+1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQ = false;
+        else cur += ch;
+      } else {
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { fields.push(cur); cur = ''; }
+        else cur += ch;
+      }
+    }
+    fields.push(cur);
+    rows.push(fields);
+  }
+  if (rows.length < 2) return [];
+  return rows.slice(1).map(r => ({
+    dateSold: (r[0]||'').trim(),
+    customerName: (r[1]||'').trim(),
+    customerPhone: (r[2]||'').trim(),
+    vehicle: (r[3]||'').trim(),
+    advisor: (r[4]||'').trim(),
+    jobType: (r[5]||'').trim(),
+    saleAmount: parseFloat(String(r[6]||'0').replace(/[^0-9.\-]/g,'')) || 0,
+    quoteAmount: parseFloat(String(r[7]||'0').replace(/[^0-9.\-]/g,'')) || 0,
+    transType: (r[8]||'').trim(),
+    warranty: (r[9]||'').trim(),
+    notes: (r[10]||'').trim()
+  })).filter(r => r.dateSold || r.customerName);
+}
+
+function normalizePhone(phone) {
+  if (!phone) return '';
+  return String(phone).replace(/\D/g, '').slice(-10);
+}
+
+function getSalesForWeek(off) {
+  const s = getWkStart(off), e = getWkEnd(s);
+  return allSales.filter(sale => { const d = pd(sale.dateSold); return d && d >= s && d <= e; });
+}
+
+function matchSaleToCall(sale) {
+  const p = normalizePhone(sale.customerPhone);
+  if (!p) return null;
+  return allCalls.find(c => normalizePhone(c.customerPhone) === p);
+}
+
+function fmtWkShort(off) {
+  const s = getWkStart(off);
+  return s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function goSalesNow() { salesWeekOff = 0; renderSales(); }
+function changeSalesWeek(d) { salesWeekOff += d; renderSales(); }
+
+function renderSales() {
+  if (!document.getElementById('salesWeekLabel')) return;
+  document.getElementById('salesWeekLabel').textContent = fmtWkLabel(salesWeekOff);
+  document.getElementById('salesWeekSub').textContent = salesWeekOff===0?'Current Week':salesWeekOff===-1?'Last Week':`${Math.abs(salesWeekOff)} weeks ${salesWeekOff<0?'ago':'ahead'}`;
+
+  const wk = getSalesForWeek(salesWeekOff);
+  const lw = getSalesForWeek(salesWeekOff - 1);
+
+  const total = wk.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const count = wk.length;
+  const aro = count ? total / count : 0;
+  const lwTotal = lw.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const bridged = wk.filter(s => matchSaleToCall(s)).length;
+
+  document.getElementById('sTotal').textContent = '$' + Math.round(total).toLocaleString();
+  document.getElementById('sCount').textContent = count;
+  document.getElementById('sARO').textContent = '$' + Math.round(aro).toLocaleString();
+  document.getElementById('sBridged').textContent = bridged + ' / ' + count;
+
+  if (lwTotal > 0 && total > 0) {
+    const d = total - lwTotal;
+    const pct = lwTotal > 0 ? Math.round((d / lwTotal) * 100) : 0;
+    const cls = d > 0 ? 'delta-up' : d < 0 ? 'delta-down' : 'delta-flat';
+    document.getElementById('sTotalDelta').innerHTML = `<span class="${cls}">${d>0?'+':''}$${Math.round(Math.abs(d)).toLocaleString()} (${pct>0?'+':''}${pct}%) vs last week</span>`;
+  } else {
+    document.getElementById('sTotalDelta').textContent = 'this week';
+  }
+  document.getElementById('sCountSub').textContent = lw.length ? `${lw.length} last week` : 'this week';
+
+  renderSalesAdvisor('Jack', 'sAdvJackStats', wk);
+  renderSalesAdvisor('Jay', 'sAdvJayStats', wk);
+
+  const brianSales = wk.filter(s => (s.advisor||'').toLowerCase() === 'brian');
+  document.getElementById('sBrianCardWrap').innerHTML = brianSales.length ? `
+    <div class="advisor-card" style="margin-bottom:20px;">
+      <div class="card-label">Advisor</div>
+      <div class="advisor-name-big">BRIAN</div>
+      ${renderSalesAdvisorStatsHTML(brianSales, total)}
+    </div>` : '';
+
+  renderJobTypeBreakdown(wk);
+  renderTransTypeBreakdown(wk);
+  renderSalesTrend();
+  renderSalesLog(wk);
+}
+
+function renderSalesAdvisor(name, elId, allWk) {
+  const mine = allWk.filter(s => (s.advisor||'').toLowerCase() === name.toLowerCase());
+  const total = allWk.reduce((a,b) => a + (b.saleAmount||0), 0);
+  document.getElementById(elId).innerHTML = renderSalesAdvisorStatsHTML(mine, total);
+}
+
+function renderSalesAdvisorStatsHTML(mySales, weekTotal) {
+  if (!mySales.length) return '<div style="font-size:13px;color:var(--text-muted);padding:14px 0 4px;">No sales this week</div>';
+  const myTotal = mySales.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const myCount = mySales.length;
+  const myAro = myCount ? myTotal / myCount : 0;
+  const sharePct = weekTotal ? Math.round((myTotal / weekTotal) * 100) : 0;
+  return `
+    <div class="sales-adv-stats">
+      <div class="sales-adv-stat"><div class="sales-adv-stat-label">Sales</div><div class="sales-adv-stat-val">$${Math.round(myTotal).toLocaleString()}</div></div>
+      <div class="sales-adv-stat"><div class="sales-adv-stat-label">Jobs</div><div class="sales-adv-stat-val">${myCount}</div></div>
+      <div class="sales-adv-stat"><div class="sales-adv-stat-label">ARO</div><div class="sales-adv-stat-val">$${Math.round(myAro).toLocaleString()}</div></div>
+      <div class="sales-adv-stat"><div class="sales-adv-stat-label">Share</div><div class="sales-adv-stat-val">${sharePct}%</div></div>
+    </div>`;
+}
+
+function renderJobTypeBreakdown(wk) {
+  const types = ['Transmission', 'Transmission Service', 'Automotive', 'Other'];
+  const total = wk.reduce((a,b) => a + (b.saleAmount||0), 0);
+  if (!wk.length) {
+    document.getElementById('sJobTypeBreakdown').innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:14px 0;">No sales</div>';
+    return;
+  }
+  const html = types.map(t => {
+    const matched = wk.filter(s => s.jobType === t);
+    const sum = matched.reduce((a,b) => a + (b.saleAmount||0), 0);
+    const pct = total > 0 ? (sum / total) * 100 : 0;
+    return `<div class="jt-bar-row">
+      <div class="jt-bar-label">${t}</div>
+      <div class="jt-bar-track"><div class="jt-bar-fill" style="width:${pct}%"></div></div>
+      <div class="jt-bar-count">${matched.length}</div>
+      <div class="jt-bar-total">$${Math.round(sum).toLocaleString()}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('sJobTypeBreakdown').innerHTML = html;
+}
+
+function renderTransTypeBreakdown(wk) {
+  const types = ['ATR Rebuilt', 'Used Unit', 'New (Dealer)', 'Manual', 'Other', 'N/A'];
+  const total = wk.reduce((a,b) => a + (b.saleAmount||0), 0);
+  if (!wk.length) {
+    document.getElementById('sTransTypeBreakdown').innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:14px 0;">No sales</div>';
+    return;
+  }
+  const rows = types.map(t => {
+    const matched = wk.filter(s => s.transType === t);
+    if (matched.length === 0) return '';
+    const sum = matched.reduce((a,b) => a + (b.saleAmount||0), 0);
+    const pct = total > 0 ? (sum / total) * 100 : 0;
+    return `<div class="jt-bar-row">
+      <div class="jt-bar-label">${t}</div>
+      <div class="jt-bar-track"><div class="jt-bar-fill" style="width:${pct}%;background:var(--blue);"></div></div>
+      <div class="jt-bar-count">${matched.length}</div>
+      <div class="jt-bar-total">$${Math.round(sum).toLocaleString()}</div>
+    </div>`;
+  }).filter(s => s).join('');
+  document.getElementById('sTransTypeBreakdown').innerHTML = rows || '<div style="font-size:13px;color:var(--text-muted);padding:14px 0;">No transmission type data</div>';
+}
+
+function renderSalesTrend() {
+  const data = [];
+  for (let i = 7; i >= 0; i--) {
+    const w = getSalesForWeek(salesWeekOff - i);
+    data.push({
+      label: fmtWkShort(salesWeekOff - i),
+      total: w.reduce((a,b) => a + (b.saleAmount||0), 0),
+      count: w.length
+    });
+  }
+  const canvas = document.getElementById('salesTrendChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.offsetWidth, h = 180;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const maxTotal = Math.max(1, ...data.map(d => d.total));
+  const maxCount = Math.max(1, ...data.map(d => d.count));
+  const padL = 50, padR = 50, padT = 20, padB = 30;
+  const chartW = w - padL - padR, chartH = h - padT - padB;
+  const slot = chartW / data.length;
+  const barW = slot * 0.55;
+
+  ctx.fillStyle = '#3b82f6';
+  data.forEach((d, i) => {
+    const x = padL + slot * i + (slot - barW) / 2;
+    const barH = (d.count / maxCount) * chartH;
+    ctx.fillRect(x, padT + chartH - barH, barW, barH);
+  });
+
+  ctx.strokeStyle = '#22c55e';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  data.forEach((d, i) => {
+    const x = padL + slot * (i + 0.5);
+    const y = padT + chartH - (d.total / maxTotal) * chartH;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  ctx.fillStyle = '#22c55e';
+  data.forEach((d, i) => {
+    const x = padL + slot * (i + 0.5);
+    const y = padT + chartH - (d.total / maxTotal) * chartH;
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle = '#888';
+  ctx.font = '10px DM Mono';
+  ctx.textAlign = 'center';
+  data.forEach((d, i) => {
+    const x = padL + slot * (i + 0.5);
+    ctx.fillText(d.label, x, h - 8);
+  });
+}
+
+function renderSalesLog(wk) {
+  document.getElementById('sLogCount').textContent = wk.length + ' sale' + (wk.length === 1 ? '' : 's') + ' this week';
+  if (!wk.length) {
+    document.getElementById('sLogWrap').innerHTML = '<div class="empty-state"><div class="empty-icon">💰</div><div>No sales recorded for this week</div></div>';
+    return;
+  }
+  const sorted = [...wk].sort((a,b) => {
+    const da = pd(a.dateSold), db = pd(b.dateSold);
+    return (db?db.getTime():0) - (da?da.getTime():0);
+  });
+  const rows = sorted.map(s => {
+    const matched = matchSaleToCall(s);
+    const badge = matched ? '<span class="match-badge matched">MATCHED</span>' : '<span class="match-badge unmatched">NO MATCH</span>';
+    const idx = matched ? allCalls.indexOf(matched) : -1;
+    const onclick = matched ? `onclick="openModal(${idx})"` : '';
+    const cursor = matched ? 'cursor:pointer;' : '';
+    return `<tr ${onclick} style="${cursor}">
+      <td>${esc(fd(s.dateSold))}</td>
+      <td>${esc(s.customerName||'—')}</td>
+      <td>${esc(s.vehicle||'—')}</td>
+      <td>${esc(s.advisor||'—')}</td>
+      <td>${esc(s.jobType||'—')}</td>
+      <td class="sale-amount">$${Math.round(s.saleAmount||0).toLocaleString()}</td>
+      <td>${esc(s.transType||'—')}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('sLogWrap').innerHTML = `
+    <table class="call-table">
+      <thead><tr>
+        <th>Date</th><th>Customer</th><th>Vehicle</th><th>Advisor</th><th>Job Type</th><th>Amount</th><th>Trans Type</th><th>Match</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+// ============================================================================
+// END SALES TAB
+// ============================================================================
+
 </script>
 </body>
 </html>
