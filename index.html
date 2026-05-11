@@ -1113,15 +1113,20 @@ function renderReport() {
     const a=avg(mine.map(c=>c.total)), band=getBand(a), bc=getBandColor(band);
     const hi=Math.max(...mine.map(c=>c.total)), lo=Math.min(...mine.map(c=>c.total));
     const myAppts=mine.filter(c=>c.apptBooked==='Yes').length;
-    // v7: Filter out follow-up calls before picking Best/Worst/Most Improvable.
-    // Follow-ups (same customer phone seen earlier) score badly because the
-    // rubric assumes first-contact intake. They stay in the count and avg, but
-    // don't get pulled for coaching review.
+    // v7.1: Filter out follow-up calls, then select Best + 3 Most Improvable.
+    // The worst call is intentionally DROPPED from coaching — ~90% of the time
+    // the bottom call is a misclassified non-lead (callback on a prior quote,
+    // service-only inquiry that slipped the filter, etc.) and coaching on it
+    // wastes the session. Follow-ups (same customer phone seen earlier) are
+    // also excluded since the rubric assumes first-contact intake.
     const firstContact = mine.filter(isFirstContact);
     const followUpCount = mine.length - firstContact.length;
-    const sorted=[...firstContact].sort((a,b)=>b.total-a.total);
-    const best=sorted[0], worst=sorted[sorted.length-1];
-    const mid=sorted.length>=3?sorted[Math.floor(sorted.length/2)]:null;
+    const sortedDesc=[...firstContact].sort((a,b)=>b.total-a.total);
+    const best=sortedDesc[0]||null;
+    // Most Improvable: middle of the distribution (drop best AND worst), sorted
+    // by lowest score first so coaching tackles biggest gaps first. Capped at 3.
+    const middle=sortedDesc.slice(1,-1);
+    const improvable=[...middle].sort((a,b)=>a.total-b.total).slice(0,3);
     const callItem=(c,color,label)=>{
       const idx=allCalls.indexOf(c);
       return `<div class="call-review-item">
@@ -1150,14 +1155,13 @@ function renderReport() {
         <button class="report-mode-btn deep" id="wkRptBtnDeep-${key}" onclick="genWeeklyAdvisorReport('${name}', ${rptWeekOff}, 'deep')">DEEP DIVE</button>
       </div>
       <div class="report-mode-desc" id="wkRptDesc-${key}">
-        <strong>Quick Review</strong> \u2014 Monday coaching format. Pattern + 3 calls + replacement language. Print and walk through in 20 min.<br>
+        <strong>Quick Review</strong> \u2014 Monday coaching format. Best call + up to 3 most improvable + replacement language. Print and walk through in 20 min.<br>
         <strong>Deep Dive</strong> \u2014 Phase-by-phase educational breakdown. For onboarding or poor call analysis.
       </div>
       <div id="wkRptOut-${key}"></div>
       <div class="modal-section-title" style="margin-top:20px;">Calls to Review</div>
       ${best ? callItem(best,'var(--green)','\ud83c\udfc6 Best Call') : '<div style="font-size:13px;color:var(--text-muted);padding:14px 0;font-style:italic;">No first-contact calls this week to coach on (all calls were follow-ups from existing leads).</div>'}
-      ${best && worst!==best?callItem(worst,'var(--red)','\u26a0 Needs Most Work'):''}
-      ${best && mid&&mid!==best&&mid!==worst?callItem(mid,'var(--amber)','\u2197 Most Improvable'):''}
+      ${improvable.map((c,i)=>callItem(c,'var(--amber)',`\u2197 Most Improvable ${improvable.length>1?'#'+(i+1):''}`.trim())).join('')}
     </div>`;
   }).join('');
   document.getElementById('rptContent').innerHTML=`
@@ -1178,9 +1182,16 @@ async function genWeeklyAdvisorReport(name, wkOff, mode) {
   const outEl=document.getElementById(`wkRptOut-${key}`);
   const scored=getWkCalls(wkOff).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
   if(!scored.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No scored calls for this advisor this week.</div>';return;}
-  const sorted=[...scored].sort((a,b)=>b.total-a.total);
-  const best=sorted[0], worst=sorted[sorted.length-1], mid=sorted.length>=3?sorted[Math.floor(sorted.length/2)]:null;
-  const callsToReport=[best,worst!==best?worst:null,mid&&mid!==best&&mid!==worst?mid:null].filter(Boolean);
+  // v7.1: Apply isFirstContact() here too so the AI narrative skips follow-ups.
+  // Selection: Best + up to 3 Most Improvable. Worst call intentionally dropped
+  // (usually a misclassified non-lead — see renderReport for full rationale).
+  const firstContact=scored.filter(isFirstContact);
+  if(!firstContact.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No first-contact calls this week to coach on (all calls were follow-ups from existing leads).</div>';return;}
+  const sortedDesc=[...firstContact].sort((a,b)=>b.total-a.total);
+  const best=sortedDesc[0]||null;
+  const middle=sortedDesc.slice(1,-1);
+  const improvable=[...middle].sort((a,b)=>a.total-b.total).slice(0,3);
+  const callsToReport=[best,...improvable].filter(Boolean);
   const txAvailable=callsToReport.filter(c=>getTx(c).length>50);
   if(!txAvailable.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcripts available for these calls. Cannot generate report.</div>';return;}
   btnQuick.disabled=true; btnDeep.disabled=true;
@@ -1198,7 +1209,13 @@ async function genWeeklyAdvisorReport(name, wkOff, mode) {
   const lwScored=getWkCalls(wkOff-1).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
   const lwA=lwScored.length?avg(lwScored.map(c=>c.total)):null;
 
-  const callLabels=['BEST CALL','WORST CALL','MOST IMPROVABLE CALL'];
+  // v7.1: labels match new selection (best + up to 3 most improvable). Built
+  // dynamically so the label always matches the actual call index.
+  const callLabels=callsToReport.map((c,i)=>{
+    if(i===0) return 'BEST CALL';
+    if(callsToReport.length===2) return 'MOST IMPROVABLE CALL';
+    return `MOST IMPROVABLE CALL #${i}`;
+  });
   const callReports=[];
 
   try {
@@ -1271,7 +1288,7 @@ PHASE 3 - DELIVERING PRICE (${c.phase3||'?'}/3.0)
 [Same format. Was value stated before price? Was the confirmation hook used? Bridge question? How was a competing quote handled if applicable? Explain the sandwich method and why each element matters.]
 
 PHASE 4 - CLOSING (${c.phase4||'?'}/2.0)
-[Same format. Was a two-choice close attempted? Were specific times offered? Was a callback number captured? Explain why "let me know" is a lost lead.]
+[Same format. Was a two-choice close attempted? Were specific times offered? Was the customer's first name used in the close? Explain why "let me know" is a lost lead. Note: do NOT coach on capturing the phone number — ATR uses CallerID, so the phone is captured automatically regardless of what the advisor says.]
 
 KEY COACHING FLAGS:
 [2-3 most impactful flags, each with:]
@@ -1575,9 +1592,10 @@ CLOSING RULES
 - For leads where advisor promised a callback: end with a question instead.
 
 WARRANTY
-- ATR warranty is 1 year unlimited miles in writing.
+- ATR warranty is 3 years unlimited miles in writing.
 - Only mention if directly relevant to the customer's concern.
 - Never lead with the warranty.
+- If the customer is comparing shops or worried about durability, the warranty is the strongest trust signal — nobody in the valley offers 3 years with no mileage cap.
 
 FINANCING
 - ATR uses Snap Finance and EasyPay.
@@ -1594,11 +1612,33 @@ async function claudeCall(userMsg, maxTokens=1500, systemOverride=null) {
       max_tokens:maxTokens,
       system:systemOverride||`You are the ATR Call Intelligence AI for Advanced Transmission Repair, Phoenix AZ. You score calls using the ATR Sales Playbook.
 
-4-PHASE FRAMEWORK:
+SCOREABLE vs NON-SCOREABLE \u2014 CHECK THIS FIRST.
+Only score calls where a new or potential customer is inquiring about a transmission PROBLEM, REPAIR, or REBUILD (slipping, shuddering, not moving, warning light, noise, leak, etc.), or where the advisor is making a first-time outbound sales contact to a fresh lead.
+
+NOT SCOREABLE \u2014 do not score these. Mention in your reasoning that the call is non-scoreable, do not run the 4-phase rubric:
+1. Wrong number, vendor, supplier, or spam
+2. Employee or internal call
+3. Existing customer checking on a vehicle currently in shop
+4. Existing customer scheduling a known appointment for a job already quoted
+5. Warranty return \u2014 customer calling about a prior ATR repair
+6. Transmission SERVICE only (fluid change, flush, filter) with NO problem or symptom
+7. General automotive inquiry \u2014 not transmission (brakes, engine, AC, electrical)
+8. Customer calling back to accept or decline a previously given quote
+9. Call where no transmission repair or rebuild need is ever discussed
+10. Call under 60 seconds with insufficient conversation to evaluate
+11. CALLBACK ON A PRIOR QUOTE about financing status, scheduling, rescheduling, towing logistics, deposit, or any follow-up question on a quote already given \u2014 NOT scoreable even if the advisor mentions value, warranty, or attempts to close. These are logistics calls, not sales calls.
+
+Edge cases that ARE scoreable: a caller who starts with a service request but reveals a symptom (problem takes priority); a caller mentioning both service and a problem.
+
+4-PHASE FRAMEWORK (only if scoreable):
 Phase 1 \u2014 Establish Control (2.5pts): Professional greeting, get name within 30 seconds, redirect to diagnostics before price.
 Phase 2 \u2014 Diagnostic Questions (2.5pts): 5 questions before price \u2014 year/make/model, mileage, symptoms, prior diagnosis, CEL. Summarize back. Name specific transmission model.
-Phase 3 \u2014 Delivering Price (3.0pts): Sandwich \u2014 value first, price range (parts/labor/fluids), reassurance bridge. Confirmation Hook: "We can get that down to an exact number once we get eyes on it \u2014 the diagnostic is free and takes about an hour." Bridge question IMMEDIATELY after price. Never apologize. Competing quote: educate don't discount. Financing: never quote monthly payment before application. 7 criteria.
-Phase 4 \u2014 Closing (2.0pts): Alternative-choice close with two specific times. Get name and number. Committed next action.
+Phase 3 \u2014 Delivering Price (3.0pts): Sandwich \u2014 value first, price range (parts/labor/fluids), reassurance bridge. Warranty stated as 3 YEARS, UNLIMITED MILES, IN WRITING. Confirmation Hook: "We can get that down to an exact number once we get eyes on it \u2014 the diagnostic is free and takes about an hour." Bridge question IMMEDIATELY after price. Never apologize. Competing quote: educate don't discount. Financing: never quote monthly payment before application. 7 criteria.
+Phase 4 \u2014 Closing (2.0pts): Alternative-choice close with two specific times. Get the customer's first name and use it. Committed next action.
+
+PHONE NUMBER CAPTURE \u2014 DO NOT COACH ON THIS. ATR uses CallerID; the phone is captured automatically by the phone system regardless of what the advisor does. Never flag "capture callback number" or "ask for phone number" as a coaching opportunity. Do not deduct points for not asking for a phone number.
+
+WARRANTY \u2014 The current ATR warranty is 3 YEARS, UNLIMITED MILES, IN WRITING (live since May 2026; previous 1yr/unlimited is retired). Any mention of "1 year warranty" by the advisor is INCORRECT and should be flagged as a coaching opportunity to update their language to "3 years, unlimited miles."
 
 SCORING: Elite 9.0+, Strong 7.5-8.9, Developing 6.0-7.4, Needs Work 4.0-5.9, Poor 0-3.9.
 Show work: list each criterion with raw score (0/0.5/1/2), sum raw points, show scaling to phase max, apply deductions.
