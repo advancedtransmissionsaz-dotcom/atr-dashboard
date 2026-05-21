@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v7</title>
+<title>ATR Call Intelligence v7.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -702,6 +702,22 @@ function isFirstContact(call) {
   return !earlierWithSamePhone;
 }
 
+// v7.2: Detect the "JT pattern" — appointment booked successfully without any
+// price discussion because the customer never asked. The scoring rubric scores
+// Phase 3 as zero (accurate — no price was delivered), but the call is NOT a
+// coaching opportunity. The advisor's choice to skip price was correct.
+// The v3.2 scoring prompt tags these with APPT_WITHOUT_PRICE in the flags array.
+function isApptWithoutPriceCall(call) {
+  if (!call.flags) return false;
+  return call.flags.split(',').some(f => f.trim().toUpperCase() === 'APPT_WITHOUT_PRICE');
+}
+
+// v7.2: Combined coaching-eligibility filter. A call is coachable if it's a
+// first-contact intake AND it's not an appt-booked-without-price call.
+function isCoachable(call) {
+  return isFirstContact(call) && !isApptWithoutPriceCall(call);
+}
+
 // RENDER ALL
 function renderAll() { renderWeek(); renderLog(); renderReport(); renderSales(); }
 
@@ -1117,11 +1133,21 @@ function renderReport() {
     // The worst call is intentionally DROPPED from coaching — ~90% of the time
     // the bottom call is a misclassified non-lead (callback on a prior quote,
     // service-only inquiry that slipped the filter, etc.) and coaching on it
-    // wastes the session. Follow-ups (same customer phone seen earlier) are
-    // also excluded since the rubric assumes first-contact intake.
-    const firstContact = mine.filter(isFirstContact);
-    const followUpCount = mine.length - firstContact.length;
-    const sortedDesc=[...firstContact].sort((a,b)=>b.total-a.total);
+    // wastes the session.
+    // v7.2: Also exclude APPT_WITHOUT_PRICE calls (the "JT pattern") — appts
+    // booked successfully without any price discussion because the customer
+    // never asked. Phase 3 scores low and is accurate, but the call isn't a
+    // coaching opportunity.
+    const coachable = mine.filter(isCoachable);
+    const followUpCount = mine.filter(c => !isFirstContact(c)).length;
+    const apptNoPriceCount = mine.filter(c => isFirstContact(c) && isApptWithoutPriceCall(c)).length;
+    const excludedNote = (() => {
+      const parts = [];
+      if (followUpCount > 0) parts.push(`${followUpCount} follow-up${followUpCount===1?'':'s'}`);
+      if (apptNoPriceCount > 0) parts.push(`${apptNoPriceCount} appt-without-price`);
+      return parts.length ? ` · ${parts.join(' + ')} excluded from coaching` : '';
+    })();
+    const sortedDesc=[...coachable].sort((a,b)=>b.total-a.total);
     const best=sortedDesc[0]||null;
     // Most Improvable: middle of the distribution (drop best AND worst), sorted
     // by lowest score first so coaching tackles biggest gaps first. Capped at 3.
@@ -1142,7 +1168,7 @@ function renderReport() {
     // CHANGE #1: Two report mode buttons instead of single generate button
     return `<div class="wrc">
       <div class="wrc-header">
-        <div><div class="wrc-name">${name}</div><div style="font-size:12px;color:var(--text-muted);">${mine.length} calls \u00b7 ${myAppts} appts \u00b7 ${Math.round(myAppts/mine.length*100)}% booking rate${followUpCount > 0 ? ` \u00b7 ${followUpCount} follow-up${followUpCount===1?'':'s'} excluded from coaching` : ''}</div></div>
+        <div><div class="wrc-name">${name}</div><div style="font-size:12px;color:var(--text-muted);">${mine.length} calls \u00b7 ${myAppts} appts \u00b7 ${Math.round(myAppts/mine.length*100)}% booking rate${excludedNote}</div></div>
         <div style="text-align:right;"><div class="wrc-score" style="color:${bc}">${a.toFixed(1)}</div><div style="font-size:11px;font-weight:600;letter-spacing:2px;color:${bc};text-transform:uppercase;">${band}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:20px;">
@@ -1160,7 +1186,7 @@ function renderReport() {
       </div>
       <div id="wkRptOut-${key}"></div>
       <div class="modal-section-title" style="margin-top:20px;">Calls to Review</div>
-      ${best ? callItem(best,'var(--green)','\ud83c\udfc6 Best Call') : '<div style="font-size:13px;color:var(--text-muted);padding:14px 0;font-style:italic;">No first-contact calls this week to coach on (all calls were follow-ups from existing leads).</div>'}
+      ${best ? callItem(best,'var(--green)','\ud83c\udfc6 Best Call') : '<div style="font-size:13px;color:var(--text-muted);padding:14px 0;font-style:italic;">No coachable calls this week (all were follow-ups or appointments booked without price discussion).</div>'}
       ${improvable.map((c,i)=>callItem(c,'var(--amber)',`\u2197 Most Improvable ${improvable.length>1?'#'+(i+1):''}`.trim())).join('')}
     </div>`;
   }).join('');
@@ -1183,11 +1209,12 @@ async function genWeeklyAdvisorReport(name, wkOff, mode) {
   const scored=getWkCalls(wkOff).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
   if(!scored.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No scored calls for this advisor this week.</div>';return;}
   // v7.1: Apply isFirstContact() here too so the AI narrative skips follow-ups.
+  // v7.2: Also apply the APPT_WITHOUT_PRICE filter via isCoachable.
   // Selection: Best + up to 3 Most Improvable. Worst call intentionally dropped
   // (usually a misclassified non-lead — see renderReport for full rationale).
-  const firstContact=scored.filter(isFirstContact);
-  if(!firstContact.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No first-contact calls this week to coach on (all calls were follow-ups from existing leads).</div>';return;}
-  const sortedDesc=[...firstContact].sort((a,b)=>b.total-a.total);
+  const coachable=scored.filter(isCoachable);
+  if(!coachable.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No coachable calls this week (all were follow-ups or appointments booked without price discussion).</div>';return;}
+  const sortedDesc=[...coachable].sort((a,b)=>b.total-a.total);
   const best=sortedDesc[0]||null;
   const middle=sortedDesc.slice(1,-1);
   const improvable=[...middle].sort((a,b)=>a.total-b.total).slice(0,3);
@@ -1261,6 +1288,8 @@ RULES:
 - Write replacement language using the ACTUAL customer name, vehicle, and symptom from this call
 - Tone: direct, constructive, like a coach who wants this advisor to win
 - Keep it tight - this gets printed and discussed in 20 minutes
+- The close standard is securing a specific committed time to come in for the free diagnostic — any natural phrasing counts. Only flag the close if it was left open-ended (no scripted two-choice required).
+- Do not flag warranty wording. Trust the advisor's warranty call.
 
 TRANSCRIPT:
 ${truncTx}`;
@@ -1288,7 +1317,7 @@ PHASE 3 - DELIVERING PRICE (${c.phase3||'?'}/3.0)
 [Same format. Was value stated before price? Was the confirmation hook used? Bridge question? How was a competing quote handled if applicable? Explain the sandwich method and why each element matters.]
 
 PHASE 4 - CLOSING (${c.phase4||'?'}/2.0)
-[Same format. Was a two-choice close attempted? Were specific times offered? Was the customer's first name used in the close? Explain why "let me know" is a lost lead. Note: do NOT coach on capturing the phone number — ATR uses CallerID, so the phone is captured automatically regardless of what the advisor says.]
+[Same format. Did the advisor ask for the appointment and land on a SPECIFIC committed next step — the standard is offering to get the vehicle in for the free diagnostic at a specific time? Any natural phrasing counts; a scripted two-choice close is NOT required or preferred. Explain why leaving it open ("let me know," "call me back") is a lost lead. Note: do NOT coach on capturing the phone number — ATR uses CallerID, so the phone is captured automatically regardless of what the advisor says.]
 
 KEY COACHING FLAGS:
 [2-3 most impactful flags, each with:]
@@ -1320,19 +1349,28 @@ ${truncTx}`;
     }
 
     // Generate THIS WEEK'S FOCUS for Quick Review (after all calls analyzed)
+    // v7.3: Ground the focus in REAL frequency across ALL coachable calls, not an
+    // impression from the 3-4 spotlight reports. Averages phase scores and counts
+    // flags so the headline pattern survives an advisor's pushback ("that's just my
+    // 3 worst calls"). Also names one genuine strength to keep.
     let weekFocus = '';
     if (mode === 'quick') {
       try {
-        const focusPrompt = `You are analyzing ${name}'s calls this week at Advanced Transmission Repair. Based on these coaching reports, identify the SINGLE biggest pattern across all calls.
+        const nC = coachable.length;
+        const pAvg = p => avg(coachable.map(c => +c[p] || 0)).toFixed(1);
+        const flagCounts = {};
+        coachable.forEach(c => (c.flags || '').split(',').map(f => f.trim()).filter(Boolean)
+          .forEach(f => { flagCounts[f] = (flagCounts[f] || 0) + 1; }));
+        const topFlags = Object.entries(flagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6)
+          .map(([f, n]) => `"${f}" on ${n} of ${nC}`).join('; ') || 'none recorded';
+        const focusPrompt = `You are writing the "THIS WEEK'S FOCUS" for ${name}'s coaching report at Advanced Transmission Repair. Ground EVERY claim in the data below. Do NOT generalize from a handful of calls — use the real frequency numbers so the advisor cannot dismiss it as cherry-picking.
 
-Write 2-3 specific sentences. Reference actual call data — number of calls, specific behaviors observed, where the money is walking out. Do NOT use placeholders or punt with "see below." Be direct and specific.
+DATA ACROSS ALL ${nC} COACHABLE CALLS THIS WEEK (follow-ups and appointment-without-price already excluded):
+- Average phase scores: Phase 1 Control ${pAvg('phase1')}/2.5, Phase 2 Diagnostic ${pAvg('phase2')}/2.5, Phase 3 Price ${pAvg('phase3')}/3.0, Phase 4 Close ${pAvg('phase4')}/2.0
+- Most frequent coaching flags: ${topFlags}
+- Booking rate: ${myAppts} of ${scored.length} calls booked an appointment
 
-Example of good output: "${name} is losing customers at the close. 3 of ${scored.length} calls ended with 'I'll call you back' instead of a booked appointment. The diagnostic questions and price delivery are improving — the close is where the money is walking out the door."
-
-Here are the coaching reports from this week's calls:
-${callReports.join('\n---\n')}
-
-Write ONLY the 2-3 sentence focus summary. No headers, no labels, no preamble.`;
+Pick the SINGLE highest-leverage pattern, ranked by frequency and by phase value (Phase 3 price and Phase 4 close move booking the most). State the REAL frequency in the sentence (e.g., "the close was left open on 9 of ${nC} calls" or "Phase 3 averaged ${pAvg('phase3')}/3.0"). Then name ONE genuine strength worth keeping. 3-4 sentences, direct and specific. No placeholders, no "see below."`;
         weekFocus = await claudeCall(focusPrompt, 500);
       } catch(e) { weekFocus = 'Could not generate focus summary.'; }
     }
@@ -1634,11 +1672,15 @@ Edge cases that ARE scoreable: a caller who starts with a service request but re
 Phase 1 \u2014 Establish Control (2.5pts): Professional greeting, get name within 30 seconds, redirect to diagnostics before price.
 Phase 2 \u2014 Diagnostic Questions (2.5pts): 5 questions before price \u2014 year/make/model, mileage, symptoms, prior diagnosis, CEL. Summarize back. Name specific transmission model.
 Phase 3 \u2014 Delivering Price (3.0pts): Sandwich \u2014 value first, price range (parts/labor/fluids), reassurance bridge. Warranty stated as 3 YEARS, UNLIMITED MILES, IN WRITING. Confirmation Hook: "We can get that down to an exact number once we get eyes on it \u2014 the diagnostic is free and takes about an hour." Bridge question IMMEDIATELY after price. Never apologize. Competing quote: educate don't discount. Financing: never quote monthly payment before application. 7 criteria.
-Phase 4 \u2014 Closing (2.0pts): Alternative-choice close with two specific times. Get the customer's first name and use it. Committed next action.
+Phase 4 \u2014 Closing (2.0pts): Score the OUTCOME, not the script. The standard close is offering to get the vehicle in for the free diagnostic at a specific time (today/tomorrow). Any natural phrasing that lands a SPECIFIC committed next step counts \u2014 a scripted two-choice ("Tuesday at 9 or Thursday at 2") is NOT required and not preferred. Get and use the customer's first name. Flag the close ONLY when it was left open-ended ("let me know," "call me back," "come by whenever").
 
 PHONE NUMBER CAPTURE \u2014 DO NOT COACH ON THIS. ATR uses CallerID; the phone is captured automatically by the phone system regardless of what the advisor does. Never flag "capture callback number" or "ask for phone number" as a coaching opportunity. Do not deduct points for not asking for a phone number.
 
-WARRANTY \u2014 The current ATR warranty is 3 YEARS, UNLIMITED MILES, IN WRITING (live since May 2026; previous 1yr/unlimited is retired). Any mention of "1 year warranty" by the advisor is INCORRECT and should be flagged as a coaching opportunity to update their language to "3 years, unlimited miles."
+APPOINTMENT-WITHOUT-PRICE CLASSIFICATION (v3.2). Some calls book successfully without any price discussion \u2014 the customer confirms capability, asks logistics, and books, never asking what it costs. In those cases skipping price was usually the right move. Flag these calls by including "APPT_WITHOUT_PRICE" as one of the entries in the `flags` array when ALL of: (1) appointment was booked, (2) customer never asked about price/cost/estimate/quote, (3) advisor never delivered a price, (4) customer was moving toward action (not stalling or comparison-shopping). Phase 3 still scores as observed \u2014 this flag is metadata only. The dashboard uses it to exclude these calls from the "Most Improvable" coaching pool.
+
+WARRANTY \u2014 ATR's standard rebuild warranty is 3 years, unlimited miles, in writing. Do NOT flag, coach, or deduct on warranty wording \u2014 warranty terms vary by job type (rebuild vs used unit vs general repair) and the advisor is trusted to state the correct warranty for the situation.
+
+OFFERED ALTERNATIVE UNPROMPTED \u2014 If the advisor proactively offers a used unit, dealer/"new" unit, or a cheaper alternative the customer did NOT ask about first, include "OFFERED_ALTERNATIVE_UNPROMPTED" in the flags array and treat it as a coaching opportunity: it steers the customer off the high-margin rebuild and undercuts the warranty. Only when the customer did not raise the alternative. This is a coaching flag, not an automatic point deduction.
 
 SCORING: Elite 9.0+, Strong 7.5-8.9, Developing 6.0-7.4, Needs Work 4.0-5.9, Poor 0-3.9.
 Show work: list each criterion with raw score (0/0.5/1/2), sum raw points, show scaling to phase max, apply deductions.
