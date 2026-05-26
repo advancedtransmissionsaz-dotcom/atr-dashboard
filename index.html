@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v7.3</title>
+<title>ATR Call Intelligence v7.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -68,16 +68,24 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .week-nav-sub { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; text-align: center; }
 
 /* STATS */
-.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+.stats-row.stats-row-6 { grid-template-columns: repeat(6, 1fr); }
 .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; position: relative; overflow: hidden; }
 .stat-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--border); }
 .stat-card.red::after { background: var(--red); }
 .stat-card.green::after { background: var(--green); }
 .stat-card.amber::after { background: var(--amber); }
 .stat-card.blue::after { background: var(--blue); }
+.stat-card.violet::after { background: #7c5cff; }
+.stat-card.cyan::after { background: #06b6d4; }
 .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-family: 'DM Mono', monospace; }
 .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 1px; line-height: 1; }
 .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.stat-12mo { font-size: 10px; color: var(--text-muted); opacity: 0.7; margin-top: 4px; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.sales-adv-conv-row { display: flex; align-items: baseline; gap: 10px; padding: 10px 12px; background: var(--surface2); border-top: 1px solid var(--border); margin-top: 1px; font-family: 'DM Mono', monospace; }
+.sales-adv-conv-row .conv-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+.sales-adv-conv-row .conv-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; color: var(--text); }
+.sales-adv-conv-row .conv-roll { font-size: 11px; color: var(--text-muted); margin-left: auto; }
 .delta-up { color: var(--green); } .delta-down { color: var(--red); } .delta-flat { color: var(--text-muted); }
 
 /* ADVISOR CARDS */
@@ -85,7 +93,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .advisor-name-big { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; margin-bottom: 2px; }
 .advisor-score-big { font-family: 'Bebas Neue', sans-serif; font-size: 64px; line-height: 1; margin: 6px 0 4px; }
 .advisor-band-lbl { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
-.advisor-sub-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.advisor-sub-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
 .advisor-sub-stat { background: var(--surface2); padding: 8px 12px; }
 .advisor-sub-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
 .advisor-sub-val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; margin-top: 2px; }
@@ -358,9 +366,11 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 <button class="week-nav-btn now" onclick="goNow()">THIS WEEK</button>
 <button class="week-nav-btn" onclick="changeWeek(1)">NEXT &rarr;</button>
 </div>
-<div class="stats-row">
+<div class="stats-row stats-row-6">
 <!-- CHANGE #2: Jack/Jay tiles now show call count, not avg score -->
 <div class="stat-card red"><div class="stat-label">Calls Scored</div><div class="stat-value" id="wkTotal">&mdash;</div><div class="stat-sub" id="wkTotalSub">this week</div></div>
+<div class="stat-card violet"><div class="stat-label">Calls / Working Day</div><div class="stat-value" id="wkPerDay">&mdash;</div><div class="stat-sub" id="wkPerDaySub">vs ~8/day target</div></div>
+<div class="stat-card cyan"><div class="stat-label">Appts Booked</div><div class="stat-value" id="wkAppts">&mdash;</div><div class="stat-sub" id="wkApptsSub">booking rate</div></div>
 <div class="stat-card green"><div class="stat-label">Week Avg</div><div class="stat-value" id="wkAvg">&mdash;</div><div class="stat-sub" id="wkAvgDelta">vs last week</div></div>
 <div class="stat-card amber"><div class="stat-label">Jack This Week</div><div class="stat-value" id="wkJack">&mdash;</div><div class="stat-sub" id="wkJackSub">&mdash;</div></div>
 <div class="stat-card blue"><div class="stat-label">Jay This Week</div><div class="stat-value" id="wkJay">&mdash;</div><div class="stat-sub" id="wkJaySub">&mdash;</div></div>
@@ -387,7 +397,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 </div>
 <div class="two-col">
 <div class="card">
-<div class="card-header"><div class="card-title">8-Week Trend</div><div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">&#9642; calls &nbsp; &mdash; avg score</div></div>
+<div class="card-header"><div class="card-title">8-Week Trend</div><div style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;">&#9642; calls &nbsp; &mdash; avg score &nbsp; <span style="color:#7c5cff;">&#8210;&#8210; avg volume</span></div></div>
 <div class="trend-container"><canvas id="trendChart"></canvas></div>
 </div>
 <div class="card">
@@ -509,10 +519,12 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 <button class="week-nav-btn" onclick="changeSalesWeek(1)">NEXT &rarr;</button>
 </div>
 
-<div class="stats-row">
-<div class="stat-card green"><div class="stat-label">Sales Total</div><div class="stat-value" id="sTotal">&mdash;</div><div class="stat-sub" id="sTotalDelta">&mdash;</div></div>
-<div class="stat-card blue"><div class="stat-label">Sale Count</div><div class="stat-value" id="sCount">&mdash;</div><div class="stat-sub" id="sCountSub">&mdash;</div></div>
-<div class="stat-card amber"><div class="stat-label">Avg Repair Order</div><div class="stat-value" id="sARO">&mdash;</div><div class="stat-sub">per sold job</div></div>
+<div class="stats-row stats-row-6">
+<div class="stat-card green"><div class="stat-label">Sales Total</div><div class="stat-value" id="sTotal">&mdash;</div><div class="stat-sub" id="sTotalDelta">&mdash;</div><div class="stat-12mo" id="sTotal12mo"></div></div>
+<div class="stat-card blue"><div class="stat-label">Sale Count</div><div class="stat-value" id="sCount">&mdash;</div><div class="stat-sub" id="sCountSub">&mdash;</div><div class="stat-12mo" id="sCount12mo"></div></div>
+<div class="stat-card cyan"><div class="stat-label">Trans Sales</div><div class="stat-value" id="sTrans">&mdash;</div><div class="stat-sub" id="sTransSub">&mdash;</div><div class="stat-12mo" id="sTrans12mo"></div></div>
+<div class="stat-card violet"><div class="stat-label">Trans Conversion</div><div class="stat-value" id="sConv">&mdash;</div><div class="stat-sub" id="sConvSub">4-wk rolling</div><div class="stat-12mo" id="sConv12mo"></div></div>
+<div class="stat-card amber"><div class="stat-label">Avg Repair Order</div><div class="stat-value" id="sARO">&mdash;</div><div class="stat-sub">per sold job</div><div class="stat-12mo" id="sARO12mo"></div></div>
 <div class="stat-card red"><div class="stat-label">Bridged to Calls</div><div class="stat-value" id="sBridged">&mdash;</div><div class="stat-sub">phone match in scored calls</div></div>
 </div>
 
@@ -685,6 +697,74 @@ function fd(str) { if(!str) return '\u2014'; try { return new Date(str).toLocale
 function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
 function avg2(calls,f) { const v=calls.map(c=>c[f]).filter(x=>x!==null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }
 
+// v7.4: ISO 8601 week number for a given date (week containing the Thursday).
+function isoWeekNum(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = (date.getUTCDay() + 6) % 7;
+  date.setUTCDate(date.getUTCDate() - dayNum + 3);
+  const firstThursday = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
+  const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
+  firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
+  return 1 + Math.round((date - firstThursday) / (7 * 24 * 3600 * 1000));
+}
+
+// v7.4: Working days (Mon-Fri) elapsed in a week. Shop closed Sat/Sun. Current
+// week counts weekdays up to today so a partial week is judgeable mid-week.
+function workingDaysElapsed(off) {
+  if (off !== 0) return 5;
+  const s = getWkStart(off);
+  const today = new Date(); today.setHours(0,0,0,0);
+  let count = 0;
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(s); d.setDate(s.getDate() + i); d.setHours(0,0,0,0);
+    if (d <= today) count++;
+  }
+  return Math.max(count, 1);
+}
+
+// v7.5: Scored qualified leads for a given week (optional advisor filter).
+function getScoredCallsForWeek(off, advisor) {
+  return getWkCalls(off).filter(c => c.total !== null && (!advisor || (c.advisor||'').toLowerCase().includes(advisor.toLowerCase())));
+}
+
+// v7.5: Primary transmission sales (Job Type = "Transmission" only — excludes
+// Transmission Service, Automotive, Other) for a given week (optional advisor filter).
+function getTransSalesForWeek(off, advisor) {
+  return getSalesForWeek(off).filter(s => s.isPrimary && s.jobType === 'Transmission'
+    && (!advisor || (s.advisor||'').toLowerCase() === advisor.toLowerCase()));
+}
+
+// v7.5: Conversion % for one week. Returns null when no scored calls (avoids div/0).
+// Note: leads and sales in the same week don't perfectly correspond — same lead may
+// close in a later week. This is fine in aggregate; use rolling for the real signal.
+function convPctWeek(off, advisor) {
+  const calls = getScoredCallsForWeek(off, advisor).length;
+  const sales = getTransSalesForWeek(off, advisor).length;
+  return calls > 0 ? (sales / calls) * 100 : null;
+}
+
+// v7.5: Conversion % rolling over N weeks ending at off (inclusive). Sums numerators
+// and denominators across weeks rather than averaging weekly ratios — smoother.
+function convPctRolling(off, weeks, advisor) {
+  let calls = 0, sales = 0;
+  for (let i = off - weeks + 1; i <= off; i++) {
+    calls += getScoredCallsForWeek(i, advisor).length;
+    sales += getTransSalesForWeek(i, advisor).length;
+  }
+  return calls > 0 ? (sales / calls) * 100 : null;
+}
+
+// v7.5: Trailing 12-month windows — anchored to today, not selected week.
+// Used for the small grey footer on Sales tiles and Conversion tile.
+function getLast12MoSales() {
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 365);
+  return allSales.filter(s => { const d = pd(s.dateSold); return d && d >= cutoff; });
+}
+function getLast12MoScoredCalls() {
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 365);
+  return allCalls.filter(c => { if (c.total === null) return false; const d = pd(c.date); return d && d >= cutoff; });
+}
+
 // v7: Detect if a call is the customer's FIRST contact (vs a follow-up).
 // Returns true if no earlier call exists with the same phone number.
 // Used to filter follow-ups (financing check-ins, scheduling callbacks) out of
@@ -725,7 +805,8 @@ function renderAll() { renderWeek(); renderLog(); renderReport(); renderSales();
 function goNow() { weekOff=0; renderWeek(); }
 function changeWeek(d) { weekOff+=d; renderWeek(); }
 function renderWeek() {
-  document.getElementById('weekLabel').textContent = fmtWkLabel(weekOff);
+  // v7.4: ISO week number alongside the date range (team refers to weeks by number).
+  document.getElementById('weekLabel').textContent = fmtWkLabel(weekOff) + ' \u00b7 Wk ' + isoWeekNum(getWkStart(weekOff));
   document.getElementById('weekSub').textContent = weekOff===0?'Current Week':weekOff===-1?'Last Week':`${Math.abs(weekOff)} weeks ${weekOff<0?'ago':'ahead'}`;
   const wk = getWkCalls(weekOff).filter(c=>c.total!==null);
   const pw = getWkCalls(weekOff-1).filter(c=>c.total!==null);
@@ -736,6 +817,46 @@ function renderWeek() {
   if (wkA && pwA) {
     const d = wkA-pwA, cls = d>0?'delta-up':d<0?'delta-down':'delta-flat', sign = d>0?'+':'';
     document.getElementById('wkAvgDelta').innerHTML = `<span class="${cls}">${sign}${d.toFixed(1)} vs last week</span>`;
+  } else {
+    document.getElementById('wkAvgDelta').textContent = 'vs last week';
+  }
+
+  // v7.4: Week-over-week % change in qualified-lead (scored-call) volume.
+  const wtSub = document.getElementById('wkTotalSub');
+  if (pw.length > 0) {
+    const pct = ((wk.length - pw.length) / pw.length) * 100;
+    const cls = pct>0?'delta-up':pct<0?'delta-down':'delta-flat', sign = pct>0?'+':'';
+    wtSub.innerHTML = `<span class="${cls}">${sign}${Math.round(pct)}% vs last week</span>`;
+  } else {
+    wtSub.textContent = 'this week';
+  }
+
+  // v7.4: Average qualified leads per working day (Mon-Fri; shop closed Sat/Sun),
+  // over working-days-elapsed so a partial week is judgeable mid-week. Target ~8/day.
+  const wdays = workingDaysElapsed(weekOff);
+  const perDay = wk.length / wdays;
+  const perDayEl = document.getElementById('wkPerDay');
+  const perDaySubEl = document.getElementById('wkPerDaySub');
+  if (wk.length > 0 || weekOff <= 0) {
+    perDayEl.textContent = perDay.toFixed(1);
+    const cls = perDay>=8?'delta-up':perDay>=6?'delta-flat':'delta-down';
+    const elapsedNote = weekOff===0 ? ` \u00b7 ${wdays} of 5 days` : '';
+    perDaySubEl.innerHTML = `<span class="${cls}">vs ~8/day target${elapsedNote}</span>`;
+  } else {
+    perDayEl.textContent = '\u2014';
+    perDaySubEl.textContent = 'vs ~8/day target';
+  }
+
+  // v7.5: Appointments booked this week + booking rate (appts / scored calls).
+  const appts = wk.filter(c => c.apptBooked === 'Yes').length;
+  document.getElementById('wkAppts').textContent = appts;
+  const apptsSub = document.getElementById('wkApptsSub');
+  if (wk.length > 0) {
+    const rate = (appts / wk.length) * 100;
+    const cls = rate>=50?'delta-up':rate>=35?'delta-flat':'delta-down';
+    apptsSub.innerHTML = `<span class="${cls}">${Math.round(rate)}% booking rate</span>`;
+  } else {
+    apptsSub.textContent = 'booking rate';
   }
   const jackW = wk.filter(c=>(c.advisor||'').toLowerCase().includes('jack'));
   const jayW = wk.filter(c=>(c.advisor||'').toLowerCase().includes('jay'));
@@ -776,9 +897,13 @@ function renderAdvisorCard(key, name, wkScored) {
   bigEl.style.color = bc;
   const bandEl = document.getElementById(key+'BandLbl');
   bandEl.textContent = band; bandEl.style.color = bc;
+  // v7.5: Appts booked this week by this advisor + booking rate
+  const myAppts = mine.filter(c => c.apptBooked === 'Yes').length;
+  const myBookRate = mine.length ? Math.round((myAppts / mine.length) * 100) : null;
   document.getElementById(key+'SubStats').innerHTML = `
     <div class="advisor-sub-stat"><div class="advisor-sub-label">Last Week</div><div class="advisor-sub-val" style="color:${lwA?(lwA>=(a||0)?'var(--green)':'var(--amber)'):'var(--text-muted)'}">${lwA?lwA.toFixed(1):'\u2014'}</div></div>
-    <div class="advisor-sub-stat"><div class="advisor-sub-label">60-Day Avg</div><div class="advisor-sub-val">${r60A?r60A.toFixed(1):'\u2014'}</div></div>`;
+    <div class="advisor-sub-stat"><div class="advisor-sub-label">60-Day Avg</div><div class="advisor-sub-val">${r60A?r60A.toFixed(1):'\u2014'}</div></div>
+    <div class="advisor-sub-stat"><div class="advisor-sub-label">Appts</div><div class="advisor-sub-val">${myAppts}${myBookRate!==null?` <span style="font-size:11px;color:var(--text-muted);">(${myBookRate}%)</span>`:''}</div></div>`;
   if (mine.length) {
     const p1=avg2(mine,'phase1'), p2=avg2(mine,'phase2'), p3=avg2(mine,'phase3'), p4=avg2(mine,'phase4');
     document.getElementById(key+'Bars').innerHTML = mBar('Phase 1',p1,2.5)+mBar('Phase 2',p2,2.5)+mBar('Phase 3',p3,3.0)+mBar('Phase 4',p4,2.0);
@@ -855,6 +980,17 @@ function renderTrend() {
   ctx.strokeStyle='#222'; ctx.lineWidth=1;
   [0,.25,.5,.75,1].forEach(f=>{ const y=pad.t+ch*f; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke(); });
   weeks.forEach((wk,i)=>{ const x=pad.l+i*step+step/2, barH=(wk.count/maxC)*ch, y=pad.t+ch-barH; ctx.fillStyle=i===weeks.length-1?'rgba(200,16,46,0.55)':'rgba(200,16,46,0.2)'; ctx.fillRect(x-bw/2,y,bw,barH); if(wk.count>0){ctx.fillStyle='#666';ctx.font='9px DM Mono';ctx.textAlign='center';ctx.fillText(wk.count,x,y-3);} });
+  // v7.4: Rolling weekly-average baseline for call VOLUME, so a slow week reads in
+  // context. Averages completed weeks with calls (excludes the current partial week).
+  const baseWeeks = weeks.slice(0, weeks.length - (weekOff===0?1:0)).filter(w=>w.count>0);
+  if (baseWeeks.length) {
+    const baseline = baseWeeks.reduce((a,w)=>a+w.count,0)/baseWeeks.length;
+    const by = pad.t+ch-(baseline/maxC)*ch;
+    ctx.save(); ctx.setLineDash([4,3]); ctx.strokeStyle='#7c5cff'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(pad.l,by); ctx.lineTo(pad.l+cw,by); ctx.stroke(); ctx.restore();
+    ctx.fillStyle='#7c5cff'; ctx.font='9px DM Mono'; ctx.textAlign='right';
+    ctx.fillText('avg '+baseline.toFixed(1)+'/wk', pad.l+cw, by-4);
+  }
   ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2; let first=true;
   weeks.forEach((wk,i)=>{ if(!wk.avg) return; const x=pad.l+i*step+step/2, y=pad.t+ch-(wk.avg/10)*ch; if(first){ctx.moveTo(x,y);first=false;} else ctx.lineTo(x,y); });
   ctx.stroke();
@@ -1866,6 +2002,39 @@ function renderSales() {
   document.getElementById('sARO').textContent = count ? '$' + Math.round(aro).toLocaleString() : '—';
   document.getElementById('sBridged').textContent = bridged + ' / ' + count;
 
+  // v7.5: Conversion tile (this week % + 4-week rolling sub).
+  const convThis = convPctWeek(salesWeekOff);
+  const conv4wk = convPctRolling(salesWeekOff, 4);
+  document.getElementById('sConv').textContent = convThis !== null ? Math.round(convThis) + '%' : '—';
+  document.getElementById('sConvSub').textContent = conv4wk !== null
+    ? '4-wk rolling: ' + Math.round(conv4wk) + '%'
+    : '4-wk rolling';
+
+  // v7.6: Trans Sales tile — primary transmission deals this week (count + $)
+  const wkTrans = getTransSalesForWeek(salesWeekOff);
+  const transCount = wkTrans.length;
+  const transRevenue = wkTrans.reduce((a,s) => a + (s.saleAmount||0), 0);
+  document.getElementById('sTrans').textContent = transCount;
+  document.getElementById('sTransSub').textContent = transCount ? '$' + Math.round(transRevenue).toLocaleString() : 'no trans deals';
+
+  // v7.5: Trailing-12-month footers (anchored to today, weekly averages).
+  const last12Sales = getLast12MoSales();
+  const last12Primary = last12Sales.filter(s => s.isPrimary);
+  const last12TransPrimary = last12Primary.filter(s => s.jobType === 'Transmission');
+  const last12Scored = getLast12MoScoredCalls();
+  const wks12 = 52;
+  const t12_avgWk = last12Sales.reduce((a,b) => a + (b.saleAmount||0), 0) / wks12;
+  const c12_avgWk = last12Primary.length / wks12;
+  const aro12 = last12Primary.length ? last12Primary.reduce((a,b) => a + (b.saleAmount||0), 0) / last12Primary.length : 0;
+  const conv12 = last12Scored.length ? (last12TransPrimary.length / last12Scored.length) * 100 : null;
+  document.getElementById('sTotal12mo').textContent = '12-mo: $' + Math.round(t12_avgWk).toLocaleString() + '/wk avg';
+  document.getElementById('sCount12mo').textContent = '12-mo: ' + c12_avgWk.toFixed(1) + '/wk avg';
+  document.getElementById('sARO12mo').textContent = last12Primary.length ? '12-mo avg: $' + Math.round(aro12).toLocaleString() : '';
+  document.getElementById('sConv12mo').textContent = conv12 !== null ? '12-mo avg: ' + Math.round(conv12) + '%' : '';
+  // v7.6: Trans Sales trailing-12-mo footer
+  const trans12_avgWk = last12TransPrimary.length / wks12;
+  document.getElementById('sTrans12mo').textContent = '12-mo: ' + trans12_avgWk.toFixed(1) + '/wk avg';
+
   // v7: Sales Total subtitle — show add-on revenue distinctly when present
   if (lwTotal > 0 && total > 0) {
     const d = total - lwTotal;
@@ -1887,7 +2056,7 @@ function renderSales() {
     <div class="advisor-card" style="margin-bottom:20px;">
       <div class="card-label">Advisor</div>
       <div class="advisor-name-big">BRIAN</div>
-      ${renderSalesAdvisorStatsHTML(brianSales, total)}
+      ${renderSalesAdvisorStatsHTML(brianSales, total, convPctWeek(salesWeekOff, 'Brian'), convPctRolling(salesWeekOff, 4, 'Brian'))}
     </div>` : '';
 
   renderJobTypeBreakdown(wk);
@@ -1900,24 +2069,34 @@ function renderSales() {
 function renderSalesAdvisor(name, elId, allWk) {
   const mine = allWk.filter(s => (s.advisor||'').toLowerCase() === name.toLowerCase());
   const total = allWk.reduce((a,b) => a + (b.saleAmount||0), 0);
-  document.getElementById(elId).innerHTML = renderSalesAdvisorStatsHTML(mine, total);
+  // v7.5: Conversion for this advisor (this week + 4-week rolling)
+  const convWk = convPctWeek(salesWeekOff, name);
+  const conv4 = convPctRolling(salesWeekOff, 4, name);
+  document.getElementById(elId).innerHTML = renderSalesAdvisorStatsHTML(mine, total, convWk, conv4);
 }
 
-function renderSalesAdvisorStatsHTML(mySales, weekTotal) {
+function renderSalesAdvisorStatsHTML(mySales, weekTotal, convWk, conv4) {
   if (!mySales.length) return '<div style="font-size:13px;color:var(--text-muted);padding:14px 0 4px;">No sales this week</div>';
   // v7: Primary sales only count for jobs/ARO. Add-ons still count for total.
   const myPrimary = mySales.filter(s => s.isPrimary);
   const myTotal = mySales.reduce((a,b) => a + (b.saleAmount||0), 0);
   const myPrimaryTotal = myPrimary.reduce((a,b) => a + (b.saleAmount||0), 0);
   const myCount = myPrimary.length;
+  // v7.6: Transmission-only deals for this advisor (used in "Trans / All" stat)
+  const myTrans = myPrimary.filter(s => s.jobType === 'Transmission').length;
   const myAro = myCount ? myPrimaryTotal / myCount : 0;
   const sharePct = weekTotal ? Math.round((myTotal / weekTotal) * 100) : 0;
   return `
     <div class="sales-adv-stats">
       <div class="sales-adv-stat"><div class="sales-adv-stat-label">Sales</div><div class="sales-adv-stat-val">$${Math.round(myTotal).toLocaleString()}</div></div>
-      <div class="sales-adv-stat"><div class="sales-adv-stat-label">New Deals</div><div class="sales-adv-stat-val">${myCount}</div></div>
+      <div class="sales-adv-stat"><div class="sales-adv-stat-label">Trans / All</div><div class="sales-adv-stat-val">${myTrans} <span style="font-size:14px;color:var(--text-muted);">/ ${myCount}</span></div></div>
       <div class="sales-adv-stat"><div class="sales-adv-stat-label">ARO</div><div class="sales-adv-stat-val">${myCount ? '$' + Math.round(myAro).toLocaleString() : '—'}</div></div>
       <div class="sales-adv-stat"><div class="sales-adv-stat-label">Share</div><div class="sales-adv-stat-val">${sharePct}%</div></div>
+    </div>
+    <div class="sales-adv-conv-row">
+      <span class="conv-label">Trans Conv</span>
+      <span class="conv-val">${convWk !== null ? Math.round(convWk) + '%' : '—'}</span>
+      <span class="conv-roll">${conv4 !== null ? '4-wk: ' + Math.round(conv4) + '%' : '4-wk: —'}</span>
     </div>`;
 }
 
