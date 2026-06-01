@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v7.6</title>
+<title>ATR Call Intelligence v7.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -517,6 +517,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 </div>
 <button class="week-nav-btn now" onclick="goSalesNow()">THIS WEEK</button>
 <button class="week-nav-btn" onclick="changeSalesWeek(1)">NEXT &rarr;</button>
+<button class="week-nav-btn" onclick="printSalesReport()" title="Print this week's sales report" style="border-color:var(--red);color:var(--text);">&#9114; PRINT REPORT</button>
 </div>
 
 <div class="stats-row stats-row-6">
@@ -754,6 +755,25 @@ function convPctRolling(off, weeks, advisor) {
   return calls > 0 ? (sales / calls) * 100 : null;
 }
 
+// v7.7: Industry-benchmark tier color & label for transmission conversion %.
+// Thresholds reasoned from auto-repair funnel data (BDC appointment-set rate,
+// service show rate, in-shop close rate). Compare the 4-week rolling number
+// against these tiers — weekly numbers are noisy by nature.
+function convTierColor(pct) {
+  if (pct === null) return 'var(--text-muted)';
+  if (pct < 10) return 'var(--red)';
+  if (pct < 20) return 'var(--amber)';
+  if (pct < 30) return 'var(--green)';
+  return '#16a34a'; // top tier — bold green
+}
+function convTierLabel(pct) {
+  if (pct === null) return '';
+  if (pct < 10) return 'poor';
+  if (pct < 20) return 'avg';
+  if (pct < 30) return 'strong';
+  return 'top tier';
+}
+
 // v7.5: Trailing 12-month windows — anchored to today, not selected week.
 // Used for the small grey footer on Sales tiles and Conversion tile.
 function getLast12MoSales() {
@@ -763,6 +783,25 @@ function getLast12MoSales() {
 function getLast12MoScoredCalls() {
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 365);
   return allCalls.filter(c => { if (c.total === null) return false; const d = pd(c.date); return d && d >= cutoff; });
+}
+
+// v7.8: How many weeks of actual sales data we have, capped at 52.
+// Used as the /wk-avg denominator so the trailing footer doesn't divide
+// 3 weeks of real data by 52 weeks (which made averages look ~17x too low).
+// Once you cross the 12-month mark this returns 52 and the footer is a true
+// rolling 12-month average; before that it adapts to actual data span.
+function getActiveSpanWeeks() {
+  if (!allSales.length) return 1;
+  const times = allSales.map(s => { const d = pd(s.dateSold); return d ? d.getTime() : null; }).filter(t => t);
+  if (!times.length) return 1;
+  const earliest = Math.min(...times);
+  const weeks = Math.ceil((Date.now() - earliest) / (7 * 24 * 3600 * 1000));
+  return Math.min(Math.max(weeks, 1), 52);
+}
+// v7.8: Footer prefix that matches the actual data span — "3-wk" early on,
+// "12-mo" once mature. Keeps the label honest with the math.
+function dataSpanPrefix(span) {
+  return span < 13 ? span + '-wk' : '12-mo';
 }
 
 // v7: Detect if a call is the customer's FIRST contact (vs a follow-up).
@@ -1976,6 +2015,79 @@ function fmtWkShort(off) {
 function goSalesNow() { salesWeekOff = 0; renderSales(); }
 function changeSalesWeek(d) { salesWeekOff += d; renderSales(); }
 
+// v7.9: One-click printable weekly sales report for manager meetings.
+// Recomputes the currently-shown sales week from data already loaded and
+// hands a clean layout to the existing printWindow() helper. No new feeds.
+function printSalesReport() {
+  if (!allSales.length) { alert('Sales data not loaded yet.'); return; }
+  const off = salesWeekOff;
+  const m = n => '$' + Math.round(n||0).toLocaleString();
+  const wk = getSalesForWeek(off), lw = getSalesForWeek(off-1);
+  const prim = wk.filter(s=>s.isPrimary), addon = wk.filter(s=>s.isAddOn);
+  const total = wk.reduce((a,b)=>a+(b.saleAmount||0),0);
+  const lwTotal = lw.reduce((a,b)=>a+(b.saleAmount||0),0);
+  const primTotal = prim.reduce((a,b)=>a+(b.saleAmount||0),0);
+  const addonTotal = addon.reduce((a,b)=>a+(b.saleAmount||0),0);
+  const count = prim.length, aro = count?primTotal/count:0;
+  const transU = getTransSalesForWeek(off), transRev = transU.reduce((a,b)=>a+(b.saleAmount||0),0);
+  const cv = convPctWeek(off);
+  let delta = 'first week of data';
+  if (lwTotal>0){ const d=total-lwTotal, pct=Math.round(d/lwTotal*100); delta=(d>=0?'+':'-')+m(Math.abs(d))+' ('+(pct>=0?'+':'')+pct+'%) vs last week'; }
+
+  const advisors=[...new Set(wk.map(s=>s.advisor).filter(Boolean))];
+  const ordr=['Jack','Jay','Brian']; advisors.sort((a,b)=>{const ia=ordr.indexOf(a),ib=ordr.indexOf(b);return (ia<0?9:ia)-(ib<0?9:ib);});
+  const advRows = advisors.map(a=>{
+    const mine=wk.filter(s=>(s.advisor||'').toLowerCase()===a.toLowerCase()), mp=mine.filter(s=>s.isPrimary);
+    const mt=mine.reduce((s,x)=>s+(x.saleAmount||0),0), mpt=mp.reduce((s,x)=>s+(x.saleAmount||0),0);
+    const c=mp.length, mar=c?mpt/c:0, tu=getTransSalesForWeek(off,a).length, cc=convPctWeek(off,a);
+    return `<tr><td>${esc(a)}</td><td class=r>${c}</td><td class=r>${m(mt)}</td><td class=r>${c?m(mar):'—'}</td><td class=r>${tu}</td><td class=r>${cc===null?'—':Math.round(cc)+'%'}</td></tr>`;
+  }).join('');
+
+  const byType={}; transU.forEach(s=>{const k=s.transType||'(unspecified)'; (byType[k]=byType[k]||{u:0,r:0}); byType[k].u++; byType[k].r+=(s.saleAmount||0);});
+  const typeRows = Object.keys(byType).sort().map(k=>`<tr><td>${esc(k)}</td><td class=r>${byType[k].u}</td><td class=r>${m(byType[k].r)}</td></tr>`).join('') || '<tr><td colspan=3>No transmission deals this week.</td></tr>';
+
+  const span=getActiveSpanWeeks();
+  const last12=getLast12MoSales().filter(s=>s.isPrimary&&s.jobType==='Transmission');
+  const used=/used/i;
+  const transPerWk=(last12.length/span).toFixed(1);
+  const builtPerWk=(last12.filter(s=>!used.test(s.transType)).length/span).toFixed(1);
+  const spanLbl = span<13 ? span+'-wk avg' : '12-mo avg';
+  const transPct = total>0?Math.round(transRev/total*100):0;
+
+  const body = `<style>
+    table{border-collapse:collapse;width:100%;margin:6px 0 14px;font-size:12px;}
+    th,td{border-bottom:1px solid #ddd;padding:5px 8px;text-align:left;}
+    td.r,th.r{text-align:right;}
+    tr.tot td{font-weight:bold;border-top:2px solid #111;background:#fafafa;}
+    h2{font-size:13px;color:#C8102E;border-bottom:1px solid #eee;padding-bottom:3px;margin:18px 0 6px;text-transform:uppercase;letter-spacing:1px;}
+    </style>
+    <h1>ATR Weekly Sales Report</h1>
+    <div class="meta">${esc(fmtWkLabel(off))} · Wk ${isoWeekNum(getWkStart(off))} · Generated ${new Date().toLocaleString()}</div>
+    <h2>This Week at a Glance</h2>
+    <table>
+      <tr><td>Sales Total</td><td class=r><b>${m(total)}</b></td><td>${delta}${addonTotal>0?'  ·  incl. '+m(addonTotal)+' add-ons':''}</td></tr>
+      <tr><td>Deals (new)</td><td class=r>${count}</td><td>${lw.filter(s=>s.isPrimary).length} last week</td></tr>
+      <tr><td>Avg Repair Order</td><td class=r>${count?m(aro):'—'}</td><td>per new deal</td></tr>
+      <tr><td>Transmission Units</td><td class=r>${transU.length}</td><td>${transU.length?m(transRev):'no trans deals'}</td></tr>
+      <tr><td>Trans Conversion</td><td class=r>${cv===null?'—':Math.round(cv)+'%'}</td><td>units / scored calls</td></tr>
+    </table>
+    <h2>By Advisor</h2>
+    <table>
+      <thead><tr><th>Advisor</th><th class=r>Deals</th><th class=r>Sales Total</th><th class=r>ARO</th><th class=r>Trans Units</th><th class=r>Trans Conv.</th></tr></thead>
+      <tbody>${advRows || '<tr><td colspan=6>No sales recorded this week.</td></tr>'}
+      <tr class=tot><td>Total</td><td class=r>${count}</td><td class=r>${m(total)}</td><td class=r>${count?m(aro):'—'}</td><td class=r>${transU.length}</td><td class=r>${cv===null?'—':Math.round(cv)+'%'}</td></tr></tbody>
+    </table>
+    <h2>Transmission Focus</h2>
+    <p>Of ${m(total)} booked this week, <b>${m(transRev)} (${transPct}%)</b> came from transmission jobs; ${m(total-transRev)} (${100-transPct}%) from automotive / other.</p>
+    <table>
+      <thead><tr><th>Transmission deals</th><th class=r>Units</th><th class=r>Revenue</th></tr></thead>
+      <tbody>${typeRows}</tbody>
+    </table>
+    <p>Trailing pace — <b>${transPerWk}</b> transmission units/wk (${spanLbl}); <b>${builtPerWk}</b> built units/wk excluding used.</p>`;
+  printWindow('ATR Weekly Sales Report — ' + fmtWkLabel(off), body);
+}
+
+
 function renderSales() {
   if (!document.getElementById('salesWeekLabel')) return;
   document.getElementById('salesWeekLabel').textContent = fmtWkLabel(salesWeekOff);
@@ -2005,9 +2117,17 @@ function renderSales() {
   // v7.5: Conversion tile (this week % + 4-week rolling sub).
   const convThis = convPctWeek(salesWeekOff);
   const conv4wk = convPctRolling(salesWeekOff, 4);
-  document.getElementById('sConv').textContent = convThis !== null ? Math.round(convThis) + '%' : '—';
-  document.getElementById('sConvSub').textContent = conv4wk !== null
-    ? '4-wk rolling: ' + Math.round(conv4wk) + '%'
+  // v7.7: Color the top-line conversion by tier; tier label sits next to the 4-wk rolling.
+  const sConvEl = document.getElementById('sConv');
+  if (convThis !== null) {
+    sConvEl.textContent = Math.round(convThis) + '%';
+    sConvEl.style.color = convTierColor(convThis);
+  } else {
+    sConvEl.textContent = '—';
+    sConvEl.style.color = '';
+  }
+  document.getElementById('sConvSub').innerHTML = conv4wk !== null
+    ? `4-wk rolling: <span style="color:${convTierColor(conv4wk)};font-weight:600;">${Math.round(conv4wk)}%</span> <span style="color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-size:9px;">(${convTierLabel(conv4wk)})</span>`
     : '4-wk rolling';
 
   // v7.6: Trans Sales tile — primary transmission deals this week (count + $)
@@ -2022,18 +2142,21 @@ function renderSales() {
   const last12Primary = last12Sales.filter(s => s.isPrimary);
   const last12TransPrimary = last12Primary.filter(s => s.jobType === 'Transmission');
   const last12Scored = getLast12MoScoredCalls();
-  const wks12 = 52;
+  // v7.8: Use actual data span as the /wk avg denominator (not hardcoded 52).
+  // Avoids diluting early-period averages by 49 zero weeks.
+  const wks12 = getActiveSpanWeeks();
+  const prefix = dataSpanPrefix(wks12);
   const t12_avgWk = last12Sales.reduce((a,b) => a + (b.saleAmount||0), 0) / wks12;
   const c12_avgWk = last12Primary.length / wks12;
   const aro12 = last12Primary.length ? last12Primary.reduce((a,b) => a + (b.saleAmount||0), 0) / last12Primary.length : 0;
   const conv12 = last12Scored.length ? (last12TransPrimary.length / last12Scored.length) * 100 : null;
-  document.getElementById('sTotal12mo').textContent = '12-mo: $' + Math.round(t12_avgWk).toLocaleString() + '/wk avg';
-  document.getElementById('sCount12mo').textContent = '12-mo: ' + c12_avgWk.toFixed(1) + '/wk avg';
-  document.getElementById('sARO12mo').textContent = last12Primary.length ? '12-mo avg: $' + Math.round(aro12).toLocaleString() : '';
-  document.getElementById('sConv12mo').textContent = conv12 !== null ? '12-mo avg: ' + Math.round(conv12) + '%' : '';
-  // v7.6: Trans Sales trailing-12-mo footer
+  document.getElementById('sTotal12mo').textContent = prefix + ': $' + Math.round(t12_avgWk).toLocaleString() + '/wk avg';
+  document.getElementById('sCount12mo').textContent = prefix + ': ' + c12_avgWk.toFixed(1) + '/wk avg';
+  document.getElementById('sARO12mo').textContent = last12Primary.length ? prefix + ' avg: $' + Math.round(aro12).toLocaleString() : '';
+  document.getElementById('sConv12mo').textContent = conv12 !== null ? prefix + ' avg: ' + Math.round(conv12) + '%' : '';
+  // v7.6: Trans Sales trailing footer — same span-aware denominator
   const trans12_avgWk = last12TransPrimary.length / wks12;
-  document.getElementById('sTrans12mo').textContent = '12-mo: ' + trans12_avgWk.toFixed(1) + '/wk avg';
+  document.getElementById('sTrans12mo').textContent = prefix + ': ' + trans12_avgWk.toFixed(1) + '/wk avg';
 
   // v7: Sales Total subtitle — show add-on revenue distinctly when present
   if (lwTotal > 0 && total > 0) {
@@ -2095,8 +2218,8 @@ function renderSalesAdvisorStatsHTML(mySales, weekTotal, convWk, conv4) {
     </div>
     <div class="sales-adv-conv-row">
       <span class="conv-label">Trans Conv</span>
-      <span class="conv-val">${convWk !== null ? Math.round(convWk) + '%' : '—'}</span>
-      <span class="conv-roll">${conv4 !== null ? '4-wk: ' + Math.round(conv4) + '%' : '4-wk: —'}</span>
+      <span class="conv-val" style="color:${convTierColor(convWk)};">${convWk !== null ? Math.round(convWk) + '%' : '—'}</span>
+      <span class="conv-roll">${conv4 !== null ? `4-wk: <span style="color:${convTierColor(conv4)};font-weight:600;">${Math.round(conv4)}%</span> <span style="text-transform:uppercase;letter-spacing:1px;font-size:9px;color:var(--text-muted);">(${convTierLabel(conv4)})</span>` : '4-wk: —'}</span>
     </div>`;
 }
 
