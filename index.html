@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v8.1</title>
+<title>ATR Call Intelligence v8.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2056,6 +2056,57 @@ function changeSalesWeek(d) { salesWeekOff += d; renderSales(); }
 // v7.9: One-click printable weekly sales report for manager meetings.
 // Recomputes the currently-shown sales week from data already loaded and
 // hands a clean layout to the existing printWindow() helper. No new feeds.
+// v8.2: Per-week sales+calls metric snapshot used by the printable report's
+// "Why This Week Moved" explainer and the 4-week-average context. All deterministic
+// arithmetic off data already loaded — no API/algorithm.
+function salesWeekMetrics(o) {
+  const sales = getSalesForWeek(o);
+  const prim = sales.filter(s => s.isPrimary);
+  const total = sales.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const trans = getTransSalesForWeek(o);                 // primary, Job Type = Transmission
+  const transRev = trans.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const auto = prim.filter(s => s.jobType === 'Automotive');
+  const autoRev = auto.reduce((a,b) => a + (b.saleAmount||0), 0);
+  const calls = getScoredCallsForWeek(o).length;
+  const conv = convPctWeek(o);                            // null if no scored calls
+  return { total, transUnits: trans.length, transRev, autoUnits: auto.length, autoRev, calls, conv };
+}
+// Trailing 4-week averages (the 4 weeks BEFORE the shown week) as the "is this normal?" baseline.
+function salesWeekAvg4(off) {
+  const weeks = [off-4, off-3, off-2, off-1];
+  const ms = weeks.map(salesWeekMetrics);
+  const avg = k => ms.reduce((a,x) => a + (x[k]||0), 0) / ms.length;
+  // Conversion: pool sales/calls across the 4 weeks (smoother than averaging weekly ratios).
+  let c = 0, s = 0;
+  weeks.forEach(i => { c += getScoredCallsForWeek(i).length; s += getTransSalesForWeek(i).length; });
+  return { total: avg('total'), transUnits: avg('transUnits'), transRev: avg('transRev'),
+           autoUnits: avg('autoUnits'), autoRev: avg('autoRev'), calls: avg('calls'),
+           conv: c > 0 ? (s/c)*100 : null };
+}
+// Plain-English "why it moved": ranks the biggest week-over-week drivers, returns top 3.
+function salesWeekWhy(off) {
+  const $ = n => '$' + Math.round(Math.abs(n||0)).toLocaleString();
+  const cur = salesWeekMetrics(off), lw = salesWeekMetrics(off-1);
+  const totalDelta = cur.total - lw.total;
+  const drivers = [];
+  const tU = cur.transUnits - lw.transUnits, tR = cur.transRev - lw.transRev;
+  if (tU !== 0 || Math.abs(tR) >= 1)
+    drivers.push({ impact: Math.abs(tR) + 1, txt: `Transmission deals ${tU>=0?'rose':'fell'} from ${lw.transUnits} to ${cur.transUnits} (${tR>=0?'+':'-'}${$(tR)} revenue)` });
+  const aU = cur.autoUnits - lw.autoUnits, aR = cur.autoRev - lw.autoRev;
+  if (aU !== 0 || Math.abs(aR) >= 1)
+    drivers.push({ impact: Math.abs(aR) + 1, txt: `Automotive ${aU>=0?'rose':'fell'} from ${lw.autoUnits} to ${cur.autoUnits} deal${cur.autoUnits===1?'':'s'} (${aR>=0?'+':'-'}${$(aR)} revenue)` });
+  if (cur.conv !== null && lw.conv !== null) {
+    const cD = Math.round(cur.conv - lw.conv);
+    if (Math.abs(cD) >= 1)
+      drivers.push({ impact: Math.abs(cD) * 800, txt: `Conversion ${cD>=0?'up':'down'} from ${Math.round(lw.conv)}% to ${Math.round(cur.conv)}% (${cur.calls} calls handled vs ${lw.calls})` });
+  }
+  const callD = cur.calls - lw.calls;
+  if (callD !== 0 && !(cur.conv !== null && lw.conv !== null && Math.abs(Math.round(cur.conv-lw.conv)) >= 1))
+    drivers.push({ impact: Math.abs(callD) * 400, txt: `Calls handled ${callD>=0?'up':'down'} from ${lw.calls} to ${cur.calls}` });
+  drivers.sort((a,b) => b.impact - a.impact);
+  return { totalDelta, hasLast: lw.total > 0 || lw.calls > 0, top: drivers.slice(0,3).map(d => d.txt) };
+}
+
 function printSalesReport() {
   if (!allSales.length) { alert('Sales data not loaded yet.'); return; }
   const off = salesWeekOff;
@@ -2072,6 +2123,28 @@ function printSalesReport() {
   const collected = getCollectedForWeek(off);
   let delta = 'first week of data';
   if (lwTotal>0){ const d=total-lwTotal, pct=Math.round(d/lwTotal*100); delta=(d>=0?'+':'-')+m(Math.abs(d))+' ('+(pct>=0?'+':'')+pct+'%) vs last week'; }
+
+  // v8.2: call metrics + 4-week-average context + "why it moved" explainer.
+  const avg4 = salesWeekAvg4(off);
+  const why = salesWeekWhy(off);
+  const callsThis = getScoredCallsForWeek(off).length;
+  const callsLast = getScoredCallsForWeek(off-1).length;
+  if (avg4.total > 0) delta += ' · 4-wk avg ' + m(avg4.total);
+  const convAvg4 = avg4.conv === null ? null : Math.round(avg4.conv);
+  const callsAvg4 = avg4.calls ? avg4.calls.toFixed(0) : '0';
+  // Build the "Why This Week Moved" block (top 2-3 drivers, plain sentences).
+  let whyHtml;
+  if (!why.hasLast) {
+    whyHtml = '<p>Not enough prior-week data yet to explain the change — this builds once a few weeks are logged.</p>';
+  } else {
+    const dir = why.totalDelta >= 0 ? 'up' : 'down';
+    const head = `Sales total came in <b>${dir} ${m(Math.abs(why.totalDelta))}</b> vs last week`
+      + (avg4.total > 0 ? `, ${total >= avg4.total ? 'above' : 'below'} the 4-week average of ${m(avg4.total)}.` : '.');
+    const bullets = why.top.length
+      ? '<ul style="margin:6px 0 0 18px;padding:0;">' + why.top.map(t => `<li style="margin:2px 0;">${esc(t)}</li>`).join('') + '</ul>'
+      : '<p style="margin:6px 0 0;">Mix held steady week over week — no single driver stands out.</p>';
+    whyHtml = `<p style="margin:0;">${head}</p>${bullets}`;
+  }
 
   const advisors=[...new Set(wk.map(s=>s.advisor).filter(Boolean))];
   const ordr=['Jack','Jay','Brian']; advisors.sort((a,b)=>{const ia=ordr.indexOf(a),ib=ordr.indexOf(b);return (ia<0?9:ia)-(ib<0?9:ib);});
@@ -2109,8 +2182,11 @@ function printSalesReport() {
       <tr><td>Deals (new)</td><td class=r>${count}</td><td>${lw.filter(s=>s.isPrimary).length} last week</td></tr>
       <tr><td>Avg Repair Order</td><td class=r>${count?m(aro):'—'}</td><td>per new deal</td></tr>
       <tr><td>Transmission Units</td><td class=r>${transU.length}</td><td>${transU.length?m(transRev):'no trans deals'}</td></tr>
-      <tr><td>Trans Conversion</td><td class=r>${cv===null?'—':Math.round(cv)+'%'}</td><td>units / scored calls</td></tr>
+      <tr><td>Calls Handled</td><td class=r>${callsThis}</td><td>${callsLast} last week · ${callsAvg4}/wk avg (scored calls)</td></tr>
+      <tr><td>Trans Conversion</td><td class=r>${cv===null?'—':Math.round(cv)+'%'}</td><td>${transU.length} units / ${callsThis} calls${convAvg4!==null?' · 4-wk avg '+convAvg4+'%':''}</td></tr>
     </table>
+    <h2>Why This Week Moved</h2>
+    ${whyHtml}
     <h2>By Advisor</h2>
     <table>
       <thead><tr><th>Advisor</th><th class=r>Deals</th><th class=r>Sales Total</th><th class=r>ARO</th><th class=r>Trans Units</th><th class=r>Trans Conv.</th></tr></thead>
