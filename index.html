@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v8.0</title>
+<title>ATR Call Intelligence v8.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -71,6 +71,7 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
 .stats-row.stats-row-6 { grid-template-columns: repeat(6, 1fr); }
 .stats-row.stats-row-7 { grid-template-columns: repeat(7, 1fr); }
+.stats-row.stats-row-3 { grid-template-columns: repeat(3, 1fr); }
 .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; position: relative; overflow: hidden; }
 .stat-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--border); }
 .stat-card.red::after { background: var(--red); }
@@ -529,6 +530,13 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 <div class="stat-card violet"><div class="stat-label">Trans Conversion</div><div class="stat-value" id="sConv">&mdash;</div><div class="stat-sub" id="sConvSub">4-wk rolling</div><div class="stat-12mo" id="sConv12mo"></div></div>
 <div class="stat-card amber"><div class="stat-label">Avg Repair Order</div><div class="stat-value" id="sARO">&mdash;</div><div class="stat-sub">per sold job</div><div class="stat-12mo" id="sARO12mo"></div></div>
 <div class="stat-card red"><div class="stat-label">Bridged to Calls</div><div class="stat-value" id="sBridged">&mdash;</div><div class="stat-sub">phone match in scored calls</div></div>
+</div>
+
+<!-- v8.1 MARGIN ROW (owner view). Aggregates only — per Master Hub, no running profit total lives on the team Sheet; totals/averages live here. Counts only delivered jobs with cost data entered (margin blank on migrated history). -->
+<div class="stats-row stats-row-3">
+<div class="stat-card green"><div class="stat-label">Avg Margin</div><div class="stat-value" id="sMarginAvg">&mdash;</div><div class="stat-sub" id="sMarginAvgSub">weighted, pre-tax</div></div>
+<div class="stat-card amber"><div class="stat-label">Collected Profit</div><div class="stat-value" id="sProfitTotal">&mdash;</div><div class="stat-sub" id="sProfitTotalSub">delivered this week</div></div>
+<div class="stat-card blue"><div class="stat-label">Avg Profit / Job</div><div class="stat-value" id="sProfitAvg">&mdash;</div><div class="stat-sub" id="sProfitAvgSub">jobs with cost data</div></div>
 </div>
 
 <div class="two-col">
@@ -1949,7 +1957,10 @@ function parseSalesCSV(text) {
     rows.push(fields);
   }
   if (rows.length < 2) return [];
-  // Schema: Date_Sold | RO Number | Customer_Name | Customer_Phone | Vehicle | Advisor | Job_Type | Transmission_Type | Sale_Amount | Notes
+  // v8.1 schema (after fixWeeklySalesModel): Transmission_Type renamed to Source at H,
+  // Transmission Model inserted at I, Sale_Amount shifted I->J, Notes shifted J->K.
+  // A Date_Sold | B RO Number | C Customer_Name | D Customer_Phone | E Vehicle |
+  // F Advisor | G Job_Type | H Source | I Transmission Model | J Sale_Amount | K Notes
   const parsed = rows.slice(1).map(r => ({
     dateSold: (r[0]||'').trim(),
     roNumber: (r[1]||'').trim(),
@@ -1958,9 +1969,10 @@ function parseSalesCSV(text) {
     vehicle: (r[4]||'').trim(),
     advisor: (r[5]||'').trim(),
     jobType: (r[6]||'').trim(),
-    transType: (r[7]||'').trim(),
-    saleAmount: parseFloat(String(r[8]||'0').replace(/[^0-9.\-]/g,'')) || 0,
-    notes: (r[9]||'').trim(),
+    transType: (r[7]||'').trim(),          // H "Source" — kept field name transType for downstream code
+    transModel: (r[8]||'').trim(),         // I Transmission Model (NEW)
+    saleAmount: parseFloat(String(r[9]||'0').replace(/[^0-9.\-]/g,'')) || 0,  // J (moved from I)
+    notes: (r[10]||'').trim(),             // K (moved from J)
     // Legacy fields (no longer in sheet but referenced elsewhere — kept as defaults)
     quoteAmount: 0,
     warranty: ''
@@ -2021,7 +2033,23 @@ function fmtWkShort(off) {
 }
 
 // v8.0: collected (cash in) for a given week, from the Payments feed.
-function getCollectedForWeek(off){ const s=getWkStart(off), e=getWkEnd(s); return allPayments.filter(p=>{ const d=pd(p.paymentDate); return d && d>=s && d<=e; }).reduce((a,p)=>a+(p.amountPaid||0),0); }
+function getCollectedRowsForWeek(off){ const s=getWkStart(off), e=getWkEnd(s); return allPayments.filter(p=>{ const d=pd(p.paymentDate); return d && d>=s && d<=e; }); }
+function getCollectedForWeek(off){ return getCollectedRowsForWeek(off).reduce((a,p)=>a+(p.amountPaid||0),0); }
+// v8.1: weekly margin aggregates for the owner margin tiles. Only counts delivered
+// jobs that have cost data entered (subtotal>0 AND profit reported) — migrated history
+// has no cost split, so margin stays blank there and doesn't dilute the average.
+// Avg margin is WEIGHTED (sum profit / sum subtotal), not a mean of per-job %s.
+function getMarginStatsForWeek(off){
+  const rows = getCollectedRowsForWeek(off).filter(p => p.subtotal > 0 && (p.profit !== 0 || p.marginPct !== null));
+  const profitSum = rows.reduce((a,p)=>a+(p.profit||0),0);
+  const subtotalSum = rows.reduce((a,p)=>a+(p.subtotal||0),0);
+  return {
+    jobs: rows.length,
+    profitSum,
+    avgMargin: subtotalSum > 0 ? (profitSum / subtotalSum) * 100 : null,
+    avgProfit: rows.length ? profitSum / rows.length : null
+  };
+}
 function goSalesNow() { salesWeekOff = 0; renderSales(); }
 function changeSalesWeek(d) { salesWeekOff += d; renderSales(); }
 
@@ -2125,6 +2153,22 @@ function renderSales() {
   const collected = getCollectedForWeek(salesWeekOff);
   document.getElementById('sCollected').textContent = '$' + Math.round(collected).toLocaleString();
   document.getElementById('sCollectedSub').textContent = total>0 ? 'vs $' + Math.round(total).toLocaleString() + ' sold' : 'collected this week';
+
+  // v8.1: margin tiles (owner view). Color avg margin by tier: green >=50, amber 40-50, red <40.
+  const m = getMarginStatsForWeek(salesWeekOff);
+  const mEl = document.getElementById('sMarginAvg');
+  if (m.avgMargin !== null) {
+    mEl.textContent = m.avgMargin.toFixed(0) + '%';
+    mEl.style.color = m.avgMargin >= 50 ? 'var(--green)' : m.avgMargin >= 40 ? 'var(--amber)' : 'var(--red)';
+    document.getElementById('sMarginAvgSub').textContent = m.jobs + (m.jobs === 1 ? ' job w/ costs' : ' jobs w/ costs');
+  } else {
+    mEl.textContent = '—'; mEl.style.color = '';
+    document.getElementById('sMarginAvgSub').textContent = 'no cost data yet';
+  }
+  document.getElementById('sProfitTotal').textContent = m.jobs ? '$' + Math.round(m.profitSum).toLocaleString() : '—';
+  document.getElementById('sProfitTotalSub').textContent = m.jobs ? 'delivered this week' : 'awaiting cost entry';
+  document.getElementById('sProfitAvg').textContent = m.avgProfit !== null ? '$' + Math.round(m.avgProfit).toLocaleString() : '—';
+  document.getElementById('sProfitAvgSub').textContent = m.jobs ? (m.jobs + (m.jobs === 1 ? ' job' : ' jobs') + ' w/ cost data') : 'jobs with cost data';
   document.getElementById('sCount').textContent = count;
   document.getElementById('sARO').textContent = count ? '$' + Math.round(aro).toLocaleString() : '—';
   document.getElementById('sBridged').textContent = bridged + ' / ' + count;
@@ -2386,7 +2430,9 @@ function renderSalesLog(wk) {
 // ============================================================================
 // v7: RECONCILIATION (Sales Tracker x Payments cross-reference)
 // ============================================================================
-const PAYMENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRmTR058Oz3C6kc0jHx_pyhRGov7Z2sJLY-v7lb2UDeXUxaqIbWXr9lthWlWk2a052CK8VY3ED9YBN_/pub?gid=610158593&single=true&output=csv';
+// v8.1: NEW Payments (rich) tab published to web. gid 1399418352.
+// (Old gid 610158593 = "Payments old" legacy tab — retired after a few clean days.)
+const PAYMENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRmTR058Oz3C6kc0jHx_pyhRGov7Z2sJLY-v7lb2UDeXUxaqIbWXr9lthWlWk2a052CK8VY3ED9YBN_/pub?gid=1399418352&single=true&output=csv';
 let allPayments = [];
 
 async function loadPaymentsData() {
@@ -2423,15 +2469,49 @@ function parsePaymentsCSV(text) {
     rows.push(fields);
   }
   if (rows.length < 2) return [];
-  // Schema: Payment_Date | Invoice_Number | Customer_Name | Customer_Phone | Amount_Paid | Tax | Notes
-  return rows.slice(1).map(r => ({
+  // v8.1 NEW Payments (rich) tab. Header is on sheet row 4, data row 5+, and the
+  // in-cell title rows above it ("COLLECTIONS") publish as junk rows. So we DON'T
+  // assume row 0 is the header — we locate it by content (robust to row trimming).
+  // Column map (0-indexed): A0 Date | B1 RO # | C2 Customer | D3 Phone | E4 Advisor |
+  // F5 Job Type | G6 Source | H7 Cash | I8 Check | J9 Credit Card | K10 Finance |
+  // L11 Tax | M12 Invoice Total | N13 Subtotal(pre-tax) | O14 Towing | P15 Program |
+  // Q16 Parts | R17 R&R Hrs | S18 Build Hrs | T19 Labor Cost | U20 Profit |
+  // V21 Margin % | W22 Disc? | X23 Notes | Y24 Transmission Model
+  const money = v => parseFloat(String(v||'0').replace(/[^0-9.\-]/g,'')) || 0;
+  const pct = v => {
+    const s = String(v||'').trim();
+    if (!s) return null;
+    const n = parseFloat(s.replace(/[^0-9.\-]/g,''));
+    if (isNaN(n)) return null;
+    // "52.3%" -> 52.3 ; bare fraction "0.52" -> 52 ; bare "52" -> 52
+    if (s.includes('%')) return n;
+    return (Math.abs(n) > 0 && Math.abs(n) <= 1) ? n * 100 : n;
+  };
+  // Find header row: first row whose first cell is "Date" and that contains an "RO" cell.
+  let hdr = -1;
+  for (let i = 0; i < rows.length; i++) {
+    const cells = rows[i].map(c => (c||'').trim().toLowerCase());
+    if (cells[0] === 'date' && cells.some(c => c === 'ro #' || c === 'ro' || c === 'ro number')) { hdr = i; break; }
+  }
+  if (hdr === -1) hdr = 0; // fallback: assume first row is header
+  return rows.slice(hdr + 1).map(r => ({
     paymentDate: (r[0]||'').trim(),
-    invoiceNumber: (r[1]||'').trim(),
+    invoiceNumber: (r[1]||'').trim(),   // RO #
     customerName: (r[2]||'').trim(),
     customerPhone: (r[3]||'').trim(),
-    amountPaid: parseFloat(String(r[4]||'0').replace(/[^0-9.\-]/g,'')) || 0,
-    tax: parseFloat(String(r[5]||'0').replace(/[^0-9.\-]/g,'')) || 0,
-    notes: (r[6]||'').trim()
+    advisor: (r[4]||'').trim(),
+    jobType: (r[5]||'').trim(),
+    source: (r[6]||'').trim(),
+    amountPaid: money(r[12]),           // M Invoice Total (= cash+check+cc+finance, incl tax) = what was collected
+    subtotal: money(r[13]),             // N Subtotal pre-tax (margin denominator)
+    tax: money(r[11]),                  // L Tax
+    parts: money(r[16]),                // Q
+    laborCost: money(r[19]),            // T
+    profit: money(r[20]),               // U Profit
+    marginPct: pct(r[21]),              // V Margin % (null if blank, e.g. migrated history)
+    disc: (r[22]||'').trim(),
+    notes: (r[23]||'').trim(),
+    transModel: (r[24]||'').trim()
   })).filter(r => r.paymentDate || r.invoiceNumber);
 }
 
