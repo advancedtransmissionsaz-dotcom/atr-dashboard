@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v8.3</title>
+<title>ATR Call Intelligence v8.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1908,9 +1908,9 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function printWindow(title, body) {
   const w=window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
-  <style>body{font-family:Arial,sans-serif;max-width:820px;margin:40px auto;font-size:13px;line-height:1.8;color:#111;}
-  h1{font-size:18px;border-bottom:2px solid #C8102E;padding-bottom:8px;margin-bottom:6px;}
-  .meta{color:#666;font-size:11px;margin-bottom:24px;}
+  <style>body{font-family:Arial,sans-serif;max-width:820px;margin:24px auto;font-size:13px;line-height:1.45;color:#111;}
+  h1{font-size:18px;border-bottom:2px solid #C8102E;padding-bottom:6px;margin-bottom:5px;}
+  .meta{color:#666;font-size:11px;margin-bottom:14px;}
   pre{white-space:pre-wrap;font-family:Arial,sans-serif;font-size:13px;}</style>
   </head><body>${body}</body></html>`);
   w.document.close(); w.print();
@@ -2076,12 +2076,18 @@ function salesWeekAvg4(off) {
   const weeks = [off-4, off-3, off-2, off-1];
   const ms = weeks.map(salesWeekMetrics);
   const avg = k => ms.reduce((a,x) => a + (x[k]||0), 0) / ms.length;
-  // Conversion: pool sales/calls across the 4 weeks (smoother than averaging weekly ratios).
-  let c = 0, s = 0;
-  weeks.forEach(i => { c += getScoredCallsForWeek(i).length; s += getTransSalesForWeek(i).length; });
+  // Pool numerators/denominators across the 4 weeks (smoother than averaging weekly ratios).
+  let c = 0, s = 0, ap = 0;
+  weeks.forEach(i => {
+    const sc = getScoredCallsForWeek(i);
+    c += sc.length;
+    s += getTransSalesForWeek(i).length;
+    ap += sc.filter(x => x.apptBooked === 'Yes').length;
+  });
   return { total: avg('total'), transUnits: avg('transUnits'), transRev: avg('transRev'),
            autoUnits: avg('autoUnits'), autoRev: avg('autoRev'), calls: avg('calls'),
-           conv: c > 0 ? (s/c)*100 : null };
+           conv: c > 0 ? (s/c)*100 : null,
+           bookRate: c > 0 ? (ap/c)*100 : null };
 }
 // Plain-English "why it moved": ranks the biggest week-over-week drivers, returns top 3.
 function salesWeekWhy(off) {
@@ -2107,6 +2113,9 @@ function salesWeekWhy(off) {
   return { totalDelta, hasLast: lw.total > 0 || lw.calls > 0, top: drivers.slice(0,3).map(d => d.txt) };
 }
 
+// v8.4: Weekly targets shown on the printable report. Edit these three numbers anytime.
+const REPORT_GOALS = { transUnitsPerWk: 8, apptRatePct: 40, transConvPct: 30 };
+
 function printSalesReport() {
   if (!allSales.length) { alert('Sales data not loaded yet.'); return; }
   const off = salesWeekOff;
@@ -2129,17 +2138,21 @@ function printSalesReport() {
   const why = salesWeekWhy(off);
   const callsThis = getScoredCallsForWeek(off).length;
   const callsLast = getScoredCallsForWeek(off-1).length;
-  if (avg4.total > 0) delta += ' · 4-wk avg ' + m(avg4.total);
+  if (avg4.total > 0) { const p = Math.round((total - avg4.total) / avg4.total * 100); delta += ' · ' + (p>=0?'+':'') + p + '% vs 4-wk avg (' + m(avg4.total) + ')'; }
   const convAvg4 = avg4.conv === null ? null : Math.round(avg4.conv);
   const callsAvg4 = avg4.calls ? avg4.calls.toFixed(0) : '0';
   const callsPctVs4 = avg4.calls > 0 ? Math.round((callsThis - avg4.calls) / avg4.calls * 100) : null;
-  // v8.3: automotive split + appointments booked (from scored-call apptBooked flag).
-  const autoPrimary = wk.filter(s => s.isPrimary && s.jobType === 'Automotive');
-  const autoUnits = autoPrimary.length;
-  const autoRev = autoPrimary.reduce((a,b) => a + (b.saleAmount||0), 0);
+  // v8.4: "Automotive" = everything that isn't a primary transmission deal (auto + service + other).
+  // Counts/revenue are total minus transmission, so Transmission + Automotive reconcile to the week.
+  const autoUnits = count - transU.length;
+  const autoRev = total - transRev;
+  // Appointments booked (from scored-call apptBooked flag) + rolling 4-wk booking rate.
   const apptsThis = getScoredCallsForWeek(off).filter(c => c.apptBooked === 'Yes').length;
   const apptsLast = getScoredCallsForWeek(off-1).filter(c => c.apptBooked === 'Yes').length;
   const bookRate = callsThis > 0 ? (apptsThis / callsThis) * 100 : null;
+  const bookRateAvg4 = avg4.bookRate === null ? null : Math.round(avg4.bookRate);
+  // Weighted avg margin for the week's delivered jobs that have cost data entered.
+  const mar = getMarginStatsForWeek(off);
   // Build the "Why This Week Moved" block (top 2-3 drivers, plain sentences).
   let whyHtml;
   if (!why.hasLast) {
@@ -2159,8 +2172,10 @@ function printSalesReport() {
   const advRows = advisors.map(a=>{
     const mine=wk.filter(s=>(s.advisor||'').toLowerCase()===a.toLowerCase()), mp=mine.filter(s=>s.isPrimary);
     const mt=mine.reduce((s,x)=>s+(x.saleAmount||0),0), mpt=mp.reduce((s,x)=>s+(x.saleAmount||0),0);
-    const c=mp.length, mar=c?mpt/c:0, tu=getTransSalesForWeek(off,a).length, cc=convPctWeek(off,a);
-    return `<tr><td>${esc(a)}</td><td class=r>${c}</td><td class=r>${m(mt)}</td><td class=r>${c?m(mar):'—'}</td><td class=r>${tu}</td><td class=r>${cc===null?'—':Math.round(cc)+'%'}</td></tr>`;
+    const c=mp.length, aroA=c?mpt/c:0, tu=getTransSalesForWeek(off,a).length, cc=convPctWeek(off,a);
+    const myAppts=getScoredCallsForWeek(off,a).filter(x=>x.apptBooked==='Yes').length;
+    const pctSales=total>0?Math.round(mt/total*100):0;
+    return `<tr><td>${esc(a)}</td><td class=r>${m(mt)}</td><td class=r>${pctSales}%</td><td class=r>${c?m(aroA):'—'}</td><td class=r>${myAppts}</td><td class=r>${tu}</td><td class=r>${cc===null?'—':Math.round(cc)+'%'}</td></tr>`;
   }).join('');
 
   const byType={}; transU.forEach(s=>{const k=s.transType||'(unspecified)'; (byType[k]=byType[k]||{u:0,r:0}); byType[k].u++; byType[k].r+=(s.saleAmount||0);});
@@ -2175,11 +2190,12 @@ function printSalesReport() {
   const transPct = total>0?Math.round(transRev/total*100):0;
 
   const body = `<style>
-    table{border-collapse:collapse;width:100%;margin:6px 0 14px;font-size:12px;}
-    th,td{border-bottom:1px solid #ddd;padding:5px 8px;text-align:left;}
+    table{border-collapse:collapse;width:100%;margin:4px 0 9px;font-size:12px;}
+    th,td{border-bottom:1px solid #ddd;padding:3px 6px;text-align:left;}
     td.r,th.r{text-align:right;}
     tr.tot td{font-weight:bold;border-top:2px solid #111;background:#fafafa;}
-    h2{font-size:13px;color:#C8102E;border-bottom:1px solid #eee;padding-bottom:3px;margin:18px 0 6px;text-transform:uppercase;letter-spacing:1px;}
+    h2{font-size:13px;color:#C8102E;border-bottom:1px solid #eee;padding-bottom:3px;margin:11px 0 4px;text-transform:uppercase;letter-spacing:1px;}
+    p{margin:5px 0;}
     </style>
     <h1>ATR Weekly Sales Report</h1>
     <div class="meta">WEEK ${isoWeekNum(getWkStart(off))} · ${esc(fmtWkLabel(off))} · Generated ${new Date().toLocaleString()}</div>
@@ -2187,20 +2203,21 @@ function printSalesReport() {
     <table>
       <tr><td>Sales Total</td><td class=r><b>${m(total)}</b></td><td>${delta}</td></tr>
       <tr><td>Collected</td><td class=r>${m(collected)}</td><td>cash in this week · vs ${m(total)} sold</td></tr>
-      <tr><td>Transmission</td><td class=r>${transU.length}</td><td>${transU.length?m(transRev)+' sold':'no trans deals'}</td></tr>
-      <tr><td>Automotive</td><td class=r>${autoUnits}</td><td>${autoUnits?m(autoRev)+' sold':'no automotive'}</td></tr>
-      <tr><td>Avg Repair Order</td><td class=r>${count?m(aro):'—'}</td><td>per new deal</td></tr>
       <tr><td>Calls Handled</td><td class=r>${callsThis}</td><td>${callsLast} last week${callsPctVs4!==null?' · '+(callsPctVs4>=0?'+':'')+callsPctVs4+'% vs 4-wk avg':''}</td></tr>
-      <tr><td>Appts Booked</td><td class=r>${apptsThis}</td><td>${bookRate!==null?Math.round(bookRate)+'% of calls · ':''}${apptsLast} last week</td></tr>
-      <tr><td>Trans Conversion</td><td class=r>${cv===null?'—':Math.round(cv)+'%'}</td><td>${transU.length} units / ${callsThis} calls${convAvg4!==null?' · 4-wk avg '+convAvg4+'%':''}</td></tr>
+      <tr><td>Appts Booked</td><td class=r>${apptsThis}</td><td>${bookRate!==null?Math.round(bookRate)+'% of calls':'booking rate'} · goal ${REPORT_GOALS.apptRatePct}%${bookRateAvg4!==null?' · 4-wk avg '+bookRateAvg4+'%':''}</td></tr>
+      <tr><td>Transmission</td><td class=r>${transU.length}</td><td>${transU.length?m(transRev)+' sold':'no trans deals'} · goal ${REPORT_GOALS.transUnitsPerWk}/wk</td></tr>
+      <tr><td>Automotive <span style="color:#888;font-weight:normal;">(all other)</span></td><td class=r>${autoUnits}</td><td>${autoUnits>0?m(autoRev)+' sold':'none'}</td></tr>
+      <tr><td>Avg Repair Order</td><td class=r>${count?m(aro):'—'}</td><td>per job sold</td></tr>
+      <tr><td>Avg Margin</td><td class=r>${mar.avgMargin!==null?Math.round(mar.avgMargin)+'%':'—'}</td><td>${mar.jobs?mar.jobs+(mar.jobs===1?' job':' jobs')+' w/ cost data · pre-tax':'no cost data yet'}</td></tr>
+      <tr><td>Trans Conversion</td><td class=r>${cv===null?'—':Math.round(cv)+'%'}</td><td>${transU.length} units / ${callsThis} calls · goal ${REPORT_GOALS.transConvPct}%${convAvg4!==null?' · 4-wk avg '+convAvg4+'%':''}</td></tr>
     </table>
     <h2>Why This Week Moved</h2>
     ${whyHtml}
     <h2>By Advisor</h2>
     <table>
-      <thead><tr><th>Advisor</th><th class=r>Deals</th><th class=r>Sales Total</th><th class=r>ARO</th><th class=r>Trans Units</th><th class=r>Trans Conv.</th></tr></thead>
-      <tbody>${advRows || '<tr><td colspan=6>No sales recorded this week.</td></tr>'}
-      <tr class=tot><td>Total</td><td class=r>${count}</td><td class=r>${m(total)}</td><td class=r>${count?m(aro):'—'}</td><td class=r>${transU.length}</td><td class=r>${cv===null?'—':Math.round(cv)+'%'}</td></tr></tbody>
+      <thead><tr><th>Advisor</th><th class=r>Sales Total</th><th class=r>% of Sales</th><th class=r>ARO</th><th class=r>Appts</th><th class=r>Trans Units</th><th class=r>Trans Conv.</th></tr></thead>
+      <tbody>${advRows || '<tr><td colspan=7>No sales recorded this week.</td></tr>'}
+      <tr class=tot><td>Total</td><td class=r>${m(total)}</td><td class=r>100%</td><td class=r>${count?m(aro):'—'}</td><td class=r>${apptsThis}</td><td class=r>${transU.length}</td><td class=r>${cv===null?'—':Math.round(cv)+'%'}</td></tr></tbody>
     </table>
     <h2>Transmission Focus</h2>
     <p>Of ${m(total)} booked this week, <b>${m(transRev)} (${transPct}%)</b> came from transmission jobs; ${m(total-transRev)} (${100-transPct}%) from automotive / other.</p>
