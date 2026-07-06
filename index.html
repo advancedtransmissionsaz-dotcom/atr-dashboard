@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v8.4 (v4 audited)</title>
+<title>ATR Call Intelligence v8.5 (printable coaching)</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -167,6 +167,31 @@ body { background: var(--black); color: var(--text); font-family: 'DM Sans', san
 .modal-tab.active { color: var(--text); border-bottom-color: var(--red); }
 .modal-tab-content { display: none; }
 .modal-tab-content.active { display: block; }
+.pk-pack{color:var(--text);}
+.pk-cover,.pk-call,.pk-recap{margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:6px;background:var(--surface);}
+.pk-h1{font-size:22px;font-weight:800;}
+.pk-sub{color:var(--text-muted);font-size:12px;margin-bottom:12px;}
+.pk-metrics{display:flex;gap:1px;background:var(--border);margin:8px 0;}
+.pk-metric{flex:1;background:var(--surface2);padding:10px;text-align:center;}
+.pk-metric-v{font-family:'Bebas Neue',sans-serif;font-size:24px;}
+.pk-metric-l{font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;}
+.pk-focus{border-left:3px solid var(--red);padding:10px 12px;margin:10px 0;background:rgba(27,42,74,0.06);}
+.pk-sec{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);padding-bottom:3px;margin:14px 0 6px;}
+.pk-table{width:100%;border-collapse:collapse;font-size:13px;}
+.pk-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-family:'DM Mono',monospace;padding:5px 8px;border-bottom:1px solid var(--border);}
+.pk-table td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:top;}
+.pk-callhead{border:1px solid var(--border);border-left:3px solid var(--red);padding:10px 12px;margin-bottom:8px;}
+.pk-ch-role{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);}
+.pk-ch-name{font-size:16px;font-weight:700;}
+.pk-ch-meta{font-size:12px;color:var(--text-muted);font-weight:400;}
+.pk-ch-score{font-family:'Bebas Neue',sans-serif;font-size:30px;}
+.pk-ch-band{font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:1px;}
+.pk-ch-phases{font-size:12px;color:var(--text-muted);margin-top:4px;}
+.pk-read,.pk-body{line-height:1.7;}
+.pk-transcript{font-size:12px;line-height:1.5;border:1px solid var(--border);background:var(--surface2);padding:10px 12px;margin:4px 0 8px;}
+.pk-transcript strong{font-weight:700;}
+.pk-recap-title{font-size:18px;font-weight:800;border-bottom:2px solid var(--red);padding-bottom:4px;}
+
 .modal-score-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
 .modal-phase { background: var(--surface2); padding: 14px; text-align: center; }
 .modal-phase-label { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
@@ -1532,7 +1557,7 @@ function mdToHtml(text) {
 }
 
 // ============================================================================
-// v4 COACHING MODULE (per-call review + weekly pack). Added v8.2 (Jul 2026).
+// v4 COACHING MODULE (per-call review + weekly pack). Added v8.2, print rebuilt v8.5.
 // Coaching is derived from the v4 rubric turned toward the advisor, via a
 // DEDICATED system prompt (ATR_COACH_SYSTEM_PROMPT) so score and coaching can
 // never contradict. Scoring lives in the claudeCall() default prompt; the text
@@ -1585,6 +1610,62 @@ OUTPUT - per-call review. Return GitHub-flavored markdown in EXACTLY this struct
 **BOTTOM LINE:** one or two sentences on what would move this call's score up.
 
 Never use [vehicle] or [symptom] placeholders - always the real vehicle and symptom. Keep it tight and printable.`;
+
+// ---------------------------------------------------------------------------
+// PRINT (v8.5). The pack renders with .pk-* classes. On screen it uses the
+// .pk-* rules in the dashboard stylesheet; for print we open a fresh window
+// with this SELF-CONTAINED, black-and-white stylesheet so page breaks and
+// typography are fully controlled (the dashboard's CSS variables don't carry
+// into a new window). Each call and the recap start on a fresh page.
+// ---------------------------------------------------------------------------
+const PK_PRINT_CSS = `
+*{box-sizing:border-box;}
+@page{margin:0.55in;}
+body{font-family:Arial,Helvetica,sans-serif;color:#000;font-size:10.5pt;line-height:1.4;margin:0;}
+.pk-call,.pk-recap{page-break-before:always;}
+.pk-cover:first-child{page-break-before:avoid;}
+.pk-h1{font-size:21pt;font-weight:800;margin:0 0 2px;}
+.pk-sub{font-size:10pt;color:#444;margin:0 0 12px;}
+.pk-metrics{display:flex;border:1.5px solid #000;margin:10px 0;}
+.pk-metric{flex:1;text-align:center;padding:7px 4px;border-right:1px solid #999;}
+.pk-metric:last-child{border-right:none;}
+.pk-metric-v{font-size:17pt;font-weight:800;line-height:1.1;}
+.pk-metric-l{font-size:7pt;letter-spacing:1px;text-transform:uppercase;color:#333;}
+.pk-focus{border:1px solid #000;border-left:5px solid #000;padding:7px 10px;margin:10px 0;background:#f1f1f1;page-break-inside:avoid;}
+.pk-sec{font-size:9pt;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1.5px solid #000;padding-bottom:2px;margin:14px 0 6px;}
+.pk-table{width:100%;border-collapse:collapse;font-size:10pt;}
+.pk-table th{text-align:left;font-size:7.5pt;text-transform:uppercase;letter-spacing:1px;border-bottom:1.5px solid #000;padding:4px 6px;}
+.pk-table td{border-bottom:1px solid #bbb;padding:4px 6px;vertical-align:top;}
+.pk-callhead{border:1.5px solid #000;padding:8px 11px;margin-bottom:8px;page-break-inside:avoid;page-break-after:avoid;}
+.pk-ch-role{font-size:8.5pt;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
+.pk-ch-name{font-size:15pt;font-weight:800;margin:1px 0;}
+.pk-ch-meta{font-size:9pt;color:#333;font-weight:400;}
+.pk-ch-line{margin-top:3px;}
+.pk-ch-score{font-size:22pt;font-weight:800;}
+.pk-ch-band{font-weight:800;text-transform:uppercase;font-size:9pt;letter-spacing:1px;}
+.pk-ch-booked{font-size:9pt;}
+.pk-ch-phases{font-size:9pt;margin-top:4px;color:#222;}
+.pk-read{font-size:10.5pt;margin-bottom:4px;}
+.pk-transcript{font-size:8.6pt;line-height:1.35;border:1px solid #999;background:#f7f7f7;padding:8px 10px;margin:4px 0 8px;text-align:justify;}
+.pk-transcript strong{font-weight:800;}
+.pk-body{font-size:10.5pt;line-height:1.45;}
+.pk-body div{page-break-inside:avoid;}
+.pk-recap-title{font-size:16pt;font-weight:800;border-bottom:2.5px solid #000;padding-bottom:4px;}
+.pk-recap ul,.pk-cover ul{margin:4px 0;padding-left:18px;}
+.pk-recap li{margin:4px 0;}
+hr{border:none;border-top:1.5px solid #000;margin:10px 0;}
+h1,h2,h3{font-size:11pt;margin:8px 0 4px;}
+`;
+
+function printPkDoc(title, bodyHtml){
+  const w=window.open('','_blank');
+  if(!w){ alert('Popup blocked — allow popups for this site to print the pack.'); return; }
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+title+'</title><style>'+PK_PRINT_CSS+'</style></head><body>'+bodyHtml+'</body></html>');
+  w.document.close(); w.focus();
+  setTimeout(function(){ try{ w.print(); }catch(e){} }, 350);
+}
+function printPack(name){ const key=name.toLowerCase(); printPkDoc('ATR Weekly Coaching Pack — '+name, document.getElementById('wkRptTxt-'+key)?.innerHTML||''); }
+function printCoachPk(){ printPkDoc('ATR Per-Call Review', document.getElementById('coachRptTxt')?.innerHTML||''); }
 
 // DYNAMIC COACHING ENGINE. Reads the advisor's recent scored calls and decides
 // how DEEP to coach: Tier 1 fundamentals until they're consistently green, then
@@ -1641,50 +1722,64 @@ function pickWeeklyPack(coachable){
   return {best, improvable};
 }
 
-// Booked-rate-by-band table - the proof the coaching is working. If booked rate
-// climbs with the score, the coaching path is right. Uses ALL scoreable calls.
+// Booked-rate-by-band table (B&W, uses the dashboard's getBand buckets).
 function bookedRateByBandHTML(calls){
-  const order=[['Elite',9,99],['Strong',7,8.999],['Developing',5,6.999],['Needs Work',3,4.999],['Poor',0,2.999]];
-  const rows=order.map(([label,lo,hi])=>{
-    const inB=calls.filter(c=>c.total!==null&&c.total>=lo&&c.total<=hi);
+  const order=['Elite','Strong','Developing','Needs Work','Poor'];
+  const scored=calls.filter(c=>c.total!==null);
+  const rows=order.map(label=>{
+    const inB=scored.filter(c=>(c.band||getBand(c.total))===label);
     if(!inB.length) return '';
     const booked=inB.filter(c=>(c.apptBooked||'').toLowerCase()==='yes').length;
     const rate=Math.round(booked/inB.length*100);
-    const col=getBandColor(label);
-    return `<tr>
-      <td style="padding:6px 10px;border-bottom:1px solid var(--border);"><span style="color:${col};font-weight:600;">${label}</span> <span style="color:var(--text-muted);font-size:11px;">(${lo===9?'9.0+':lo.toFixed(1)+'-'+hi.toFixed(1)})</span></td>
-      <td style="padding:6px 10px;border-bottom:1px solid var(--border);text-align:center;">${inB.length}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid var(--border);text-align:center;font-weight:700;color:${rate>=50?'var(--green)':rate>=33?'var(--amber)':'var(--red)'}">${rate}%</td>
-    </tr>`;
+    return `<tr><td><strong>${label}</strong></td><td style="text-align:center;">${inB.length}</td><td style="text-align:center;font-weight:700;">${rate}%</td></tr>`;
   }).filter(Boolean).join('');
   if(!rows) return '';
-  return `<div style="margin:14px 0;">
-    <div class="modal-section-title" style="margin-bottom:8px;">Does the score predict booking?</div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead><tr style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;">
-        <th style="padding:6px 10px;text-align:left;">Band</th><th style="padding:6px 10px;">Calls</th><th style="padding:6px 10px;">Booked rate</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div style="font-size:11px;color:var(--text-muted);margin-top:6px;font-style:italic;">Booked rate should climb with the score. Flat across bands means the rubric is measuring the wrong things.</div>
-  </div>`;
+  return `<div class="pk-sec">Does the score predict booking?</div>
+    <table class="pk-table"><thead><tr><th>Band</th><th style="text-align:center;">Calls</th><th style="text-align:center;">Booked rate</th></tr></thead><tbody>${rows}</tbody></table>
+    <div style="font-size:9pt;color:#555;font-style:italic;margin-top:4px;">Booked rate should climb with the score. Flat across bands means the rubric is measuring the wrong things.</div>`;
 }
 
-// Build one full per-call review (metrics + AI notes + full transcript) as HTML.
+// Reformat the raw (unlabeled) transcript into inline, speaker-labeled, strictly
+// verbatim text, correcting obvious ASR mis-hears in [brackets]. Falls back to the
+// raw transcript if the model appears to have dropped content.
+async function formatTranscriptHTML(c){
+  const tx=getTx(c);
+  if(!tx) return '<div class="pk-transcript" style="font-style:italic;">No transcript stored for this call.</div>';
+  const adv=(c.advisor||'Advisor').split(/\s+/)[0];
+  const rawWords=tx.split(/\s+/).filter(Boolean).length;
+  let out='';
+  try{
+    const msg=`Reformat this raw call transcript for a printed coaching packet.
+RULES:
+1. Label every speaker turn inline: the ADVISOR (this is ${adv}; the one who answers "thanks for calling...") as **${adv}:** and the CUSTOMER as **Cust:**.
+2. Output ONE continuous flowing paragraph. Separate consecutive turns with " · " (space, middot, space). Do NOT put each turn on its own line; do NOT use line breaks or bullets.
+3. Keep EVERY word VERBATIM. Do not summarize, shorten, paraphrase, reorder, or omit anything.
+4. The ONLY change allowed: when a word is an OBVIOUS transcription error, replace it with the corrected word in [square brackets] (e.g. "Vance Transmission" -> "[Advanced] Transmission"; an obviously mis-heard shop name, vehicle, or number). Do NOT bracket ordinary words.
+5. Output ONLY the reformatted transcript text, nothing else.
+
+RAW TRANSCRIPT:
+${tx}`;
+    out=await claudeCall(msg, 3800, 'You reformat raw phone-call transcripts into clean, inline speaker-labeled, strictly verbatim text for coaching packets. You never summarize, drop, or reword content; you only add speaker labels and bracket obvious mis-hears.');
+  }catch(e){ out=''; }
+  const outWords=(out||'').replace(/\*\*/g,'').replace(/\[[^\]]*\]/g,' ').split(/\s+/).filter(Boolean).length;
+  if(!out || outWords < rawWords*0.75){
+    return `<div class="pk-transcript">${esc(tx)}</div>`;   // safety net: full raw transcript
+  }
+  return `<div class="pk-transcript">${mdToHtml(out.trim())}</div>`;
+}
+
+// Build one full per-call review page (v8.5 order: header -> The Read ->
+// full transcript -> phase breakdown / what worked / notes / bottom line).
 async function buildPerCallReviewHTML(c, opts){
   opts = opts || {};
-  const tx=getTx(c);
-  const band=c.band||getBand(c.total), bc=getBandColor(band);
-  const bookedYes=(c.apptBooked||'').toLowerCase()==='yes';
+  const band=c.band||getBand(c.total);
   const respect=(c.flags||'').toUpperCase().includes('RESPECT');
-  const phases=[['Phase 1',c.phase1,2.5],['Phase 2',c.phase2,2.5],['Phase 3',c.phase3,3.0],['Phase 4',c.phase4,2.0]];
-  const phaseChips=phases.map(([p,v,m])=>{
-    const pct=v?(v/m)*100:0, col=pct>=85?'var(--green)':pct>=65?'var(--amber)':'var(--red)';
-    return `<span style="display:inline-block;margin:2px 6px 2px 0;padding:3px 8px;background:var(--surface2);border-radius:3px;font-size:12px;"><span style="color:var(--text-muted);">${p}</span> <span style="color:${col};font-weight:700;">${v!==null?v:'—'}</span><span style="color:var(--text-muted);font-size:11px;">/${m}</span></span>`;
-  }).join('');
+  const tx=getTx(c);
   const truncTx=tx.length>4000?tx.substring(0,4000)+'...[truncated for analysis]':tx;
   const focus = opts.focus || coachingFocus(c.advisor, c.date);
+  // 1) coaching review (read + phase breakdown + what worked + notes + bottom line)
   let notesMd;
-  try {
+  try{
     const userMsg=`Write the per-call coaching review for this call.
 Advisor: ${c.advisor||'Unknown'}
 Customer: ${c.customerName||'Unknown'} | Vehicle: ${c.vehicle||'Unknown'} | Date: ${c.date||'Unknown'}
@@ -1699,39 +1794,58 @@ TRANSCRIPT:
 ${truncTx}`;
     notesMd=await claudeCall(userMsg, 1600, ATR_COACH_SYSTEM_PROMPT);
   } catch(e){ notesMd='**Could not generate coaching notes:** '+e.message; }
-  const label=opts.label?`<span style="font-size:11px;font-weight:700;letter-spacing:1px;color:${opts.labelColor||'var(--amber)'};text-transform:uppercase;">${opts.label}</span><br>`:'';
-  return `<div class="call-review-item" style="padding:16px;margin:14px 0;">
-    <div style="margin-bottom:10px;">${label}
-      <span style="font-size:16px;font-weight:700;">${c.customerName||'Customer'} · ${c.vehicle||'Vehicle'}</span>
-      <span style="color:var(--text-muted);font-size:12px;"> · ${fd(c.date)}</span>
+  // split THE READ out so it can sit before the transcript
+  let readPart='', restPart=notesMd;
+  const pbIdx=notesMd.search(/\*\*PHASE BREAKDOWN/i);
+  if(pbIdx>0){ readPart=notesMd.slice(0,pbIdx).trim(); restPart=notesMd.slice(pbIdx).trim(); }
+  const readClean=readPart.replace(/\*\*THE READ:?\*\*/i,'').trim();
+  // 2) labeled, verbatim transcript (async)
+  const transcriptHTML = await formatTranscriptHTML(c);
+  // 3) header banner
+  const roleLabel = opts.label || 'Call';
+  const callNo = opts.callNo ? `Call ${opts.callNo} of ${opts.callTotal}` : '';
+  const phaseLine = `Phase 1 ${c.phase1!=null?c.phase1:'—'}/2.5 · Phase 2 ${c.phase2!=null?c.phase2:'—'}/2.5 · Phase 3 ${c.phase3!=null?c.phase3:'—'}/3.0 · Phase 4 ${c.phase4!=null?c.phase4:'—'}/2.0`;
+  return `<div class="pk-call">
+    <div class="pk-callhead">
+      <div class="pk-ch-role">${esc(roleLabel)}${callNo?' · '+callNo:''}</div>
+      <div class="pk-ch-name">${esc(c.customerName||'Customer')} · ${esc(c.vehicle||'Vehicle')} <span class="pk-ch-meta">· ${fd(c.date)}</span></div>
+      <div class="pk-ch-line"><span class="pk-ch-score">${c.total!==null?c.total:'—'}</span> <span class="pk-ch-band">${band}</span> &nbsp;·&nbsp; <span class="pk-ch-booked">Appt: ${c.apptBooked||'—'} (tracked, not scored)</span>${respect?' &nbsp;·&nbsp; <span class="pk-ch-booked">⚠ Respect flag — on the listen list</span>':''}</div>
+      <div class="pk-ch-phases">${phaseLine}</div>
     </div>
-    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
-      <div><span style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:${bc};line-height:1;">${c.total!==null?c.total:'—'}</span> <span style="color:${bc};font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;">${band}</span></div>
-      <div style="padding:3px 10px;border-radius:3px;font-size:12px;font-weight:600;background:${bookedYes?'rgba(39,174,96,0.15)':'var(--surface2)'};color:${bookedYes?'var(--green)':'var(--text-muted)'};">Appt: ${c.apptBooked||'—'} <span style="font-weight:400;font-size:10px;">(tracked, not scored)</span></div>
-      ${respect?`<div style="padding:3px 10px;border-radius:3px;font-size:12px;font-weight:600;background:rgba(192,57,43,0.15);color:var(--red);">⚠ Respect flag — on the listen list</div>`:''}
-    </div>
-    <div style="margin-bottom:12px;">${phaseChips}</div>
-    <div class="report-output" style="white-space:normal;line-height:1.7;">${mdToHtml(notesMd)}</div>
-    ${tx?`<div class="modal-section-title" style="margin-top:14px;">Full transcript</div>
-    <div class="transcript-box" style="max-height:260px;overflow:auto;">${esc(tx)}</div>`:''}
+    ${readClean?`<div class="pk-sec">The Read</div><div class="pk-read">${mdToHtml(readClean)}</div>`:''}
+    <div class="pk-sec">Full Transcript</div>
+    ${transcriptHTML}
+    <div class="pk-body">${mdToHtml(restPart)}</div>
   </div>`;
 }
 
-// MODAL: single-call full review (v4). Replaces the old coaching-report button.
+// Closing recap page — the sheet the advisor keeps. Deterministic (no AI call).
+function recapPageHTML(name, focus, picks){
+  const items=picks.filter(Boolean).map(c=>`<li><strong>${esc(c.customerName||c.vehicle||'Call')}</strong> (${c.total}) — ${esc(c.topCoachingNote||'—')}</li>`).join('');
+  return `<div class="pk-recap">
+    <div class="pk-recap-title">This Week — ${esc(name)}: Key Things to Remember</div>
+    <div class="pk-focus" style="margin-top:12px;"><div style="font-weight:800;">Focus tier: ${focus.label} (Tier ${focus.tier})</div><div style="margin-top:3px;">${esc(focus.line)}</div><div style="margin-top:6px;"><strong>Drill first:</strong> ${focus.open.map(esc).join(' · ')}</div></div>
+    <div class="pk-sec">Per-call takeaways</div>
+    <ul>${items}</ul>
+    <div style="margin-top:16px;font-size:9.5pt;color:#555;font-style:italic;">Reviewed with ${esc(name)} on ____________________ .</div>
+  </div>`;
+}
+
+// MODAL: single-call full review (v8.5 print format).
 async function genCoachReport(idx) {
   const c=allCalls[idx];
   if(!getTx(c)){document.getElementById('coachGenOut').innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcript available for this call.</div>';return;}
   const btn=document.getElementById('coachGenBtn');
-  btn.disabled=true; btn.textContent='BUILDING REVIEW... (15-30s)';
-  document.getElementById('coachGenOut').innerHTML='<div class="loading"><div class="spinner"></div>Building the per-call review...</div>';
+  btn.disabled=true; btn.textContent='BUILDING REVIEW... (20-40s)';
+  document.getElementById('coachGenOut').innerHTML='<div class="loading"><div class="spinner"></div>Building the per-call review (scoring notes + labeled transcript)...</div>';
   try {
-    const html=await buildPerCallReviewHTML(c);
+    const html=await buildPerCallReviewHTML(c,{label:'Per-call review'});
     document.getElementById('coachGenOut').innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px;">
         <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ REVIEW READY</div>
-        <button class="print-btn" onclick="printCoachReport('${(c.advisor||'').replace(/'/g,"\\'")}','${(c.vehicle||'').replace(/'/g,"\\'")}','${(c.date||'').replace(/'/g,"\\'")}')">&#9114; PRINT</button>
+        <button class="print-btn" onclick="printCoachPk()">&#9114; PRINT</button>
       </div>
-      <div id="coachRptTxt">${html}</div>`;
+      <div id="coachRptTxt" class="pk-pack">${html}</div>`;
     btn.disabled=false; btn.textContent='REBUILD REVIEW';
   } catch(e) {
     document.getElementById('coachGenOut').innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error: ${e.message}</div>`;
@@ -1739,8 +1853,7 @@ async function genCoachReport(idx) {
   }
 }
 
-// WEEKLY PACK (v4): cover (metrics + booked-rate-by-band + themes + index) then
-// the four full per-call reviews (1 best + 3 most-improvable) for one advisor.
+// WEEKLY PACK (v8.5): cover page -> each call on its own page -> recap page.
 async function genWeeklyPack(name, wkOff) {
   const key=name.toLowerCase();
   const btn=document.getElementById(`wkPackBtn-${key}`);
@@ -1761,20 +1874,16 @@ async function genWeeklyPack(name, wkOff) {
   const r60A=rolling.length?avg(rolling.map(c=>c.total)):null;
   const lwScored=getWkCalls(wkOff-1).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
   const lwA=lwScored.length?avg(lwScored.map(c=>c.total)):null;
-  // Top themes by leverage (frequency x phase criticality) from the flags column.
   const flagCounts={};
   coachable.forEach(c=>(c.flags||'').split(/[;,]/).map(f=>f.trim()).filter(Boolean).forEach(f=>{flagCounts[f]=(flagCounts[f]||0)+1;}));
-  const themes=Object.entries(flagCounts).sort((a,b)=>b[1]-a[1]).slice(0,4)
-    .map(([f,n])=>`<li style="margin:2px 0;">${esc(f)} <span style="color:var(--text-muted);">- ${n} of ${coachable.length} coachable calls</span></li>`).join('');
-  // Respect-flagged calls join the listen list regardless of score.
+  const themes=Object.entries(flagCounts).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([f,n])=>`<li>${esc(f)} <span style="color:#666;">— ${n} of ${coachable.length}</span></li>`).join('');
   const respectCalls=scored.filter(c=>(c.flags||'').toUpperCase().includes('RESPECT'));
   const packLabel=fmtWkLabel(wkOff);
-  // Pack-level coaching tier (as of the end of this week) so the cover and all
-  // four reviews coach at the same depth.
   const packFocus=coachingFocus(name, getWkEnd(getWkStart(wkOff)));
 
   btn.disabled=true; btn.textContent='BUILDING PACK...';
-  outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Building ${name}'s weekly pack — cover + ${withTx.length} full reviews.<br><span style="font-size:11px;opacity:0.6;">Each review takes 20-40 seconds.</span></div>`;
+  outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Building ${name}'s weekly pack — cover + ${withTx.length} full reviews (each does scoring + a labeled transcript).<br><span style="font-size:11px;opacity:0.6;">This takes a couple of minutes.</span></div>`;
 
   try {
     const reviews=[];
@@ -1782,53 +1891,41 @@ async function genWeeklyPack(name, wkOff) {
       const c=withTx[i];
       const isBest=(c===best);
       btn.textContent=`BUILDING... (REVIEW ${i+1} OF ${withTx.length})`;
-      outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Reviewing ${(c.customerName||c.vehicle||'call')} (${i+1} of ${withTx.length})...</div>`;
-      const html=await buildPerCallReviewHTML(c,{label:isBest?'🏆 Best call':`↗ Most improvable ${improvable.length>1?'#'+i:''}`.trim(),labelColor:isBest?'var(--green)':'var(--amber)',focus:packFocus});
+      outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Reviewing ${esc(c.customerName||c.vehicle||'call')} (${i+1} of ${withTx.length})...</div>`;
+      const roleLabel=isBest?'Best call':(improvable.length>1?`Most improvable #${i}`:'Most improvable');
+      const html=await buildPerCallReviewHTML(c,{label:roleLabel,callNo:i+1,callTotal:withTx.length,focus:packFocus});
       reviews.push(html);
     }
     const indexRows=picks.map((c,i)=>{
       const isBest=(c===best);
       const why=isBest?'Best call — what good sounds like':(c.topCoachingNote||'Most improvable');
-      return `<tr>
-        <td style="padding:5px 8px;border-bottom:1px solid var(--border);color:${isBest?'var(--green)':'var(--amber)'};font-weight:600;">${isBest?'Best':'Improvable'}</td>
-        <td style="padding:5px 8px;border-bottom:1px solid var(--border);">${esc(c.customerName||'Customer')} · ${esc(c.vehicle||'Vehicle')}</td>
-        <td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:center;font-weight:700;color:${getBandColor(c.band||getBand(c.total))}">${c.total}</td>
-        <td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:center;">${c.apptBooked||'—'}</td>
-        <td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);">${esc(why)}</td>
-      </tr>`;
+      return `<tr><td><strong>${isBest?'Best':'Improvable'}</strong></td><td>${esc(c.customerName||'Customer')} · ${esc(c.vehicle||'Vehicle')}</td><td style="text-align:center;font-weight:700;">${c.total}</td><td style="text-align:center;">${c.apptBooked||'—'}</td><td style="font-size:9pt;color:#555;">${esc(why)}</td></tr>`;
     }).join('');
-    const cover=`<div class="call-review-item" style="padding:18px;margin:14px 0;border-color:var(--red);">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;">Weekly Coaching Pack — ${name}</div>
-      <div style="color:var(--text-muted);font-size:12px;margin-bottom:12px;">${packLabel}</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:8px;">
-        <div style="background:var(--surface2);padding:10px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;">${scored.length}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Scoreable</div></div>
-        <div style="background:var(--surface2);padding:10px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:${getBandColor(getBand(a))}">${a.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Week Avg</div></div>
-        <div style="background:var(--surface2);padding:10px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;">${Math.round(myAppts/scored.length*100)}%</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Booking Rate</div></div>
-        <div style="background:var(--surface2);padding:10px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;">${hi.toFixed(1)}/${lo.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">High / Low</div></div>
+    const cover=`<div class="pk-cover">
+      <div class="pk-h1">Weekly Coaching Pack — ${esc(name)}</div>
+      <div class="pk-sub">${packLabel}</div>
+      <div class="pk-metrics">
+        <div class="pk-metric"><div class="pk-metric-v">${scored.length}</div><div class="pk-metric-l">Scoreable</div></div>
+        <div class="pk-metric"><div class="pk-metric-v">${a.toFixed(1)}</div><div class="pk-metric-l">Week Avg</div></div>
+        <div class="pk-metric"><div class="pk-metric-v">${Math.round(myAppts/scored.length*100)}%</div><div class="pk-metric-l">Booking Rate</div></div>
+        <div class="pk-metric"><div class="pk-metric-v">${hi.toFixed(1)}/${lo.toFixed(1)}</div><div class="pk-metric-l">High / Low</div></div>
       </div>
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Last week avg: ${lwA?lwA.toFixed(1):'N/A'} · 60-day rolling: ${r60A?r60A.toFixed(1):'N/A'}</div>
-      <div style="margin:10px 0;padding:10px 12px;background:rgba(27,42,74,0.06);border-left:3px solid var(--red);border-radius:3px;">
-        <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:'DM Mono',monospace;">Coaching focus</div>
-        <div style="font-size:14px;font-weight:600;margin-top:2px;">${packFocus.line}</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${packFocus.tier===1?'On the table now':'Working on'}: ${packFocus.open.join(' · ')}</div>
-      </div>
+      <div style="font-size:9pt;color:#555;margin-bottom:6px;">Last week avg: ${lwA?lwA.toFixed(1):'N/A'} · 60-day rolling: ${r60A?r60A.toFixed(1):'N/A'}</div>
+      <div class="pk-focus"><div style="font-size:8pt;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">Coaching focus</div><div style="font-weight:700;margin-top:2px;">${esc(packFocus.line)}</div><div style="font-size:9.5pt;color:#333;margin-top:3px;">${packFocus.tier===1?'On the table now':'Working on'}: ${packFocus.open.map(esc).join(' · ')}</div></div>
       ${bookedRateByBandHTML(scored)}
-      ${themes?`<div class="modal-section-title" style="margin-top:12px;">Top coaching themes this week</div><ul style="margin:6px 0 0;padding-left:18px;font-size:13px;">${themes}</ul>`:''}
-      <div class="modal-section-title" style="margin-top:14px;">The four calls</div>
-      <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        <thead><tr style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;">
-          <th style="padding:5px 8px;text-align:left;">Role</th><th style="padding:5px 8px;text-align:left;">Call</th><th style="padding:5px 8px;">Score</th><th style="padding:5px 8px;">Booked</th><th style="padding:5px 8px;text-align:left;">Why it's in the pack</th></tr></thead>
-        <tbody>${indexRows}</tbody>
-      </table>
-      ${respectCalls.length?`<div style="margin-top:10px;padding:8px 10px;background:rgba(192,57,43,0.1);border-left:3px solid var(--red);font-size:12px;">⚠ Listen list add-ons (respect/tone flagged, regardless of score): ${respectCalls.map(c=>esc(c.customerName||c.vehicle||'call')+' ('+c.total+')').join(', ')}</div>`:''}
+      ${themes?`<div class="pk-sec">Top coaching themes this week</div><ul>${themes}</ul>`:''}
+      <div class="pk-sec">The four calls</div>
+      <table class="pk-table"><thead><tr><th>Role</th><th>Call</th><th style="text-align:center;">Score</th><th style="text-align:center;">Booked</th><th>Why it's in the pack</th></tr></thead><tbody>${indexRows}</tbody></table>
+      ${respectCalls.length?`<div style="margin-top:10px;padding:8px 10px;border:1px solid #000;font-size:9.5pt;">⚠ Listen-list add-ons (respect/tone flagged, regardless of score): ${respectCalls.map(c=>esc(c.customerName||c.vehicle||'call')+' ('+c.total+')').join(', ')}</div>`:''}
     </div>`;
+    const recap=recapPageHTML(name, packFocus, picks);
 
     outEl.innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 4px;">
         <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ WEEKLY PACK BUILT — ${withTx.length} REVIEWS</div>
-        <button class="print-btn" onclick="printWeeklyReport('${name}','${packLabel.replace(/'/g,"\\'")}')">&#9114; PRINT PACK</button>
+        <button class="print-btn" onclick="printPack('${name}')">&#9114; PRINT PACK</button>
       </div>
-      <div id="wkRptTxt-${key}">${cover}${reviews.join('')}</div>`;
+      <div id="wkRptTxt-${key}" class="pk-pack">${cover}${reviews.join('')}${recap}</div>`;
     btn.disabled=false; btn.textContent='REBUILD WEEKLY PACK';
   } catch(e){
     outEl.innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error building pack: ${e.message}</div>`;
