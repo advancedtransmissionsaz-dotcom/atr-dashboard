@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v8.3 (v4 + dynamic coaching)</title>
+<title>ATR Call Intelligence v8.4 (v4 audited)</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1557,7 +1557,12 @@ COACHING DEPTH - MATCH THE ADVISOR'S LEVEL (this is the most important rule). Co
 - TIER 3 - POLISH (only when fundamentals AND craft are consistently solid): a sharper way to phrase a line that already worked; a specific calming line for an anxious caller at the exact beat it was needed; cutting canned or repetitive delivery.
 You will be told this advisor's CURRENT TIER and their still-open fundamentals. The rule: only raise issues at or below the current tier. If ANY Tier 1 fundamental is still an open pattern for this advisor, do NOT bring up Tier 2 or Tier 3 items at all - keep the whole review on the fundamentals, even if smaller things could be nitpicked. Only on a call where every fundamental was genuinely handled well may you surface ONE next-tier item, framed as "now that the basics are solid...". Never bury a big miss under small ones. One or two fixes maximum, biggest first.
 
-DO NOT coach on: phone-number capture (CallerID handles it), warranty wording (varies by job type - trust the advisor), talk speed/pacing (not recoverable from a transcript), or scripted-close wording (any natural phrasing that lands a specific next step counts). Booked/not-booked is context only and is never part of the grade.
+DO NOT coach on: phone-number capture (CallerID handles it), warranty wording (varies by job type - trust the advisor; for reference ATR's is 3 years unlimited miles, in writing), talk speed/pacing (not recoverable from a transcript), or scripted-close wording (any natural phrasing that lands a specific next step counts). Booked/not-booked is context only and is never part of the grade.
+
+REFERENCE YOU CAN DRAW ON (raw material for natural lines - never paste verbatim as a script, and only surface what fits the advisor's current tier):
+- Weak lines worth upgrading when they hurt a moment: "it depends on a lot of things"; repeated "I'm not sure, let me check"; apologizing for price ("I know it's a lot," "that's our best price"); dead-end closes ("so what do you want to do?", "just let me know when you're ready", "does that sound okay?").
+- Objection reframes (say them in the advisor's own words): "I got a lower quote" -> that low is usually a used unit with a short warranty; we rebuild from scratch, 3-yr unlimited-mile warranty in writing, do it once vs. risk twice (never match price or name the competitor). "Talk to my spouse" -> offer to text a short summary (range, warranty, free diagnostic) or call the decision-maker. "Second opinion" -> encourage it; free diagnostic + written estimate so they compare apples to apples. "Just tell me over the phone" -> a guess on a transmission isn't worth much; the free diagnostic gives an exact answer, no commitment. "I'll wait and see" -> symptoms rarely stay static; a targeted repair today can become a full rebuild in 30-60 days (only when true). "No money right now" -> financing via Snap/EasyPay/Qualify (90-day same-as-cash) or Synchrony (~1 yr for strong credit, ~650+); worth a quick application, never quote a monthly payment.
+- Reading cues (match the caller's state): overwhelmed -> slow down, validate, plain English, one clear next step; skeptic -> don't get defensive, invite them to check the reviews, be specific; emergency/stranded -> lead with towing, compress questions, commit a same-day come-in; researcher -> match their level, add something they don't know, skip the basics.
 
 OUTPUT - per-call review. Return GitHub-flavored markdown in EXACTLY this structure and nothing else:
 
@@ -1899,9 +1904,8 @@ WARRANTY
 - If the customer is comparing shops or worried about durability, the warranty is the strongest trust signal — nobody in the valley offers 3 years with no mileage cap.
 
 FINANCING
-- ATR uses Snap Finance and EasyPay.
-- 90-day or 12-month same as cash options.
-- Never quote a monthly payment in a text.
+- ATR uses Snap, EasyPay, and Qualify (90-day same-as-cash), plus Synchrony (about 1 year same-as-cash) for strong credit (around 650+).
+- Match the option to the customer. Never quote a monthly payment in a text.
 - Only mention financing if the customer raised money as a concern on the call.`;
 
 async function claudeCall(userMsg, maxTokens=1500, systemOverride=null) {
@@ -1922,6 +1926,8 @@ CORE IDEAS (these govern everything):
 
 STEP 0 - CLASSIFY (score it, or not). Only genuine transmission REPAIR/REBUILD inquiries are scoreable (slipping, shuddering, won't move, harsh shifting, no gears, transmission warning light, noise/leak causing damage), inbound from a new/potential customer, OR a first-time outbound sales contact to a fresh lead. NOT SCOREABLE (classify only, do not score) when the call is: a NON-transmission problem (CV axle, driveshaft, wheel bearing, U-joint, engine, brakes, electrical, AC) even if the part is "near" or "touching" the transmission; LOGISTICS-ONLY/DEFERRED (whole call is towing/directions/scheduling and price+diagnosis pushed to a later call); CALLBACK ON A PRIOR QUOTE (financing/scheduling/accepting a quote already given); SERVICE-ONLY (fluid/flush/filter, no symptom); WARRANTY RETURN; VENDOR/SPAM/INTERNAL/EMPLOYEE; existing customer on a vehicle already in the shop; or UNDER 60 SECONDS. A caller who opens with a service request but reveals a symptom IS scoreable (the problem takes priority). Score only when the advisor had a real chance to advance the sale on THIS call.
 
+TRANSCRIPTION QUALITY (these are Deepgram auto-transcripts - accents, phone audio, and background noise garble words, names, and numbers). Score INTENT, not garble. Do NOT deduct for a garbled or mis-heard greeting, shop name, or advisor name - "Vanscast," "Banner Transmission," "Benz Transmission," and "Vans Transmission" are all ASR mishears of "Advanced Transmission"; assume the greeting was fine. Read obvious number garble in context ("48 to 52" or "4800 to 5200" = a $4,800-$5,200 range; "32" = $3,200). If the customer's name appears only once but the advisor clearly used it naturally, do not treat it as "used only once." Only deduct when a behavior is CLEARLY absent, never when the transcript is merely unclear - give the advisor the benefit of the doubt.
+
 STEP 1 - READ THE CALL (required before any number). Think it through, then write 2-3 plain sentences (the "read"): who is the customer and what did they want, and how did it shift during the call (price-shopper posture, researcher, overwhelmed/low-info, emergency/stranded, already-wants-to-come-in)? "Price shopper" is usually a POSTURE, not a type. What was the RIGHT objective for this state, and what were the key pivots? Transmission type only if it is a common, clearly-known unit.
 
 STEP 2 - WEIGH THE EVIDENCE (four phases + respect). Mark any criterion N/A when the customer's state makes it irrelevant; reweight around what applied.
@@ -1933,7 +1939,7 @@ RESPECT & RAPPORT (standalone axis, cap + flag): treat an anxious, vulnerable ca
 
 STEP 3 - SET THE SCORE (anchor-first). Compare to a perfect call (a 10) FOR THIS customer. Use the applicable criteria as evidence, weighting CRITICAL misses more than BASIC. Do NOT compute an arithmetic sum. Gates: price-before-expertise holds the call down (typically caps the ceiling in the 6s); a clear respect failure caps and flags. Placement: 9.0-10 Elite (reads the customer, adaptive+expert, value then a range, secures the come-in, respectful); 7.0-8.9 Strong (handled well, one real miss); 5.0-6.9 Developing (competent but several misses); 3.0-4.9 Needs Work (multiple core misses, price-dumped); 0-2.9 Poor (mishandled or disrespectful). A solid call with one real miss is ~7 not 6; a competent-but-robotic call that books and keeps control is ~7.5. Lean lenient: when a call sits between two bands, choose the higher, and reserve the bottom half of the scale for genuine mishandling or disrespect. Phase sub-scores are diagnostic only on the historical maxes (Phase 1 /2.5, Phase 2 /2.5, Phase 3 /3.0, Phase 4 /2.0); the total is the anchor-first judgment and need NOT equal their sum. A fully N/A phase outputs score 0, max 0, notes beginning "N/A -".
 
-STEP 4 - OUTPUT. If NOT SCOREABLE, return ONLY: {"scoreable":"No","scoreableReason":"<reason>","read":"<1-2 sentences>","customerName":"<if captured>","vehicle":"<if mentioned>","appointmentBooked":"<Yes/No>"}. If SCOREABLE, return ONLY raw JSON (no markdown, no fences), starting with { and ending with }, with these fields: read (2-3 sentence customer read), total (number), band, phase1/phase2/phase3/phase4 (each {score, max, notes}), respectFlag ("OK" or "FLAG: <what + quote>"), customerType, situationType, appointmentBooked (Yes/No), topCoachingNote (specific to THIS vehicle/symptom/moment), strengths (array), deductions (array), flags (string; semicolon-separated; empty if none), customerName, vehicle, scoreable ("Yes"), scoreableReason. Reason first: the read and rationale come before you commit to total. respectFlag "OK" when respectful; otherwise cap the total AND include "RESPECT" as one of the semicolon-separated entries in flags (this is what adds the call to the coaching listen list). Every note/flag must be specific to THIS call - never [vehicle] or [symptom] placeholders. Do NOT coach on phone-number capture (CallerID), warranty wording (varies by job type), talk speed (not recov`,
+STEP 4 - OUTPUT. If NOT SCOREABLE, return ONLY: {"scoreable":"No","scoreableReason":"<reason>","read":"<1-2 sentences>","customerName":"<if captured>","vehicle":"<if mentioned>","appointmentBooked":"<Yes/No>"}. If SCOREABLE, return ONLY raw JSON (no markdown, no fences), starting with { and ending with }, with these fields: read (2-3 sentence customer read), total (number), band, phase1/phase2/phase3/phase4 (each {score, max, notes}),`,
       messages:[{role:'user',content:userMsg}]
     })
   });
