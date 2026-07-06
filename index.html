@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v8.4</title>
+<title>ATR Call Intelligence v8.3 (v4 + dynamic coaching)</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1174,8 +1174,8 @@ function openModal(idx) {
     <button class="expand-btn" id="txBtn" onclick="toggleTx()">\u25bc SHOW FULL TRANSCRIPT</button>`
     :'<div class="empty-state"><div class="empty-icon">\ud83d\udcdd</div><div>No transcript available</div></div>';
   document.getElementById('mtab-coaching').innerHTML=`
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Generate a complete ATR coaching report for this call \u2014 full phase scoring with work shown, coaching flags with specific replacement language, and priority focus. Printable for advisor sessions.</p>
-    <button class="big-btn" id="coachGenBtn" onclick="genCoachReport(${idx})">GENERATE FULL COACHING REPORT</button>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Build the v4 per-call review \u2014 metrics and the customer read, phase-by-phase breakdown, the full transcript, and moment-by-moment "you said / next time" notes. Printable for coaching sessions.</p>
+    <button class="big-btn" id="coachGenBtn" onclick="genCoachReport(${idx})">BUILD PER-CALL REVIEW</button>
     <div id="coachGenOut"></div>`;
   document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active'));
@@ -1275,29 +1275,6 @@ function renderOutcomePanel(c) {
   </div>`;
 }
 
-// COACHING REPORT (single call)
-async function genCoachReport(idx) {
-  const c=allCalls[idx], tx=getTx(c);
-  if(!tx){document.getElementById('coachGenOut').innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcript available.</div>';return;}
-  const btn=document.getElementById('coachGenBtn');
-  btn.disabled=true; btn.textContent='GENERATING... (15-30 SECONDS)';
-  document.getElementById('coachGenOut').innerHTML='<div class="loading"><div class="spinner"></div>Analyzing call and building coaching report...</div>';
-  try {
-    const report=await claudeCall(
-      `Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show all raw scores, scaling math, deductions), WHAT WORKED (3 specific behaviors with transcript references), COACHING FLAGS (each with What to say instead using this exact vehicle/symptom/moment, and Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${c.advisor||'Unknown'}\nVehicle: ${c.vehicle||'Unknown'}\nDate: ${c.date||'Unknown'}\n\nTRANSCRIPT:\n${tx}`, 4000);
-    document.getElementById('coachGenOut').innerHTML=`
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">\u2713 REPORT GENERATED</div>
-      <button class="print-btn" onclick="printCoachReport('${(c.advisor||'').replace(/'/g,"\\'")}','${(c.vehicle||'').replace(/'/g,"\\'")}','${(c.date||'').replace(/'/g,"\\'")}')">&#9114; PRINT</button>
-      </div>
-      <div class="report-output" id="coachRptTxt">${esc(report)}</div>`;
-    btn.disabled=false; btn.textContent='REGENERATE REPORT';
-  } catch(e) {
-    document.getElementById('coachGenOut').innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error: ${e.message}</div>`;
-    btn.disabled=false; btn.textContent='GENERATE FULL COACHING REPORT';
-  }
-}
-
 function printCoachReport(advisor,vehicle,date) {
   const report=document.getElementById('coachRptTxt')?.textContent||'';
   printWindow(`ATR Coaching Report \u2014 ${advisor}`,`<h1>ATR Call Coaching Report</h1><div class="meta">${advisor} \u00b7 ${vehicle} \u00b7 ${date}</div><pre>${esc(report)}</pre>`);
@@ -1337,12 +1314,7 @@ function renderReport() {
       if (apptNoPriceCount > 0) parts.push(`${apptNoPriceCount} appt-without-price`);
       return parts.length ? ` · ${parts.join(' + ')} excluded from coaching` : '';
     })();
-    const sortedDesc=[...coachable].sort((a,b)=>b.total-a.total);
-    const best=sortedDesc[0]||null;
-    // Most Improvable: middle of the distribution (drop best AND worst), sorted
-    // by lowest score first so coaching tackles biggest gaps first. Capped at 3.
-    const middle=sortedDesc.slice(1,-1);
-    const improvable=[...middle].sort((a,b)=>a.total-b.total).slice(0,3);
+    const {best,improvable}=pickWeeklyPack(coachable);
     const callItem=(c,color,label)=>{
       const idx=allCalls.indexOf(c);
       return `<div class="call-review-item">
@@ -1367,12 +1339,10 @@ function renderReport() {
         <div style="background:var(--surface2);padding:12px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${lo<5?'var(--red)':'var(--amber)'}">${lo.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Week Low</div></div>
       </div>
       <div class="report-mode-btns">
-        <button class="report-mode-btn quick" id="wkRptBtnQuick-${key}" onclick="genWeeklyAdvisorReport('${name}', ${rptWeekOff}, 'quick')">QUICK REVIEW</button>
-        <button class="report-mode-btn deep" id="wkRptBtnDeep-${key}" onclick="genWeeklyAdvisorReport('${name}', ${rptWeekOff}, 'deep')">DEEP DIVE</button>
+        <button class="report-mode-btn deep" id="wkPackBtn-${key}" onclick="genWeeklyPack('${name}', ${rptWeekOff})">BUILD WEEKLY PACK</button>
       </div>
       <div class="report-mode-desc" id="wkRptDesc-${key}">
-        <strong>Quick Review</strong> \u2014 Monday coaching format. Best call + up to 3 most improvable + replacement language. Print and walk through in 20 min.<br>
-        <strong>Deep Dive</strong> \u2014 Phase-by-phase educational breakdown. For onboarding or poor call analysis.
+        <strong>Weekly Pack</strong> \u2014 1 best + 3 most-improvable, each a full per-call review (metrics + transcript + you said / next time), behind a cover with booked-rate-by-band. Print and walk it in the coaching session.
       </div>
       <div id="wkRptOut-${key}"></div>
       <div class="modal-section-title" style="margin-top:20px;">Calls to Review</div>
@@ -1388,203 +1358,6 @@ function renderReport() {
     <div class="stat-card blue"><div class="stat-label">Booking Rate</div><div class="stat-value">${Math.round(appts/scored.length*100)}%</div></div>
     </div>
     ${advisorCards}`;
-}
-
-// CHANGE #1: Two-mode weekly report generation
-async function genWeeklyAdvisorReport(name, wkOff, mode) {
-  const key=name.toLowerCase();
-  const btnQuick=document.getElementById(`wkRptBtnQuick-${key}`);
-  const btnDeep=document.getElementById(`wkRptBtnDeep-${key}`);
-  const outEl=document.getElementById(`wkRptOut-${key}`);
-  const scored=getWkCalls(wkOff).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
-  if(!scored.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No scored calls for this advisor this week.</div>';return;}
-  // v7.1: Apply isFirstContact() here too so the AI narrative skips follow-ups.
-  // v7.2: Also apply the APPT_WITHOUT_PRICE filter via isCoachable.
-  // Selection: Best + up to 3 Most Improvable. Worst call intentionally dropped
-  // (usually a misclassified non-lead — see renderReport for full rationale).
-  const coachable=scored.filter(isCoachable);
-  if(!coachable.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No coachable calls this week (all were follow-ups or appointments booked without price discussion).</div>';return;}
-  const sortedDesc=[...coachable].sort((a,b)=>b.total-a.total);
-  const best=sortedDesc[0]||null;
-  const middle=sortedDesc.slice(1,-1);
-  const improvable=[...middle].sort((a,b)=>a.total-b.total).slice(0,3);
-  const callsToReport=[best,...improvable].filter(Boolean);
-  const txAvailable=callsToReport.filter(c=>getTx(c).length>50);
-  if(!txAvailable.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcripts available for these calls. Cannot generate report.</div>';return;}
-  btnQuick.disabled=true; btnDeep.disabled=true;
-  const modeLabel = mode==='quick' ? 'QUICK REVIEW' : 'DEEP DIVE';
-  btnQuick.textContent=mode==='quick'?`GENERATING ${modeLabel}...`:'QUICK REVIEW';
-  btnDeep.textContent=mode==='deep'?`GENERATING ${modeLabel}...`:'DEEP DIVE';
-  outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Generating ${modeLabel.toLowerCase()} for ${name}...<br><span style="font-size:11px;opacity:0.6;">Analyzing ${txAvailable.length} calls \u2014 this takes 60-90 seconds</span></div>`;
-
-  const a=avg(scored.map(c=>c.total));
-  const hi=Math.max(...scored.map(c=>c.total)), lo=Math.min(...scored.map(c=>c.total));
-  const myAppts=scored.filter(c=>c.apptBooked==='Yes').length;
-  const now=new Date(), d60=new Date(now); d60.setDate(d60.getDate()-60);
-  const rolling=allCalls.filter(c=>{const d=pd(c.date);return d&&d>=d60&&c.total!==null&&(c.advisor||'').toLowerCase().includes(key);});
-  const r60A=rolling.length?avg(rolling.map(c=>c.total)):null;
-  const lwScored=getWkCalls(wkOff-1).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
-  const lwA=lwScored.length?avg(lwScored.map(c=>c.total)):null;
-
-  // v7.1: labels match new selection (best + up to 3 most improvable). Built
-  // dynamically so the label always matches the actual call index.
-  const callLabels=callsToReport.map((c,i)=>{
-    if(i===0) return 'BEST CALL';
-    if(callsToReport.length===2) return 'MOST IMPROVABLE CALL';
-    return `MOST IMPROVABLE CALL #${i}`;
-  });
-  const callReports=[];
-
-  try {
-    for(let i=0;i<txAvailable.length;i++){
-      const c=txAvailable[i];
-      const tx=getTx(c);
-      const truncTx=tx.length>4000?tx.substring(0,4000)+'...[transcript truncated for length]':tx;
-      const activeBtn = mode==='quick' ? btnQuick : btnDeep;
-      activeBtn.textContent=`GENERATING... (CALL ${i+1} OF ${txAvailable.length})`;
-      outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Analyzing ${callLabels[i].toLowerCase()} (${i+1} of ${txAvailable.length})...<br><span style="font-size:11px;opacity:0.6;">Each call takes 20-40 seconds</span></div>`;
-
-      let prompt;
-      if (mode === 'quick') {
-        // CHANGE #1: Quick Review prompt - coach reviewing film
-        prompt = `You are generating a QUICK REVIEW coaching report for a Monday coaching session at Advanced Transmission Repair. This is NOT a grading rubric. Write like a coach reviewing game film with a player.
-
-CALL INFO:
-Advisor: ${name}
-Customer: ${c.customerName||'Unknown'} | Vehicle: ${c.vehicle||'Unknown'}
-Score: ${c.total} (${c.band}) | Appt: ${c.apptBooked||'Unknown'}
-This is the ${callLabels[i]} of the week.
-
-FORMAT (follow exactly):
----
-${c.customerName||'Customer'} | ${c.vehicle||'Vehicle'} | ${c.total} ${c.band} | ${callLabels[i]}
-
-WHAT WORKED:
-[1-2 lines. What the advisor did well on this specific call. Reference a specific moment.]
-
-MAKE IT BETTER:
-[1-2 coaching flags MAXIMUM. Pick only the highest-impact moments. Each one follows this EXACT format:]
-
-> "[exact quote from transcript where the mistake happened]"
-> SAY THIS: "[specific replacement using this customer's actual name, vehicle, and situation - written exactly how a confident advisor would say it on the phone, ready to read aloud]"
-> WHY: [one sentence on the psychology or technique]
-
-[blank line between each flag. Do NOT include a PATTERN line - that belongs in Deep Dive only.]
----
-
-RULES:
-- No scoring tables, no phase breakdowns, no point math
-- No headers like "SCORECARD" or "PHASE 1"
-- Write replacement language using the ACTUAL customer name, vehicle, and symptom from this call
-- Tone: direct, constructive, like a coach who wants this advisor to win
-- Keep it tight - this gets printed and discussed in 20 minutes
-- The close standard is securing a specific committed time to come in for the free diagnostic — any natural phrasing counts. Only flag the close if it was left open-ended (no scripted two-choice required).
-- Do not flag warranty wording. Trust the advisor's warranty call.
-
-TRANSCRIPT:
-${truncTx}`;
-      } else {
-        // CHANGE #1: Deep Dive prompt - educational phase-by-phase
-        prompt = `You are generating a DEEP DIVE educational coaching report for Advanced Transmission Repair. This format walks through each phase of the call framework and explains what happened, what should have happened, and why it matters. Used for onboarding new advisors or breaking down poor calls.
-
-CALL INFO:
-Advisor: ${name}
-Customer: ${c.customerName||'Unknown'} | Vehicle: ${c.vehicle||'Unknown'}
-Score: ${c.total} (${c.band}) | Appt: ${c.apptBooked||'Unknown'}
-This is the ${callLabels[i]} of the week.
-
-FORMAT (follow exactly):
----
-${c.customerName||'Customer'} | ${c.vehicle||'Vehicle'} | ${c.total} ${c.band} | ${callLabels[i]}
-
-PHASE 1 - ESTABLISH CONTROL (${c.phase1||'?'}/2.5)
-[Plain language explanation of what happened in the opening. What did the advisor do or miss? Example: "${name} answered professionally but jumped straight to 'how can I help you' without taking control of the conversation. The customer immediately asked for a price, and ${name} gave it." Then explain WHY this phase matters - not rubric language, coach language. Include specific transcript moments.]
-
-PHASE 2 - DIAGNOSTIC QUESTIONS (${c.phase2||'?'}/2.5)
-[Same format. What diagnostic questions were asked or skipped? Did the advisor name the transmission model? Summarize back before quoting? Explain why the diagnostic phase earns the right to quote premium.]
-
-PHASE 3 - DELIVERING PRICE (${c.phase3||'?'}/3.0)
-[Same format. Was value stated before price? Was the confirmation hook used? Bridge question? How was a competing quote handled if applicable? Explain the sandwich method and why each element matters.]
-
-PHASE 4 - CLOSING (${c.phase4||'?'}/2.0)
-[Same format. Did the advisor ask for the appointment and land on a SPECIFIC committed next step — the standard is offering to get the vehicle in for the free diagnostic at a specific time? Any natural phrasing counts; a scripted two-choice close is NOT required or preferred. Explain why leaving it open ("let me know," "call me back") is a lost lead. Note: do NOT coach on capturing the phone number — ATR uses CallerID, so the phone is captured automatically regardless of what the advisor says.]
-
-KEY COACHING FLAGS:
-[2-3 most impactful flags, each with:]
-> "[exact transcript quote]"
-> SAY THIS: "[specific replacement using actual customer details]"
-> WHY: [educational explanation of the technique]
-
-PRIORITY FOCUS:
-[Single most important thing to work on next call. One sentence.]
----
-
-RULES:
-- Write like a coach explaining the game to someone learning it
-- Show phase scores but explain them in context, not as math tables
-- Use actual transcript quotes to illustrate points
-- Replacement language must use THIS customer's name, vehicle, and situation
-- This is educational - explain the WHY behind every observation
-
-TRANSCRIPT:
-${truncTx}`;
-      }
-
-      try {
-        const r=await claudeCall(prompt, 2000);
-        callReports.push(r);
-      } catch(callErr) {
-        callReports.push(`${callLabels[i]} \u2014 Score ${c.total}\nCould not generate report for this call: ${callErr.message}`);
-      }
-    }
-
-    // Generate THIS WEEK'S FOCUS for Quick Review (after all calls analyzed)
-    // v7.3: Ground the focus in REAL frequency across ALL coachable calls, not an
-    // impression from the 3-4 spotlight reports. Averages phase scores and counts
-    // flags so the headline pattern survives an advisor's pushback ("that's just my
-    // 3 worst calls"). Also names one genuine strength to keep.
-    let weekFocus = '';
-    if (mode === 'quick') {
-      try {
-        const nC = coachable.length;
-        const pAvg = p => avg(coachable.map(c => +c[p] || 0)).toFixed(1);
-        const flagCounts = {};
-        coachable.forEach(c => (c.flags || '').split(',').map(f => f.trim()).filter(Boolean)
-          .forEach(f => { flagCounts[f] = (flagCounts[f] || 0) + 1; }));
-        const topFlags = Object.entries(flagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6)
-          .map(([f, n]) => `"${f}" on ${n} of ${nC}`).join('; ') || 'none recorded';
-        const focusPrompt = `You are writing the "THIS WEEK'S FOCUS" for ${name}'s coaching report at Advanced Transmission Repair. Ground EVERY claim in the data below. Do NOT generalize from a handful of calls — use the real frequency numbers so the advisor cannot dismiss it as cherry-picking.
-
-DATA ACROSS ALL ${nC} COACHABLE CALLS THIS WEEK (follow-ups and appointment-without-price already excluded):
-- Average phase scores: Phase 1 Control ${pAvg('phase1')}/2.5, Phase 2 Diagnostic ${pAvg('phase2')}/2.5, Phase 3 Price ${pAvg('phase3')}/3.0, Phase 4 Close ${pAvg('phase4')}/2.0
-- Most frequent coaching flags: ${topFlags}
-- Booking rate: ${myAppts} of ${scored.length} calls booked an appointment
-
-Pick the SINGLE highest-leverage pattern, ranked by frequency and by phase value (Phase 3 price and Phase 4 close move booking the most). State the REAL frequency in the sentence (e.g., "the close was left open on 9 of ${nC} calls" or "Phase 3 averaged ${pAvg('phase3')}/3.0"). Then name ONE genuine strength worth keeping. 3-4 sentences, direct and specific. No placeholders, no "see below."`;
-        weekFocus = await claudeCall(focusPrompt, 500);
-      } catch(e) { weekFocus = 'Could not generate focus summary.'; }
-    }
-
-    // Build header
-    const header = mode === 'quick'
-      ? `QUICK REVIEW \u2014 ${name.toUpperCase()} \u2014 ${fmtWkLabel(wkOff)}\n${'='.repeat(55)}\n${scored.length} calls scored | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)} | Appts: ${myAppts}/${scored.length}\nLast week: ${lwA?lwA.toFixed(1):'N/A'} | 60-day rolling: ${r60A?r60A.toFixed(1):'N/A'}\n\nTHIS WEEK'S FOCUS:\n${weekFocus}\n${'='.repeat(55)}\n\n`
-      : `DEEP DIVE \u2014 ${name.toUpperCase()} \u2014 ${fmtWkLabel(wkOff)}\n${'='.repeat(55)}\n${scored.length} calls scored | Week avg: ${a.toFixed(1)} (${getBand(a)}) | High: ${hi.toFixed(1)} | Low: ${lo.toFixed(1)} | Appts: ${myAppts}/${scored.length}\n${'='.repeat(55)}\n\n`;
-
-    const weeklyReport = header + callReports.join('\n\n' + '='.repeat(55) + '\n\n');
-
-    outEl.innerHTML=`
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px;">
-      <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">\u2713 ${modeLabel} GENERATED \u2014 ${txAvailable.length} CALLS ANALYZED</div>
-      <button class="print-btn" onclick="printWeeklyReport('${name}','${fmtWkLabel(wkOff).replace(/'/g,"\\'")}')">&#9114; PRINT REPORT</button>
-      </div>
-      <div class="report-output" id="wkRptTxt-${key}" style="white-space:normal;line-height:1.7;">${mdToHtml(weeklyReport)}</div>`;
-    btnQuick.disabled=false; btnDeep.disabled=false;
-    btnQuick.textContent='QUICK REVIEW'; btnDeep.textContent='DEEP DIVE';
-  } catch(e) {
-    outEl.innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error generating report: ${e.message}</div>`;
-    btnQuick.disabled=false; btnDeep.disabled=false;
-    btnQuick.textContent='QUICK REVIEW'; btnDeep.textContent='DEEP DIVE';
-  }
 }
 
 function printWeeklyReport(name, week) {
@@ -1617,8 +1390,8 @@ async function runScorer() {
   out.className='tool-output visible';
   out.textContent='Analyzing call... 15-30 seconds';
   try {
-    const r=await claudeCall(`Generate a complete human-readable ATR coaching report. NOT JSON. Include all sections: CALL SUMMARY, SCORECARD (show raw scores for each criterion, scaling math, deductions per phase), WHAT WORKED (3 specific behaviors with exact transcript moments), COACHING FLAGS (each with: what happened, exact transcript quote where it occurred, point impact, What to say instead using THIS vehicle/symptom/moment, Why this works), PRIORITY FOCUS, KILL PHRASES DETECTED.\n\nAdvisor: ${adv}\n\nTRANSCRIPT:\n${tx}`, 4000);
-    out.textContent=r;
+    const r=await claudeCall(`Score this call per the v4 rubric, then write the per-call coaching review. Determine the score, band, phase reads, and the customer read yourself from the transcript. Start with a line "**SCORE:** N.N (Band)" then follow the per-call review structure exactly (THE READ, PHASE BREAKDOWN, WHAT WORKED, COACHING NOTES, BOTTOM LINE).\n\nAdvisor: ${adv}\n\nTRANSCRIPT:\n${tx}`, 2000, ATR_COACH_SYSTEM_PROMPT);
+    out.innerHTML=mdToHtml(r);
     document.getElementById('scorerPrintBtn').style.display='inline-block';
     document.getElementById('scorerClearBtn').style.display='inline-block';
   } catch(e){out.textContent='Error: '+e.message;}
@@ -1758,6 +1531,306 @@ function mdToHtml(text) {
   return html;
 }
 
+// ============================================================================
+// v4 COACHING MODULE (per-call review + weekly pack). Added v8.2 (Jul 2026).
+// Coaching is derived from the v4 rubric turned toward the advisor, via a
+// DEDICATED system prompt (ATR_COACH_SYSTEM_PROMPT) so score and coaching can
+// never contradict. Scoring lives in the claudeCall() default prompt; the text
+// tools keep ATR_TEXT_SYSTEM_PROMPT. These three prompts stay separate.
+// ============================================================================
+const ATR_COACH_SYSTEM_PROMPT = `You are the coaching writer for Advanced Transmission Repair (ATR), Phoenix AZ. You turn the v4 scoring rubric toward the advisor: every coaching point is a rubric criterion, so the score and the advice can never contradict. Write like a coach reviewing film - warm, direct, and specific to THIS call. Speak the customer's psychology and give the natural line the advisor could actually say, never a memorized script.
+
+THE OBJECTIVE every call is graded against: get the vehicle into the shop with the advisor positioned as the trusted expert.
+
+THE FOUR PHASES (and what earns credit):
+1. Connect & read the caller - greet with shop + name, get the first name early, and READ + MATCH the caller's frame of mind (scared, price-shopping, overwhelmed, stranded). Reading the caller is CRITICAL.
+2. Diagnose & demonstrate expertise (the trust engine, not data collection) - adaptive questions that build on what the caller said, and DEMONSTRATE EXPERTISE: name the likely failure and mechanism (line pressure, burnt clutches, torque converter, valve body, solenoid), "we see these all the time," and name the specific unit when it is a common one. Expertise is CRITICAL.
+3. Frame value, then price as a range - value first (in-house build, warranty, transparency, "we won't screw you") BEFORE any number, then price as a RANGE tied to "get it in for the free diagnostic, exact once we get eyes on it." A flat single number is a miss. Expertise must come BEFORE price (a gate). All CRITICAL. For a normal automatic the in-house rebuild is the play; steering to a dealer/new unit unprompted gives away the high-margin rebuild. For a common CVT the dealer/new unit priced near a build is the CORRECT play - but only after building CVT expertise first.
+4. Secure the come-in & own the next step - book the appointment or arrange the tow-in, and OWN the next step (a specific advisor-owned follow-up), never "let me know" or a handed-over phone number. Match financing when relevant (Snap/EasyPay/Qualify 90-day; Synchrony ~1 year for credit above ~650). Both CRITICAL.
+RESPECT & RAPPORT is its own axis - an anxious, vulnerable caller must be treated with respect; condescension or combativeness is a serious problem.
+
+WHEN A CRITERION DOESN'T APPLY (e.g. an overwhelmed caller who already wants to come in and never asks price), it is N/A - do not coach it as a miss.
+
+COACHING DEPTH - MATCH THE ADVISOR'S LEVEL (this is the most important rule). Coaching must lead with the single biggest open issue and only work down to smaller ones as the big ones get fixed. Every issue belongs to a tier:
+- TIER 1 - FUNDAMENTALS (make-or-break, revenue-critical): running the framework out of order (price before diagnosing/expertise); no value statement before the number; a flat price instead of a range tied to getting the vehicle in; not securing the come-in or owning the next step; showing no real expertise; any respect/tone failure.
+- TIER 2 - CRAFT (sharpen once fundamentals hold): adaptive questioning and active listening (not re-asking an answered question, playing the concern back); naming the specific transmission; matching financing to the customer (Synchrony vs 90-day); transmission-type-correct recommendation.
+- TIER 3 - POLISH (only when fundamentals AND craft are consistently solid): a sharper way to phrase a line that already worked; a specific calming line for an anxious caller at the exact beat it was needed; cutting canned or repetitive delivery.
+You will be told this advisor's CURRENT TIER and their still-open fundamentals. The rule: only raise issues at or below the current tier. If ANY Tier 1 fundamental is still an open pattern for this advisor, do NOT bring up Tier 2 or Tier 3 items at all - keep the whole review on the fundamentals, even if smaller things could be nitpicked. Only on a call where every fundamental was genuinely handled well may you surface ONE next-tier item, framed as "now that the basics are solid...". Never bury a big miss under small ones. One or two fixes maximum, biggest first.
+
+DO NOT coach on: phone-number capture (CallerID handles it), warranty wording (varies by job type - trust the advisor), talk speed/pacing (not recoverable from a transcript), or scripted-close wording (any natural phrasing that lands a specific next step counts). Booked/not-booked is context only and is never part of the grade.
+
+OUTPUT - per-call review. Return GitHub-flavored markdown in EXACTLY this structure and nothing else:
+
+**THE READ:** 2-3 sentences - who the customer was, their frame of mind, and how it shifted during the call.
+
+**PHASE BREAKDOWN:**
+- Phase 1 - Connect & read: <Good / Partial / Missed / N-A> - <one specific reason tied to a moment>
+- Phase 2 - Diagnose & expertise: <Good / Partial / Missed / N-A> - <reason>
+- Phase 3 - Value & price: <Good / Partial / Missed / N-A> - <reason>
+- Phase 4 - Secure & next step: <Good / Partial / Missed / N-A> - <reason>
+- Respect & rapport: <OK / FLAG> - <reason>
+
+**WHAT WORKED:** 1-2 sentences naming a real strength from this call.
+
+**COACHING NOTES:** the ONE or TWO highest-leverage fixes only (Critical before Basic). For each fix, use exactly this three-line block:
+> You said: "<the advisor's actual or closely paraphrased words>"
+> Next time: "<a specific line using THIS customer's name, vehicle, and symptom - ready to read aloud>"
+> Why: <one sentence on the psychology or technique>
+
+**BOTTOM LINE:** one or two sentences on what would move this call's score up.
+
+Never use [vehicle] or [symptom] placeholders - always the real vehicle and symptom. Keep it tight and printable.`;
+
+// DYNAMIC COACHING ENGINE. Reads the advisor's recent scored calls and decides
+// how DEEP to coach: Tier 1 fundamentals until they're consistently green, then
+// Tier 2 craft, then Tier 3 polish. This is what makes coaching progressive -
+// it hammers the big misses first and only unlocks smaller ones as the advisor
+// improves. Proxies mastery off the phase-score averages + respect flags in the
+// sheet (no extra data needed).
+function coachingFocus(advisor, asOf){
+  const key=(advisor||'').toLowerCase();
+  const cut=asOf?pd(asOf):null;
+  let calls=allCalls.filter(c=>c.total!==null
+    && (c.advisor||'').toLowerCase().includes(key)
+    && isCoachable(c)
+    && (()=>{const d=pd(c.date);return d && (!cut || d<=cut);})());
+  calls.sort((a,b)=>pd(b.date)-pd(a.date));
+  const win=calls.slice(0,20);              // trailing ~20 coachable calls
+  const n=win.length;
+  const frac=(f,m)=>{const v=win.map(c=>c[f]).filter(x=>x!==null);return v.length?(v.reduce((a,b)=>a+b,0)/v.length)/m:1;};
+  const p1=frac('phase1',2.5), p2=frac('phase2',2.5), p3=frac('phase3',3.0), p4=frac('phase4',2.0);
+  const respFlagged=win.filter(c=>(c.flags||'').toUpperCase().includes('RESPECT')).length;
+  const respectClean = n ? (respFlagged/n) < 0.10 : true;
+  // Foundations = the Tier-1 phases holding across recent calls. Need >=3 calls
+  // to trust it; until then, coach fundamentals (Tier 1) by default.
+  const foundationsGreen = n>=3 && p3>=0.78 && p4>=0.78 && p2>=0.72 && respectClean;
+  const craftGreen = foundationsGreen && p1>=0.85 && p2>=0.85 && p3>=0.85 && p4>=0.85;
+  const tier = !foundationsGreen ? 1 : (!craftGreen ? 2 : 3);
+  const label = tier===1?'Fundamentals':tier===2?'Craft':'Polish';
+  const open=[];
+  if(tier===1){
+    if(!respectClean) open.push(`Respect/tone — flagged on ${respFlagged} of last ${n}`);
+    if(p3<0.78) open.push(`Value + price as a range (Phase 3 ~${(p3*3).toFixed(1)}/3.0)`);
+    if(p4<0.78) open.push(`Secure the come-in / own the next step (Phase 4 ~${(p4*2).toFixed(1)}/2.0)`);
+    if(p2<0.72) open.push(`Show expertise before quoting (Phase 2 ~${(p2*2.5).toFixed(1)}/2.5)`);
+    if(!open.length) open.push('Fundamentals nearly there — lock them in for consistency');
+  } else if(tier===2){
+    open.push('Adaptive questioning & naming the unit; match financing to the customer');
+  } else {
+    open.push('Polish — sharper phrasing and in-the-moment calming for anxious callers');
+  }
+  const line = n<3
+    ? `Not enough recent calls (${n}) to lock a tier yet — coaching the single biggest miss on each call.`
+    : `Focus tier: ${label} (Tier ${tier}). ${tier===1?'Staying on the big fundamentals until they are consistently green.':tier===2?'Fundamentals are holding — sharpening craft.':'Fundamentals and craft are solid — refining polish.'}`;
+  return {tier,label,open,line,n,p1,p2,p3,p4,respectClean};
+}
+
+// v4 weekly selection: 1 best + 3 most-improvable (lowest-scored) from the
+// coachable pool. Not-scoreable and follow-up/appt-without-price calls are
+// already excluded by isCoachable upstream.
+function pickWeeklyPack(coachable){
+  const desc=[...coachable].sort((a,b)=>b.total-a.total);
+  const best=desc[0]||null;
+  const rest=desc.slice(1);
+  const improvable=[...rest].sort((a,b)=>a.total-b.total).slice(0,3);
+  return {best, improvable};
+}
+
+// Booked-rate-by-band table - the proof the coaching is working. If booked rate
+// climbs with the score, the coaching path is right. Uses ALL scoreable calls.
+function bookedRateByBandHTML(calls){
+  const order=[['Elite',9,99],['Strong',7,8.999],['Developing',5,6.999],['Needs Work',3,4.999],['Poor',0,2.999]];
+  const rows=order.map(([label,lo,hi])=>{
+    const inB=calls.filter(c=>c.total!==null&&c.total>=lo&&c.total<=hi);
+    if(!inB.length) return '';
+    const booked=inB.filter(c=>(c.apptBooked||'').toLowerCase()==='yes').length;
+    const rate=Math.round(booked/inB.length*100);
+    const col=getBandColor(label);
+    return `<tr>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border);"><span style="color:${col};font-weight:600;">${label}</span> <span style="color:var(--text-muted);font-size:11px;">(${lo===9?'9.0+':lo.toFixed(1)+'-'+hi.toFixed(1)})</span></td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border);text-align:center;">${inB.length}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border);text-align:center;font-weight:700;color:${rate>=50?'var(--green)':rate>=33?'var(--amber)':'var(--red)'}">${rate}%</td>
+    </tr>`;
+  }).filter(Boolean).join('');
+  if(!rows) return '';
+  return `<div style="margin:14px 0;">
+    <div class="modal-section-title" style="margin-bottom:8px;">Does the score predict booking?</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;">
+        <th style="padding:6px 10px;text-align:left;">Band</th><th style="padding:6px 10px;">Calls</th><th style="padding:6px 10px;">Booked rate</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px;font-style:italic;">Booked rate should climb with the score. Flat across bands means the rubric is measuring the wrong things.</div>
+  </div>`;
+}
+
+// Build one full per-call review (metrics + AI notes + full transcript) as HTML.
+async function buildPerCallReviewHTML(c, opts){
+  opts = opts || {};
+  const tx=getTx(c);
+  const band=c.band||getBand(c.total), bc=getBandColor(band);
+  const bookedYes=(c.apptBooked||'').toLowerCase()==='yes';
+  const respect=(c.flags||'').toUpperCase().includes('RESPECT');
+  const phases=[['Phase 1',c.phase1,2.5],['Phase 2',c.phase2,2.5],['Phase 3',c.phase3,3.0],['Phase 4',c.phase4,2.0]];
+  const phaseChips=phases.map(([p,v,m])=>{
+    const pct=v?(v/m)*100:0, col=pct>=85?'var(--green)':pct>=65?'var(--amber)':'var(--red)';
+    return `<span style="display:inline-block;margin:2px 6px 2px 0;padding:3px 8px;background:var(--surface2);border-radius:3px;font-size:12px;"><span style="color:var(--text-muted);">${p}</span> <span style="color:${col};font-weight:700;">${v!==null?v:'—'}</span><span style="color:var(--text-muted);font-size:11px;">/${m}</span></span>`;
+  }).join('');
+  const truncTx=tx.length>4000?tx.substring(0,4000)+'...[truncated for analysis]':tx;
+  const focus = opts.focus || coachingFocus(c.advisor, c.date);
+  let notesMd;
+  try {
+    const userMsg=`Write the per-call coaching review for this call.
+Advisor: ${c.advisor||'Unknown'}
+Customer: ${c.customerName||'Unknown'} | Vehicle: ${c.vehicle||'Unknown'} | Date: ${c.date||'Unknown'}
+Score: ${c.total!==null?c.total:'?'} (${band}) | Appointment: ${c.apptBooked||'Unknown'}
+Diagnostic phase scores: Phase 1 ${c.phase1!=null?c.phase1:'?'}/2.5, Phase 2 ${c.phase2!=null?c.phase2:'?'}/2.5, Phase 3 ${c.phase3!=null?c.phase3:'?'}/3.0, Phase 4 ${c.phase4!=null?c.phase4:'?'}/2.0${respect?'\nA respect/tone flag was raised on this call - address it in the Respect line and the notes.':''}
+
+COACHING DEPTH: This advisor's current tier is TIER ${focus.tier} (${focus.label}). Still-open fundamentals across their recent calls: ${focus.open.join('; ')||'none'}. Apply the coaching-depth rule strictly: lead with the biggest open issue that actually shows up in THIS call; do NOT raise Tier ${focus.tier+1}+ (smaller/polish) items unless every fundamental was genuinely clean on THIS call, and even then only one.
+
+Follow the per-call review structure exactly.
+
+TRANSCRIPT:
+${truncTx}`;
+    notesMd=await claudeCall(userMsg, 1600, ATR_COACH_SYSTEM_PROMPT);
+  } catch(e){ notesMd='**Could not generate coaching notes:** '+e.message; }
+  const label=opts.label?`<span style="font-size:11px;font-weight:700;letter-spacing:1px;color:${opts.labelColor||'var(--amber)'};text-transform:uppercase;">${opts.label}</span><br>`:'';
+  return `<div class="call-review-item" style="padding:16px;margin:14px 0;">
+    <div style="margin-bottom:10px;">${label}
+      <span style="font-size:16px;font-weight:700;">${c.customerName||'Customer'} · ${c.vehicle||'Vehicle'}</span>
+      <span style="color:var(--text-muted);font-size:12px;"> · ${fd(c.date)}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
+      <div><span style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:${bc};line-height:1;">${c.total!==null?c.total:'—'}</span> <span style="color:${bc};font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;">${band}</span></div>
+      <div style="padding:3px 10px;border-radius:3px;font-size:12px;font-weight:600;background:${bookedYes?'rgba(39,174,96,0.15)':'var(--surface2)'};color:${bookedYes?'var(--green)':'var(--text-muted)'};">Appt: ${c.apptBooked||'—'} <span style="font-weight:400;font-size:10px;">(tracked, not scored)</span></div>
+      ${respect?`<div style="padding:3px 10px;border-radius:3px;font-size:12px;font-weight:600;background:rgba(192,57,43,0.15);color:var(--red);">⚠ Respect flag — on the listen list</div>`:''}
+    </div>
+    <div style="margin-bottom:12px;">${phaseChips}</div>
+    <div class="report-output" style="white-space:normal;line-height:1.7;">${mdToHtml(notesMd)}</div>
+    ${tx?`<div class="modal-section-title" style="margin-top:14px;">Full transcript</div>
+    <div class="transcript-box" style="max-height:260px;overflow:auto;">${esc(tx)}</div>`:''}
+  </div>`;
+}
+
+// MODAL: single-call full review (v4). Replaces the old coaching-report button.
+async function genCoachReport(idx) {
+  const c=allCalls[idx];
+  if(!getTx(c)){document.getElementById('coachGenOut').innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcript available for this call.</div>';return;}
+  const btn=document.getElementById('coachGenBtn');
+  btn.disabled=true; btn.textContent='BUILDING REVIEW... (15-30s)';
+  document.getElementById('coachGenOut').innerHTML='<div class="loading"><div class="spinner"></div>Building the per-call review...</div>';
+  try {
+    const html=await buildPerCallReviewHTML(c);
+    document.getElementById('coachGenOut').innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px;">
+        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ REVIEW READY</div>
+        <button class="print-btn" onclick="printCoachReport('${(c.advisor||'').replace(/'/g,"\\'")}','${(c.vehicle||'').replace(/'/g,"\\'")}','${(c.date||'').replace(/'/g,"\\'")}')">&#9114; PRINT</button>
+      </div>
+      <div id="coachRptTxt">${html}</div>`;
+    btn.disabled=false; btn.textContent='REBUILD REVIEW';
+  } catch(e) {
+    document.getElementById('coachGenOut').innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error: ${e.message}</div>`;
+    btn.disabled=false; btn.textContent='BUILD PER-CALL REVIEW';
+  }
+}
+
+// WEEKLY PACK (v4): cover (metrics + booked-rate-by-band + themes + index) then
+// the four full per-call reviews (1 best + 3 most-improvable) for one advisor.
+async function genWeeklyPack(name, wkOff) {
+  const key=name.toLowerCase();
+  const btn=document.getElementById(`wkPackBtn-${key}`);
+  const outEl=document.getElementById(`wkRptOut-${key}`);
+  const scored=getWkCalls(wkOff).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
+  if(!scored.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No scored calls for this advisor this week.</div>';return;}
+  const coachable=scored.filter(isCoachable);
+  if(!coachable.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No coachable calls this week (all follow-ups or appointments booked without price).</div>';return;}
+  const {best,improvable}=pickWeeklyPack(coachable);
+  const picks=[best,...improvable].filter(Boolean);
+  const withTx=picks.filter(c=>getTx(c).length>50);
+  if(!withTx.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcripts available for the selected calls.</div>';return;}
+
+  const a=avg(scored.map(c=>c.total)), hi=Math.max(...scored.map(c=>c.total)), lo=Math.min(...scored.map(c=>c.total));
+  const myAppts=scored.filter(c=>(c.apptBooked||'').toLowerCase()==='yes').length;
+  const now=new Date(), d60=new Date(now); d60.setDate(d60.getDate()-60);
+  const rolling=allCalls.filter(c=>{const d=pd(c.date);return d&&d>=d60&&c.total!==null&&(c.advisor||'').toLowerCase().includes(key);});
+  const r60A=rolling.length?avg(rolling.map(c=>c.total)):null;
+  const lwScored=getWkCalls(wkOff-1).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
+  const lwA=lwScored.length?avg(lwScored.map(c=>c.total)):null;
+  // Top themes by leverage (frequency x phase criticality) from the flags column.
+  const flagCounts={};
+  coachable.forEach(c=>(c.flags||'').split(/[;,]/).map(f=>f.trim()).filter(Boolean).forEach(f=>{flagCounts[f]=(flagCounts[f]||0)+1;}));
+  const themes=Object.entries(flagCounts).sort((a,b)=>b[1]-a[1]).slice(0,4)
+    .map(([f,n])=>`<li style="margin:2px 0;">${esc(f)} <span style="color:var(--text-muted);">- ${n} of ${coachable.length} coachable calls</span></li>`).join('');
+  // Respect-flagged calls join the listen list regardless of score.
+  const respectCalls=scored.filter(c=>(c.flags||'').toUpperCase().includes('RESPECT'));
+  const packLabel=fmtWkLabel(wkOff);
+  // Pack-level coaching tier (as of the end of this week) so the cover and all
+  // four reviews coach at the same depth.
+  const packFocus=coachingFocus(name, getWkEnd(getWkStart(wkOff)));
+
+  btn.disabled=true; btn.textContent='BUILDING PACK...';
+  outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Building ${name}'s weekly pack — cover + ${withTx.length} full reviews.<br><span style="font-size:11px;opacity:0.6;">Each review takes 20-40 seconds.</span></div>`;
+
+  try {
+    const reviews=[];
+    for(let i=0;i<withTx.length;i++){
+      const c=withTx[i];
+      const isBest=(c===best);
+      btn.textContent=`BUILDING... (REVIEW ${i+1} OF ${withTx.length})`;
+      outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Reviewing ${(c.customerName||c.vehicle||'call')} (${i+1} of ${withTx.length})...</div>`;
+      const html=await buildPerCallReviewHTML(c,{label:isBest?'🏆 Best call':`↗ Most improvable ${improvable.length>1?'#'+i:''}`.trim(),labelColor:isBest?'var(--green)':'var(--amber)',focus:packFocus});
+      reviews.push(html);
+    }
+    const indexRows=picks.map((c,i)=>{
+      const isBest=(c===best);
+      const why=isBest?'Best call — what good sounds like':(c.topCoachingNote||'Most improvable');
+      return `<tr>
+        <td style="padding:5px 8px;border-bottom:1px solid var(--border);color:${isBest?'var(--green)':'var(--amber)'};font-weight:600;">${isBest?'Best':'Improvable'}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid var(--border);">${esc(c.customerName||'Customer')} · ${esc(c.vehicle||'Vehicle')}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:center;font-weight:700;color:${getBandColor(c.band||getBand(c.total))}">${c.total}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid var(--border);text-align:center;">${c.apptBooked||'—'}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);">${esc(why)}</td>
+      </tr>`;
+    }).join('');
+    const cover=`<div class="call-review-item" style="padding:18px;margin:14px 0;border-color:var(--red);">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;">Weekly Coaching Pack — ${name}</div>
+      <div style="color:var(--text-muted);font-size:12px;margin-bottom:12px;">${packLabel}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:8px;">
+        <div style="background:var(--surface2);padding:10px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;">${scored.length}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Scoreable</div></div>
+        <div style="background:var(--surface2);padding:10px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:${getBandColor(getBand(a))}">${a.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Week Avg</div></div>
+        <div style="background:var(--surface2);padding:10px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;">${Math.round(myAppts/scored.length*100)}%</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">Booking Rate</div></div>
+        <div style="background:var(--surface2);padding:10px;text-align:center;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;">${hi.toFixed(1)}/${lo.toFixed(1)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;">High / Low</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Last week avg: ${lwA?lwA.toFixed(1):'N/A'} · 60-day rolling: ${r60A?r60A.toFixed(1):'N/A'}</div>
+      <div style="margin:10px 0;padding:10px 12px;background:rgba(27,42,74,0.06);border-left:3px solid var(--red);border-radius:3px;">
+        <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);font-family:'DM Mono',monospace;">Coaching focus</div>
+        <div style="font-size:14px;font-weight:600;margin-top:2px;">${packFocus.line}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${packFocus.tier===1?'On the table now':'Working on'}: ${packFocus.open.join(' · ')}</div>
+      </div>
+      ${bookedRateByBandHTML(scored)}
+      ${themes?`<div class="modal-section-title" style="margin-top:12px;">Top coaching themes this week</div><ul style="margin:6px 0 0;padding-left:18px;font-size:13px;">${themes}</ul>`:''}
+      <div class="modal-section-title" style="margin-top:14px;">The four calls</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;">
+          <th style="padding:5px 8px;text-align:left;">Role</th><th style="padding:5px 8px;text-align:left;">Call</th><th style="padding:5px 8px;">Score</th><th style="padding:5px 8px;">Booked</th><th style="padding:5px 8px;text-align:left;">Why it's in the pack</th></tr></thead>
+        <tbody>${indexRows}</tbody>
+      </table>
+      ${respectCalls.length?`<div style="margin-top:10px;padding:8px 10px;background:rgba(192,57,43,0.1);border-left:3px solid var(--red);font-size:12px;">⚠ Listen list add-ons (respect/tone flagged, regardless of score): ${respectCalls.map(c=>esc(c.customerName||c.vehicle||'call')+' ('+c.total+')').join(', ')}</div>`:''}
+    </div>`;
+
+    outEl.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 4px;">
+        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ WEEKLY PACK BUILT — ${withTx.length} REVIEWS</div>
+        <button class="print-btn" onclick="printWeeklyReport('${name}','${packLabel.replace(/'/g,"\\'")}')">&#9114; PRINT PACK</button>
+      </div>
+      <div id="wkRptTxt-${key}">${cover}${reviews.join('')}</div>`;
+    btn.disabled=false; btn.textContent='REBUILD WEEKLY PACK';
+  } catch(e){
+    outEl.innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error building pack: ${e.message}</div>`;
+    btn.disabled=false; btn.textContent='BUILD WEEKLY PACK';
+  }
+}
+
 // TEXT TOOL DEDICATED SYSTEM PROMPT (v6)
 const ATR_TEXT_SYSTEM_PROMPT = `You generate follow-up text messages for ATR (Advanced Transmission Repair) in Phoenix AZ. Write short, human-sounding texts that a real service advisor would send from their phone. Not a CRM template.
 
@@ -1838,50 +1911,29 @@ async function claudeCall(userMsg, maxTokens=1500, systemOverride=null) {
     body:JSON.stringify({
       model:'claude-sonnet-4-6',
       max_tokens:maxTokens,
-      system:systemOverride||`You are the ATR Call Intelligence AI for Advanced Transmission Repair, Phoenix AZ. You score calls using the ATR Sales Playbook.
+      system:systemOverride||`You are the ATR Call Intelligence scorer for Advanced Transmission Repair (ATR), Phoenix AZ. You grade how well an advisor HANDLED an inbound transmission call, never whether the job booked. You reason before you score.
 
-SCOREABLE vs NON-SCOREABLE \u2014 CHECK THIS FIRST.
-Only score calls where a new or potential customer is inquiring about a transmission PROBLEM, REPAIR, or REBUILD (slipping, shuddering, not moving, warning light, noise, leak, etc.), or where the advisor is making a first-time outbound sales contact to a fresh lead.
+CORE IDEAS (these govern everything):
+1. Score HANDLING only. How well did the advisor handle THIS call and THIS customer, per the ATR playbook. Whether an appointment booked is recorded separately and is NEVER a scoring input.
+2. Reason first, then score. READ the call - who the customer is, what they wanted, how their frame of mind shifted - BEFORE you produce any number.
+3. Grade against one objective: get the vehicle into the shop with the advisor positioned as the trusted expert. The four phases are the usual road to it; when the customer's state makes a criterion irrelevant, mark it N/A and reweight - do not score it as a miss.
+4. Anchor to a 10. Set the number by asking how far the call is from a perfect call FOR THIS customer. The criteria are EVIDENCE, not an arithmetic sum (a pure sum scores competent calls too harshly). A solid call with one real miss is ~7; reserve below 5 for genuine mishandling or disrespect; a call that reads the customer, builds expertise, ranges the price and secures the come-in reaches 9-10.
+5. Respect is its own axis. Condescension or combativeness caps the score and flags the call for review, regardless of technical competence.
 
-NOT SCOREABLE \u2014 do not score these. Mention in your reasoning that the call is non-scoreable, do not run the 4-phase rubric:
-1. Wrong number, vendor, supplier, or spam
-2. Employee or internal call
-3. Existing customer checking on a vehicle currently in shop
-4. Existing customer scheduling a known appointment for a job already quoted
-5. Warranty return \u2014 customer calling about a prior ATR repair
-6. Transmission SERVICE only (fluid change, flush, filter) with NO problem or symptom
-7. General automotive inquiry \u2014 not transmission (brakes, engine, AC, electrical)
-8. Customer calling back to accept or decline a previously given quote
-9. Call where no transmission repair or rebuild need is ever discussed
-10. Call under 60 seconds with insufficient conversation to evaluate
-11. CALLBACK ON A PRIOR QUOTE about financing status, scheduling, rescheduling, towing logistics, deposit, or any follow-up question on a quote already given \u2014 NOT scoreable even if the advisor mentions value, warranty, or attempts to close. These are logistics calls, not sales calls.
-12. LOGISTICS-ONLY CALL \u2014 the whole call is arranging towing, directions, drop-off, or scheduling and the advisor defers price and diagnosis to a later call ("call me Monday," "I'll get you a price then"). A symptom mentioned in passing does NOT make it scoreable when no pricing, diagnosis, or booking conversation happens on this call.
+STEP 0 - CLASSIFY (score it, or not). Only genuine transmission REPAIR/REBUILD inquiries are scoreable (slipping, shuddering, won't move, harsh shifting, no gears, transmission warning light, noise/leak causing damage), inbound from a new/potential customer, OR a first-time outbound sales contact to a fresh lead. NOT SCOREABLE (classify only, do not score) when the call is: a NON-transmission problem (CV axle, driveshaft, wheel bearing, U-joint, engine, brakes, electrical, AC) even if the part is "near" or "touching" the transmission; LOGISTICS-ONLY/DEFERRED (whole call is towing/directions/scheduling and price+diagnosis pushed to a later call); CALLBACK ON A PRIOR QUOTE (financing/scheduling/accepting a quote already given); SERVICE-ONLY (fluid/flush/filter, no symptom); WARRANTY RETURN; VENDOR/SPAM/INTERNAL/EMPLOYEE; existing customer on a vehicle already in the shop; or UNDER 60 SECONDS. A caller who opens with a service request but reveals a symptom IS scoreable (the problem takes priority). Score only when the advisor had a real chance to advance the sale on THIS call.
 
-Edge cases that ARE scoreable: a caller who starts with a service request but reveals a symptom (problem takes priority); a caller mentioning both service and a problem. A symptom mentioned in passing does NOT make a call scoreable if it never becomes a real sales conversation \u2014 e.g. the customer is only arranging logistics/towing or is a return caller deferring to a later call. Score only when the advisor had a real chance to advance the sale on THIS call.
+STEP 1 - READ THE CALL (required before any number). Think it through, then write 2-3 plain sentences (the "read"): who is the customer and what did they want, and how did it shift during the call (price-shopper posture, researcher, overwhelmed/low-info, emergency/stranded, already-wants-to-come-in)? "Price shopper" is usually a POSTURE, not a type. What was the RIGHT objective for this state, and what were the key pivots? Transmission type only if it is a common, clearly-known unit.
 
-4-PHASE FRAMEWORK (only if scoreable):
-Phase 1 \u2014 Establish Control (2.5pts): Professional greeting, get name within 30 seconds, redirect to diagnostics before price.
-Phase 2 \u2014 Diagnostic Questions (2.5pts): 5 questions before price \u2014 year/make/model, mileage, symptoms, prior diagnosis, CEL. Summarize back. Name specific transmission model.
-Phase 3 \u2014 Delivering Price (3.0pts): Sandwich \u2014 value first, price range (parts/labor/fluids), reassurance bridge. Warranty stated as 3 YEARS, UNLIMITED MILES, IN WRITING. Confirmation Hook: "We can get that down to an exact number once we get eyes on it \u2014 the diagnostic is free and takes about an hour." Bridge question IMMEDIATELY after price. Never apologize. Competing quote: educate don't discount. Financing: never quote monthly payment before application. 7 criteria.
-Phase 4 \u2014 Closing (2.0pts): Score the OUTCOME, not the script. The standard close is offering to get the vehicle in for the free diagnostic at a specific time (today/tomorrow). Any natural phrasing that lands a SPECIFIC committed next step counts \u2014 a scripted two-choice ("Tuesday at 9 or Thursday at 2") is NOT required and not preferred. Get and use the customer's first name. Flag the close ONLY when it was left open-ended ("let me know," "call me back," "come by whenever").
+STEP 2 - WEIGH THE EVIDENCE (four phases + respect). Mark any criterion N/A when the customer's state makes it irrelevant; reweight around what applied.
+PHASE 1 - Connect & read the caller: [Basic] professional greeting (shop + advisor name; a garbled/missing name that is clearly ASR is NOT a miss); [Basic] gets and uses the first name early; [CRITICAL] reads & matches the caller's frame of mind (reassures the anxious, matches the stranded caller's urgency, does NOT force price on a come-in-ready caller); [Basic] takes appropriate direction (guides without dominating).
+PHASE 2 - Diagnose & demonstrate expertise (the trust engine, NOT data collection): [Basic] adaptive questioning/active listening (builds on what the customer said, plays back the concern; asking something already answered is a MINOR ding); [CRITICAL] demonstrates expertise (names the likely failure and mechanism - line pressure, burnt clutches, torque converter, valve body, solenoid - and "we see these all the time"; generic "sounds internal" is a miss); [Basic] names the specific transmission when common/known (N/A for uncommon units); [Basic] gathers the essentials (symptom, drivability, prior work/other shops).
+PHASE 3 - Frame value, then price as a range: [CRITICAL] value before the number (in-house build, warranty, transparency, "we won't screw you" BEFORE the price); [CRITICAL] price as a RANGE tied to "get it in" ("exact once we get eyes on it, the diagnostic's free"; a flat single number is a miss even if all else is good); [CRITICAL] sequence: expertise BEFORE price (price quoted before diagnosing/expertise is a real deduction and holds Phase 3 down - a GATE; tell: customer volunteers diagnostic info AFTER the price = sequence was wrong); [Basic] transmission-type-correct recommendation (for a normal automatic the in-house rebuild is the play; steering to a dealer/new unit UNPROMPTED is a DEMERIT; for a common CVT, recommending the dealer/new unit priced NEAR a build is CORRECT - but only after building CVT expertise first; N/A if type unclear or a rare edge case). N/A RULE: if the customer's state means NO price is appropriate (already wants to come in, overwhelmed, never asks price), the WHOLE of Phase 3 is N/A - reweight, do NOT zero it.
+PHASE 4 - Secure the come-in & own the next step: [CRITICAL] secures the come-in (books an appointment or arranges the tow-in); [CRITICAL] owns the next step (a specific advisor-owned follow-up - "I'll call you tomorrow at 10," "call me and I'll hold Thursday"; ending on "let me know" or handing over a phone number and hanging up is a real miss; any natural wording counts, a scripted two-choice close is NOT required); [Basic] matches financing when relevant (qualifies credit and steers - Snap/EasyPay/Qualify = 90-day same-as-cash for most; Synchrony ~1 year for credit above ~650; defaulting to 90-day and punting to the lender is a miss; N/A if financing never comes up).
+RESPECT & RAPPORT (standalone axis, cap + flag): treat an anxious, vulnerable caller with respect. Textual tells: dismissive/condescending phrasing, combatively contradicting the customer, curtness, interrupting to correct. Tone is only partially recoverable from words - on a respect concern, set respectFlag and add to the listen list; hard-cap ONLY on clear textual cues. A clear respect failure CAPS the overall score.
 
-PHONE NUMBER CAPTURE \u2014 DO NOT COACH ON THIS. ATR uses CallerID; the phone is captured automatically by the phone system regardless of what the advisor does. Never flag "capture callback number" or "ask for phone number" as a coaching opportunity. Do not deduct points for not asking for a phone number.
+STEP 3 - SET THE SCORE (anchor-first). Compare to a perfect call (a 10) FOR THIS customer. Use the applicable criteria as evidence, weighting CRITICAL misses more than BASIC. Do NOT compute an arithmetic sum. Gates: price-before-expertise holds the call down (typically caps the ceiling in the 6s); a clear respect failure caps and flags. Placement: 9.0-10 Elite (reads the customer, adaptive+expert, value then a range, secures the come-in, respectful); 7.0-8.9 Strong (handled well, one real miss); 5.0-6.9 Developing (competent but several misses); 3.0-4.9 Needs Work (multiple core misses, price-dumped); 0-2.9 Poor (mishandled or disrespectful). A solid call with one real miss is ~7 not 6; a competent-but-robotic call that books and keeps control is ~7.5. Lean lenient: when a call sits between two bands, choose the higher, and reserve the bottom half of the scale for genuine mishandling or disrespect. Phase sub-scores are diagnostic only on the historical maxes (Phase 1 /2.5, Phase 2 /2.5, Phase 3 /3.0, Phase 4 /2.0); the total is the anchor-first judgment and need NOT equal their sum. A fully N/A phase outputs score 0, max 0, notes beginning "N/A -".
 
-APPOINTMENT-WITHOUT-PRICE CLASSIFICATION (v3.2). Some calls book successfully without any price discussion \u2014 the customer confirms capability, asks logistics, and books, never asking what it costs. In those cases skipping price was usually the right move. Flag these calls by including "APPT_WITHOUT_PRICE" as one of the entries in the flags array when ALL of: (1) appointment was booked, (2) customer never asked about price/cost/estimate/quote, (3) advisor never delivered a price, (4) customer was moving toward action (not stalling or comparison-shopping). Phase 3 still scores as observed \u2014 this flag is metadata only. The dashboard uses it to exclude these calls from the "Most Improvable" coaching pool.
-
-WARRANTY \u2014 ATR's standard rebuild warranty is 3 years, unlimited miles, in writing. Do NOT flag, coach, or deduct on warranty wording \u2014 warranty terms vary by job type (rebuild vs used unit vs general repair) and the advisor is trusted to state the correct warranty for the situation.
-
-OFFERED ALTERNATIVE UNPROMPTED \u2014 If the advisor proactively offers a used unit, dealer/"new" unit, or a cheaper alternative the customer did NOT ask about first, include "OFFERED_ALTERNATIVE_UNPROMPTED" in the flags array and treat it as a coaching opportunity: it steers the customer off the high-margin rebuild and undercuts the warranty. Only when the customer did not raise the alternative. This is a coaching flag, not an automatic point deduction.
-
-SCORING: Elite 9.0+, Strong 7.5-8.9, Developing 6.0-7.4, Needs Work 4.0-5.9, Poor 0-3.9.
-Show work: list each criterion with raw score (0/0.5/1/2), sum raw points, show scaling to phase max, apply deductions.
-
-COACHING FLAG REQUIREMENT \u2014 NON-NEGOTIABLE:
-Every flag MUST include:
-- What to say instead: Using the EXACT vehicle, EXACT symptom, EXACT moment from THIS call. Never write [vehicle] or [symptom]. Write it how a confident advisor would say it on the phone \u2014 natural, conversational, ready to read aloud.
-- Why this works: One sentence on the psychology or technique.
-
-TRANSCRIPTION QUALITY: Garbled greetings = no deduction. Obvious errors = score intent. Benefit of the doubt when unclear.`,
+STEP 4 - OUTPUT. If NOT SCOREABLE, return ONLY: {"scoreable":"No","scoreableReason":"<reason>","read":"<1-2 sentences>","customerName":"<if captured>","vehicle":"<if mentioned>","appointmentBooked":"<Yes/No>"}. If SCOREABLE, return ONLY raw JSON (no markdown, no fences), starting with { and ending with }, with these fields: read (2-3 sentence customer read), total (number), band, phase1/phase2/phase3/phase4 (each {score, max, notes}), respectFlag ("OK" or "FLAG: <what + quote>"), customerType, situationType, appointmentBooked (Yes/No), topCoachingNote (specific to THIS vehicle/symptom/moment), strengths (array), deductions (array), flags (string; semicolon-separated; empty if none), customerName, vehicle, scoreable ("Yes"), scoreableReason. Reason first: the read and rationale come before you commit to total. respectFlag "OK" when respectful; otherwise cap the total AND include "RESPECT" as one of the semicolon-separated entries in flags (this is what adds the call to the coaching listen list). Every note/flag must be specific to THIS call - never [vehicle] or [symptom] placeholders. Do NOT coach on phone-number capture (CallerID), warranty wording (varies by job type), talk speed (not recov`,
       messages:[{role:'user',content:userMsg}]
     })
   });
