@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATR Call Intelligence v8.5 (printable coaching)</title>
+<title>ATR Call Intelligence v8.6 (printable coaching)</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1714,10 +1714,13 @@ function coachingFocus(advisor, asOf){
 // v4 weekly selection: 1 best + 3 most-improvable (lowest-scored) from the
 // coachable pool. Not-scoreable and follow-up/appt-without-price calls are
 // already excluded by isCoachable upstream.
-function pickWeeklyPack(coachable){
-  const desc=[...coachable].sort((a,b)=>b.total-a.total);
+function pkCid(c){ return (c.date||'')+'|'+(c.customerName||'')+'|'+(c.customerPhone||'')+'|'+(c.vehicle||''); }
+function pickWeeklyPack(coachable, dismissed){
+  dismissed = dismissed || new Set();
+  const avail=coachable.filter(c=>!dismissed.has(pkCid(c)));
+  const desc=[...avail].sort((a,b)=>b.total-a.total);
   const best=desc[0]||null;
-  const rest=desc.slice(1);
+  const rest=best?desc.slice(1):desc;
   const improvable=[...rest].sort((a,b)=>a.total-b.total).slice(0,3);
   return {best, improvable};
 }
@@ -1799,8 +1802,10 @@ ${truncTx}`;
   const pbIdx=notesMd.search(/\*\*PHASE BREAKDOWN/i);
   if(pbIdx>0){ readPart=notesMd.slice(0,pbIdx).trim(); restPart=notesMd.slice(pbIdx).trim(); }
   const readClean=readPart.replace(/\*\*THE READ:?\*\*/i,'').trim();
-  // 2) labeled, verbatim transcript (async)
-  const transcriptHTML = await formatTranscriptHTML(c);
+  // 2) labeled, verbatim transcript (async) — only for the single-call modal.
+  // The weekly pack omits it (transcript + audio live on the dashboard) to keep the print short.
+  const wantTx = opts.includeTranscript === true;
+  const transcriptHTML = wantTx ? await formatTranscriptHTML(c) : '';
   // 3) header banner
   const roleLabel = opts.label || 'Call';
   const callNo = opts.callNo ? `Call ${opts.callNo} of ${opts.callTotal}` : '';
@@ -1813,8 +1818,9 @@ ${truncTx}`;
       <div class="pk-ch-phases">${phaseLine}</div>
     </div>
     ${readClean?`<div class="pk-sec">The Read</div><div class="pk-read">${mdToHtml(readClean)}</div>`:''}
-    <div class="pk-sec">Full Transcript</div>
-    ${transcriptHTML}
+    ${wantTx
+      ? `<div class="pk-sec">Full Transcript</div>${transcriptHTML}`
+      : `<div class="pk-read" style="font-style:italic;color:#555;">Full transcript &amp; audio: open this call on the dashboard.</div>`}
     <div class="pk-body">${mdToHtml(restPart)}</div>
   </div>`;
 }
@@ -1823,8 +1829,8 @@ ${truncTx}`;
 function recapPageHTML(name, focus, picks){
   const items=picks.filter(Boolean).map(c=>`<li><strong>${esc(c.customerName||c.vehicle||'Call')}</strong> (${c.total}) — ${esc(c.topCoachingNote||'—')}</li>`).join('');
   return `<div class="pk-recap">
-    <div class="pk-recap-title">This Week — ${esc(name)}: Key Things to Remember</div>
-    <div class="pk-focus" style="margin-top:12px;"><div style="font-weight:800;">Focus tier: ${focus.label} (Tier ${focus.tier})</div><div style="margin-top:3px;">${esc(focus.line)}</div><div style="margin-top:6px;"><strong>Drill first:</strong> ${focus.open.map(esc).join(' · ')}</div></div>
+    <div class="pk-recap-title">This Week — ${esc(name)}: Drill These</div>
+    <div style="margin-top:8px;"><strong>Drill first:</strong> ${focus.open.map(esc).join(' · ')||'—'}</div>
     <div class="pk-sec">Per-call takeaways</div>
     <ul>${items}</ul>
     <div style="margin-top:16px;font-size:9.5pt;color:#555;font-style:italic;">Reviewed with ${esc(name)} on ____________________ .</div>
@@ -1839,7 +1845,7 @@ async function genCoachReport(idx) {
   btn.disabled=true; btn.textContent='BUILDING REVIEW... (20-40s)';
   document.getElementById('coachGenOut').innerHTML='<div class="loading"><div class="spinner"></div>Building the per-call review (scoring notes + labeled transcript)...</div>';
   try {
-    const html=await buildPerCallReviewHTML(c,{label:'Per-call review'});
+    const html=await buildPerCallReviewHTML(c,{label:'Per-call review', includeTranscript:true});
     document.getElementById('coachGenOut').innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px;">
         <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ REVIEW READY</div>
@@ -1853,8 +1859,10 @@ async function genCoachReport(idx) {
   }
 }
 
-// WEEKLY PACK (v8.5): cover page -> each call on its own page -> recap page.
-async function genWeeklyPack(name, wkOff) {
+// WEEKLY PACK (v8.6): cover -> each call on its own page -> recap. Interactive:
+// swap any call (rebuilds only that one, cached) or recalibrate the whole pack.
+let PK=null;
+async function genWeeklyPack(name, wkOff){
   const key=name.toLowerCase();
   const btn=document.getElementById(`wkPackBtn-${key}`);
   const outEl=document.getElementById(`wkRptOut-${key}`);
@@ -1862,10 +1870,6 @@ async function genWeeklyPack(name, wkOff) {
   if(!scored.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No scored calls for this advisor this week.</div>';return;}
   const coachable=scored.filter(isCoachable);
   if(!coachable.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No coachable calls this week (all follow-ups or appointments booked without price).</div>';return;}
-  const {best,improvable}=pickWeeklyPack(coachable);
-  const picks=[best,...improvable].filter(Boolean);
-  const withTx=picks.filter(c=>getTx(c).length>50);
-  if(!withTx.length){outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No transcripts available for the selected calls.</div>';return;}
 
   const a=avg(scored.map(c=>c.total)), hi=Math.max(...scored.map(c=>c.total)), lo=Math.min(...scored.map(c=>c.total));
   const myAppts=scored.filter(c=>(c.apptBooked||'').toLowerCase()==='yes').length;
@@ -1875,63 +1879,89 @@ async function genWeeklyPack(name, wkOff) {
   const lwScored=getWkCalls(wkOff-1).filter(c=>c.total!==null&&(c.advisor||'').toLowerCase().includes(key));
   const lwA=lwScored.length?avg(lwScored.map(c=>c.total)):null;
   const flagCounts={};
-  coachable.forEach(c=>(c.flags||'').split(/[;,]/).map(f=>f.trim()).filter(Boolean).forEach(f=>{flagCounts[f]=(flagCounts[f]||0)+1;}));
-  const themes=Object.entries(flagCounts).sort((a,b)=>b[1]-a[1]).slice(0,5)
-    .map(([f,n])=>`<li>${esc(f)} <span style="color:#666;">— ${n} of ${coachable.length}</span></li>`).join('');
+  coachable.forEach(c=>(c.flags||'').split(/[;,]/).map(f=>f.trim()).filter(f=>f && !/^(none|n\/a|na|null)$/i.test(f)).forEach(f=>{flagCounts[f]=(flagCounts[f]||0)+1;}));
+  const themes=Object.entries(flagCounts).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([f,n])=>`<li>${esc(f)} <span style="color:#666;">— ${n} of ${coachable.length}</span></li>`).join('');
   const respectCalls=scored.filter(c=>(c.flags||'').toUpperCase().includes('RESPECT'));
   const packLabel=fmtWkLabel(wkOff);
   const packFocus=coachingFocus(name, getWkEnd(getWkStart(wkOff)));
 
-  btn.disabled=true; btn.textContent='BUILDING PACK...';
-  outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Building ${name}'s weekly pack — cover + ${withTx.length} full reviews (each does scoring + a labeled transcript).<br><span style="font-size:11px;opacity:0.6;">This takes a couple of minutes.</span></div>`;
+  PK={name,key,btn,outEl,scored,coachable,a,hi,lo,myAppts,r60A,lwA,themes,respectCalls,packLabel,packFocus,
+      dismissed:new Set(), cache:{}, currentPicks:[], busy:false};
+  await pkRender();
+}
 
-  try {
+async function pkRender(){
+  if(!PK||PK.busy) return;
+  PK.busy=true;
+  const {key,btn,outEl,scored,coachable}=PK;
+  const {best,improvable}=pickWeeklyPack(coachable, PK.dismissed);
+  const picks=[best,...improvable].filter(Boolean);
+  const withTx=picks.filter(c=>getTx(c).length>50);
+  if(!withTx.length){
+    outEl.innerHTML='<div class="coaching-box" style="border-color:var(--amber);">No more calls left to show — hit BUILD WEEKLY PACK to start the selection over.</div>';
+    if(btn){btn.disabled=false;btn.textContent='BUILD WEEKLY PACK';}
+    PK.busy=false; return;
+  }
+  PK.currentPicks=withTx;
+  if(btn){btn.disabled=true;btn.textContent='BUILDING PACK...';}
+  outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Building ${esc(PK.name)}'s weekly pack — ${withTx.length} reviews...<br><span style="font-size:11px;opacity:0.6;">Swaps rebuild only the one new call.</span></div>`;
+  try{
     const reviews=[];
     for(let i=0;i<withTx.length;i++){
-      const c=withTx[i];
-      const isBest=(c===best);
-      btn.textContent=`BUILDING... (REVIEW ${i+1} OF ${withTx.length})`;
-      outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Reviewing ${esc(c.customerName||c.vehicle||'call')} (${i+1} of ${withTx.length})...</div>`;
+      const c=withTx[i]; const cid=pkCid(c); const isBest=(c===best);
       const roleLabel=isBest?'Best call':(improvable.length>1?`Most improvable #${i}`:'Most improvable');
-      const html=await buildPerCallReviewHTML(c,{label:roleLabel,callNo:i+1,callTotal:withTx.length,focus:packFocus});
-      reviews.push(html);
+      if(!PK.cache[cid]){
+        if(btn) btn.textContent=`BUILDING... (REVIEW ${i+1} OF ${withTx.length})`;
+        outEl.innerHTML=`<div class="loading"><div class="spinner"></div>Reviewing ${esc(c.customerName||c.vehicle||'call')} (${i+1} of ${withTx.length})...</div>`;
+        PK.cache[cid]=await buildPerCallReviewHTML(c,{label:roleLabel,callNo:i+1,callTotal:withTx.length,focus:PK.packFocus});
+      }
+      reviews.push(PK.cache[cid]);
     }
-    const indexRows=picks.map((c,i)=>{
+    const indexRows=picks.map((c)=>{
       const isBest=(c===best);
       const why=isBest?'Best call — what good sounds like':(c.topCoachingNote||'Most improvable');
       return `<tr><td><strong>${isBest?'Best':'Improvable'}</strong></td><td>${esc(c.customerName||'Customer')} · ${esc(c.vehicle||'Vehicle')}</td><td style="text-align:center;font-weight:700;">${c.total}</td><td style="text-align:center;">${c.apptBooked||'—'}</td><td style="font-size:9pt;color:#555;">${esc(why)}</td></tr>`;
     }).join('');
     const cover=`<div class="pk-cover">
-      <div class="pk-h1">Weekly Coaching Pack — ${esc(name)}</div>
-      <div class="pk-sub">${packLabel}</div>
+      <div class="pk-h1">Weekly Coaching Pack — ${esc(PK.name)}</div>
+      <div class="pk-sub">${PK.packLabel}</div>
       <div class="pk-metrics">
         <div class="pk-metric"><div class="pk-metric-v">${scored.length}</div><div class="pk-metric-l">Scoreable</div></div>
-        <div class="pk-metric"><div class="pk-metric-v">${a.toFixed(1)}</div><div class="pk-metric-l">Week Avg</div></div>
-        <div class="pk-metric"><div class="pk-metric-v">${Math.round(myAppts/scored.length*100)}%</div><div class="pk-metric-l">Booking Rate</div></div>
-        <div class="pk-metric"><div class="pk-metric-v">${hi.toFixed(1)}/${lo.toFixed(1)}</div><div class="pk-metric-l">High / Low</div></div>
+        <div class="pk-metric"><div class="pk-metric-v">${PK.a.toFixed(1)}</div><div class="pk-metric-l">Week Avg</div></div>
+        <div class="pk-metric"><div class="pk-metric-v">${PK.myAppts} · ${Math.round(PK.myAppts/scored.length*100)}%</div><div class="pk-metric-l">Booked · Rate</div></div>
+        <div class="pk-metric"><div class="pk-metric-v">${PK.hi.toFixed(1)}/${PK.lo.toFixed(1)}</div><div class="pk-metric-l">High / Low</div></div>
       </div>
-      <div style="font-size:9pt;color:#555;margin-bottom:6px;">Last week avg: ${lwA?lwA.toFixed(1):'N/A'} · 60-day rolling: ${r60A?r60A.toFixed(1):'N/A'}</div>
-      <div class="pk-focus"><div style="font-size:8pt;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">Coaching focus</div><div style="font-weight:700;margin-top:2px;">${esc(packFocus.line)}</div><div style="font-size:9.5pt;color:#333;margin-top:3px;">${packFocus.tier===1?'On the table now':'Working on'}: ${packFocus.open.map(esc).join(' · ')}</div></div>
+      <div style="font-size:9pt;color:#555;margin-bottom:6px;">Last week avg: ${PK.lwA?PK.lwA.toFixed(1):'N/A'} · 60-day rolling: ${PK.r60A?PK.r60A.toFixed(1):'N/A'}</div>
+      <div class="pk-focus"><div style="font-size:8pt;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">Coaching focus</div><div style="font-weight:700;margin-top:2px;">${esc(PK.packFocus.line)}</div><div style="font-size:9.5pt;color:#333;margin-top:3px;">${PK.packFocus.tier===1?'On the table now':'Working on'}: ${PK.packFocus.open.map(esc).join(' · ')}</div></div>
       ${bookedRateByBandHTML(scored)}
-      ${themes?`<div class="pk-sec">Top coaching themes this week</div><ul>${themes}</ul>`:''}
+      ${PK.themes?`<div class="pk-sec">Top coaching themes this week</div><ul>${PK.themes}</ul>`:''}
       <div class="pk-sec">The four calls</div>
       <table class="pk-table"><thead><tr><th>Role</th><th>Call</th><th style="text-align:center;">Score</th><th style="text-align:center;">Booked</th><th>Why it's in the pack</th></tr></thead><tbody>${indexRows}</tbody></table>
-      ${respectCalls.length?`<div style="margin-top:10px;padding:8px 10px;border:1px solid #000;font-size:9.5pt;">⚠ Listen-list add-ons (respect/tone flagged, regardless of score): ${respectCalls.map(c=>esc(c.customerName||c.vehicle||'call')+' ('+c.total+')').join(', ')}</div>`:''}
+      ${PK.respectCalls.length?`<div style="margin-top:10px;padding:8px 10px;border:1px solid #000;font-size:9.5pt;">⚠ Listen-list add-ons (respect/tone flagged, regardless of score): ${PK.respectCalls.map(c=>esc(c.customerName||c.vehicle||'call')+' ('+c.total+')').join(', ')}</div>`:''}
     </div>`;
-    const recap=recapPageHTML(name, packFocus, picks);
-
+    const recap=recapPageHTML(PK.name, PK.packFocus, picks);
+    const controls=`<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0 6px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,0.02);">
+      <span style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;">PACK — swap any call:</span>
+      ${withTx.map((c,i)=>`<span style="font-size:12px;padding:2px 7px;border:1px solid var(--border);border-radius:4px;">${i+1}. ${esc(c.customerName||c.vehicle||'call')} <span style="color:var(--text-muted);">(${c.total})</span> <a href="#" onclick="pkSwapIdx(${i});return false;" title="swap out this call, bring in the next candidate" style="color:var(--red);text-decoration:none;font-weight:800;">&#10005;</a></span>`).join('')}
+      <button class="print-btn" onclick="pkRecalibrate();return false;" style="margin-left:8px;">&#8635; RECALIBRATE</button>
+      <button class="print-btn" onclick="printPack('${PK.name}')" style="margin-left:auto;">&#9114; PRINT PACK</button>
+    </div>`;
     outEl.innerHTML=`
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 4px;">
-        <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;">✓ WEEKLY PACK BUILT — ${withTx.length} REVIEWS</div>
-        <button class="print-btn" onclick="printPack('${name}')">&#9114; PRINT PACK</button>
-      </div>
+      <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;margin:16px 0 2px;">✓ WEEKLY PACK BUILT — ${withTx.length} REVIEWS</div>
+      ${controls}
       <div id="wkRptTxt-${key}" class="pk-pack">${cover}${reviews.join('')}${recap}</div>`;
-    btn.disabled=false; btn.textContent='REBUILD WEEKLY PACK';
-  } catch(e){
+    if(btn){btn.disabled=false;btn.textContent='REBUILD WEEKLY PACK';}
+  }catch(e){
     outEl.innerHTML=`<div class="coaching-box" style="border-color:var(--red);">Error building pack: ${e.message}</div>`;
-    btn.disabled=false; btn.textContent='BUILD WEEKLY PACK';
+    if(btn){btn.disabled=false;btn.textContent='BUILD WEEKLY PACK';}
   }
+  PK.busy=false;
 }
+
+// Swap one slot: dismiss that call, re-pick the next candidate, rebuild (cached).
+function pkSwapIdx(i){ if(!PK||PK.busy) return; const c=PK.currentPicks[i]; if(!c) return; PK.dismissed.add(pkCid(c)); pkRender(); }
+// Recalibrate: dismiss all four current picks and roll the next set.
+function pkRecalibrate(){ if(!PK||PK.busy) return; PK.currentPicks.forEach(c=>PK.dismissed.add(pkCid(c))); pkRender(); }
 
 // TEXT TOOL DEDICATED SYSTEM PROMPT (v6)
 const ATR_TEXT_SYSTEM_PROMPT = `You generate follow-up text messages for ATR (Advanced Transmission Repair) in Phoenix AZ. Write short, human-sounding texts that a real service advisor would send from their phone. Not a CRM template.
